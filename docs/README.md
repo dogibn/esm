@@ -12,14 +12,16 @@ v1 covers the two workflows accountants do regularly:
 - **Tracking view.** An accountant can see all students with their current outstanding balance, filterable by grade and payment status, with global search.
 - **Bank transaction import.** An accountant can upload a bank transaction Excel file, review the system's proposed matches to students, correct mismatches, and confirm before payments are recorded.
 
-Initial data (students, payment types, fee structures, and historical payments as needed) will be loaded directly into the database as a one-time setup task — no UI in v1.
+Initial data (students, enrollments, fee structures, discounts, and historical payments as needed) will be loaded directly into the database as a one-time setup task — no UI in v1. Subsequent year-start and term-start imports from esmlh.edu.mn are run as scripts by the admin.
 
 ## Not in v1
-- Adding/editing payment types through the UI (handled manually until v2)
+- Adding/editing fee structures through the UI (handled via import scripts until v2)
 - Adding new students through the UI
 - Per-student detail page
 - Printing or sending invoices
-- Year-end roll-over (v1 is intended for use within a single academic year)
+- Year-end roll-over UI (new years and terms are added by script)
+- Discount *rules* — v1 records the discount amounts applied, not the formulas behind them
+- Family / siblings modeling
 
 ## Non-goals
 - This is not a general-purpose accounting system. It tracks student payments only — not salaries, vendor payments, or school expenses.
@@ -29,6 +31,9 @@ Initial data (students, payment types, fee structures, and historical payments a
 
 ## Possibly someday
 - Automatic retrieval of bank transaction files (instead of manual download + upload)
+- Direct integration with esmlh.edu.mn for year/term-start data import (currently scripted)
+- Discount rule engine (kind, percentage, order of application)
+- Family/siblings modeling
 
 ## Stack
 _To be decided._

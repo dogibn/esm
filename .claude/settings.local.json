@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm approve-builds *)",
+      "Bash(pnpm install *)",
+      "Bash(pnpm dlx *)",
+      "Bash(mkdir -p '/Users/dolgormaabatsaikhan/Documents/projects/ESM/ESM_Payment_Tracker/app/\\(app\\)/imports/[id]')",
+      "Bash(mkdir -p '/Users/dolgormaabatsaikhan/Documents/projects/ESM/ESM_Payment_Tracker/app/api/imports/[id]/confirm')",
+      "Bash(mkdir -p ~/.traycer/yolo_artifacts)",
+      "Bash(echo '{}')",
+      "mcp__claude_ai_Supabase__get_project_url",
+      "mcp__claude_ai_Supabase__get_publishable_keys"
+    ]
+  }
+}
