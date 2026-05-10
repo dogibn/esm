@@ -11,7 +11,10 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
-    "load:students": "tsx --env-file=.env.local scripts/load/students.ts"
+    "load:students": "tsx --env-file=.env.local scripts/load/students.ts",
+    "load:grade_levels": "tsx --env-file=.env.local scripts/load/grade_levels.ts",
+    "load:academic_years": "tsx --env-file=.env.local scripts/load/academic_years.ts",
+    "load:academic_terms": "tsx --env-file=.env.local scripts/load/academic_terms.ts"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

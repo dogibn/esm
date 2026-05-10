@@ -64,6 +64,7 @@ export const academicTerms = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
+    uniqueIndex("academic_terms_academic_year_id_name_unique").on(t.academicYearId, t.name),
     uniqueIndex("academic_terms_is_current_unique")
       .on(t.isCurrent)
       .where(sql`${t.isCurrent} = TRUE`),

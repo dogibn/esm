@@ -41,6 +41,12 @@ yarn-error.log*
 # scripts — intermediate scrape output
 /scripts/scraped/
 
+# parsed data
+/scripts/parsed
+
+# data used for initial population of the database
+/scripts/data/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

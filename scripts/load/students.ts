@@ -27,7 +27,7 @@ interface ScrapedStudent {
 
 const dbUrl = process.env.DIRECT_URL;
 if (!dbUrl) {
-  console.error("ERROR: DATABASE_URL is not set.");
+  console.error("ERROR: DIERCT_URL is not set.");
   process.exit(1);
 }
 

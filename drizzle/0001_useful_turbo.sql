@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "academic_terms_academic_year_id_name_unique" ON "academic_terms" USING btree ("academic_year_id","name");
