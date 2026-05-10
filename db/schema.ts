@@ -85,6 +85,7 @@ export const grades = pgTable(
       .references(() => academicYears.id),
     teacherName: text("teacher_name").notNull(),
     teacherEmail: text("teacher_email"),
+    teacherPhone: text("teacher_phone"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },

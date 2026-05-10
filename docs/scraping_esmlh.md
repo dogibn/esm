@@ -142,19 +142,58 @@ A `<table id="example23">` with these columns:
 The loader reads this JSON, looks up `grade_id` from `(grade_name, academic_year_name)`, and inserts into `students` and `enrollments`.
 
 ---
+## Source: Staff directory
 
-## Gaps the directory doesn't cover
+URL: `https://esmlh.edu.mn/teacher/staff_directory`
 
-The student directory page does **not** contain these fields the year-start import needs. They must come from elsewhere or be supplied manually at load time. Open questions about source live in `notes.md`.
+Source for the class → teacher mapping. One row per staff member; we keep only rows whose position contains `"Form Tutor"` — those carry the assignment that populates `grades.teacher_name` and `grades.teacher_email` for the current academic year.
+
+### HTML structure
+
+Cells use `data-field` attributes. The scraper filters to rows where `<td data-field="position">` text contains `"Form Tutor"`, then extracts:
+
+| HTML cell | Maps to |
+|---|---|
+| `<td data-field="name">` | `grades.teacher_name` |
+| `<td data-field="email">` | `grades.teacher_email` |
+| `<td data-field="phone">` | (no current schema destination — kept in JSON for future use; see `notes.md`) |
+| `<td data-field="position">` | `grade_name`, after stripping `"Form Tutor"` and trimming whitespace |
+
+### Parsing rules
+
+- **Filter** — keep only rows where `position` text contains `"Form Tutor"`. Other staff (admin, non-tutor teachers) are dropped.
+- **`grade_name`** — the `position` cell text with `"Form Tutor"` removed and surrounding whitespace stripped. Used by the loader to look up which `grades` row to update for the current academic year.
+- **Other cells** — text content, stripped.
+
+### Intermediate file shape (`scripts/scraped/teachers.json`)
+
+```json
+[
+  {
+    "grade_name": "6E",
+    "teacher_name": "...",
+    "teacher_email": "...",
+    "teacher_phone": "..."
+  }
+]
+```
+`grades` table is not populated yet. When it's populated:
+
+The loader reads this JSON, finds each `grades` row by `(grade_name, current academic year)`, and updates `teacher_name` and `teacher_email`. `teacher_phone` is not currently loaded — there's no column for it in `grades`.
+
+---
+
+## Fields not sourced from any scrape yet
+
+These fields the year-start / term-start load needs are not covered by either scrape source above. They must be supplied manually at load time, or another esmlh page found. Open questions about source live in `notes.md`.
 
 - `enrollments.student_category` (`new` / `old`)
 - `enrollments.tuition_contract_id`
-- `grades.teacher_name`, `grades.teacher_email`
 - Discount data
 - Bus opt-in (term-start)
 - Club enrollments (term-start)
 
-The year-start load script combines the student-directory scrape with whatever it can get for these gaps, and **fails loudly** when a required-but-missing field would force a placeholder.
+The load scripts combine the available scrapes with whatever is supplied for these gaps, and **fail loudly** when a required-but-missing field would force a placeholder.
 
 ---
 

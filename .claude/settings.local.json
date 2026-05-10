@@ -10,7 +10,9 @@
       "Bash(echo '{}')",
       "mcp__claude_ai_Supabase__get_project_url",
       "mcp__claude_ai_Supabase__get_publishable_keys",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(pnpm db:generate *)",
+      "Bash(pnpm *)"
     ]
   }
 }

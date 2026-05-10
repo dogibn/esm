@@ -14,7 +14,8 @@
     "load:students": "tsx --env-file=.env.local scripts/load/students.ts",
     "load:grade_levels": "tsx --env-file=.env.local scripts/load/grade_levels.ts",
     "load:academic_years": "tsx --env-file=.env.local scripts/load/academic_years.ts",
-    "load:academic_terms": "tsx --env-file=.env.local scripts/load/academic_terms.ts"
+    "load:academic_terms": "tsx --env-file=.env.local scripts/load/academic_terms.ts",
+    "load:grades": "tsx --env-file=.env.local scripts/load/grades.ts"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

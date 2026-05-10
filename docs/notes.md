@@ -9,8 +9,8 @@ Private working file. Not part of AI context. When a decision is made, it migrat
 - **`tuition_contract_id` source** — esmlh? manual at year-start? Affects scraping_esmlh + year-start lifecycle in domain_model.
 - **`student_category` source (new vs old)** — diff vs prior year roster? esmlh flag? Same scope.
 - **Bus opt-in source (term-start)** — esmlh? manual list? carried from previous term? Affects scraping_esmlh + term-start lifecycle.
-- **Class → teacher mapping page on esmlh.edu.mn** — until known, `grades.teacher_name` is filled manually. Affects scraping_esmlh.
 - **`student_directory` pagination at ~1000 students** — confirm whether it server-paginates. Affects scraper.
+- **`teacher_phone` column on `grades`?** — staff directory scrape captures phone, but `grades` has no column for it; phone currently sits unused in `teachers.json`. Add column or drop from scrape. Affects schema.grades + scraping_esmlh load step.
 - **Parent phone shape** — multiple space-separated values; keep raw or split into array? Affects schema.students + scraping rule.
 - **Mid-year withdrawal** — what happens to a withdrawn student's unpaid charges? Cancelled, owed, frozen? Affects domain_model Enrollment + Charge.
 - **Mid-term club drop** — refund, cancel charge, or still owed? Affects domain_model ClubEnrollment + Charge.
