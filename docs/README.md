@@ -1,42 +1,37 @@
 # ESM Payment Tracker
 
 ## What this is
-A web application for tracking student payments at English School of Mongolia (~1000 students). It replaces the current Excel-based workflow with a faster bank-transaction import process and a more convenient way to view and search payment status across the school.
+A web application for tracking student payments at English School of Mongolia (~1000 students). Replaces the current Excel-based workflow with bank-transaction import and a faster way to view payment status across the school.
 
 ## Who uses it
-Five accountants at ESM. One of them is an admin who manages fee structures and payment types; the other four record and review payments. This is an internal tool — not public, no parent or student access.
+Five accountants at ESM. One admin manages fee structures; the other four record and review payments. Internal tool — no parent or student access.
 
 ## v1 scope
-v1 covers the two workflows accountants do regularly:
-
-- **Tracking view.** An accountant can see all students with their current outstanding balance, filterable by grade and payment status, with global search.
-- **Bank transaction import.** An accountant can upload a bank transaction Excel file, review the system's proposed matches to students, correct mismatches, and confirm before payments are recorded.
-
-Initial data (students, enrollments, fee structures, discounts, and historical payments as needed) will be loaded directly into the database as a one-time setup task — no UI in v1. Subsequent year-start and term-start imports from esmlh.edu.mn are run as scripts by the admin.
+- **Tracking view.** All students with current outstanding balance, filterable by grade and payment status, with global search.
+- **Bank transaction import.** Upload a bank Excel file, review proposed matches to students, correct mismatches, confirm.
+- **Year/term-start scripts** (admin only, run from CLI). Pull roster, classes, and club enrollments from esmlh.edu.mn.
 
 ## Not in v1
-- Adding/editing fee structures through the UI (handled via import scripts until v2)
-- Adding new students through the UI
 - Per-student detail page
+- Adding/editing fee structures, students, or enrollments through the UI
 - Printing or sending invoices
-- Year-end roll-over UI (new years and terms are added by script)
-- Discount *rules* — v1 records the discount amounts applied, not the formulas behind them
+- Discount rule engine (v1 records discount amounts, not the formulas behind them)
 - Family / siblings modeling
+- Refunds
 
 ## Non-goals
-- This is not a general-purpose accounting system. It tracks student payments only — not salaries, vendor payments, or school expenses.
-- It does not process payments. It records payments that happened elsewhere (at the bank). Funds never move through this app.
-- It is not a parent or student portal. Only accountants use it.
-- It is single-tenant for ESM. It is not designed to be reused by other schools.
+- Not a general accounting system. Tracks student payments only — no salaries, vendor payments, or expenses.
+- Doesn't process payments. Records what happened at the bank; funds never move through this app.
+- Not a parent or student portal.
+- Single-tenant for ESM.
 
-## Possibly someday
-- Automatic retrieval of bank transaction files (instead of manual download + upload)
-- Direct integration with esmlh.edu.mn for year/term-start data import (currently scripted)
-- Discount rule engine (kind, percentage, order of application)
-- Family/siblings modeling
-
-## Stack
-_To be decided._
+## Documentation
+- `domain_model.md` — entities, lifecycle, decisions
+- `schema.md` — DB tables, columns, constraints
+- `tech_stack.md` — frameworks, conventions, folder structure
+- `scraping_esmlh.md` — esmlh.edu.mn data import
+- `user_flows.md` — UI workflows
+- `CLAUDE.md` — AI entry point
 
 ## Running locally
-_To be filled in once the project runs._
+*(To be filled in once the project runs.)*

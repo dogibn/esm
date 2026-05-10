@@ -38,6 +38,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# scripts — intermediate scrape output
+/scripts/scraped/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
