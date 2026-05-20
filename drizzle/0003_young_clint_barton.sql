@@ -1,0 +1,2 @@
+ALTER TABLE "enrollments" ADD COLUMN "student_code" text;--> statement-breakpoint
+CREATE UNIQUE INDEX "enrollments_academic_year_id_student_code_unique" ON "enrollments" USING btree ("academic_year_id","student_code") WHERE "enrollments"."student_code" IS NOT NULL;

@@ -47,6 +47,9 @@ yarn-error.log*
 # data used for initial population of the database
 /scripts/data/
 
+# QA tool output (cleaning/validation reports + valid/invalid split files)
+/scripts/reports/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

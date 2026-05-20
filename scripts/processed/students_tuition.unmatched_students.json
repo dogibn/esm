@@ -1,0 +1,86 @@
+[
+    {
+        "student_id": 5365,
+        "grade_name": "3+",
+        "last_name": "Harinude",
+        "first_name": "Chasencha/Tsasantsa"
+    },
+    {
+        "student_id": 5356,
+        "grade_name": "3+",
+        "last_name": "Naredla",
+        "first_name": "Chayka Krishna"
+    },
+    {
+        "student_id": 5350,
+        "grade_name": "3+",
+        "last_name": "Altankhuyag",
+        "first_name": "Darmagirdi"
+    },
+    {
+        "student_id": 5352,
+        "grade_name": "3+",
+        "last_name": "Erdene",
+        "first_name": "Nomgun"
+    },
+    {
+        "student_id": 5363,
+        "grade_name": "4+A",
+        "last_name": "Harinude",
+        "first_name": "Daerhanduxi"
+    },
+    {
+        "student_id": 5354,
+        "grade_name": "5+B",
+        "last_name": "Purevsuren",
+        "first_name": "Gegeen"
+    },
+    {
+        "student_id": 5371,
+        "grade_name": "5+B",
+        "last_name": "Ariya",
+        "first_name": "Indira"
+    },
+    {
+        "student_id": 5343,
+        "grade_name": "5+C",
+        "last_name": "Song",
+        "first_name": "HaYoon"
+    },
+    {
+        "student_id": 5353,
+        "grade_name": "1ML",
+        "last_name": "Ariunbold",
+        "first_name": "Nandinbeleg"
+    },
+    {
+        "student_id": 3181,
+        "grade_name": "2MG",
+        "last_name": "Javkhlan",
+        "first_name": "Amirlan"
+    },
+    {
+        "student_id": 2803,
+        "grade_name": "3CL",
+        "last_name": "Manlaibayar",
+        "first_name": "Ninjin"
+    },
+    {
+        "student_id": 5342,
+        "grade_name": "3TM",
+        "last_name": "Song",
+        "first_name": "HeeYoon"
+    },
+    {
+        "student_id": 5344,
+        "grade_name": "5CB",
+        "last_name": "Li",
+        "first_name": "Ruoxi"
+    },
+    {
+        "student_id": 5345,
+        "grade_name": "8E",
+        "last_name": "Gautam",
+        "first_name": "Chitrakshi"
+    }
+]

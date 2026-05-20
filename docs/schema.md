@@ -49,6 +49,7 @@ For *what* the entities mean and *why* the schema looks like this, see `domain_m
 | `academic_year_id` | `integer` | NOT NULL, FK → `academic_years.id` |
 | `teacher_name` | `text` | NOT NULL |
 | `teacher_email` | `text` | nullable |
+| `teacher_phone` | `text` | nullable |
 | `created_at` | `timestamptz` | NOT NULL DEFAULT `now()` |
 | `updated_at` | `timestamptz` | NOT NULL DEFAULT `now()` |
 
@@ -109,10 +110,12 @@ For *what* the entities mean and *why* the schema looks like this, see `domain_m
 | `status` | `text` | NOT NULL, CHECK in (`'active'`, `'inactive'`, `'withdrawn'`) |
 | `student_category` | `text` | NOT NULL, CHECK in (`'new'`, `'old'`) |
 | `tuition_contract_id` | `text` | nullable — external reference |
+| `student_code` | `text` | nullable — `code` from tuition document; join key to other financial documents |
 | `created_at` | `timestamptz` | NOT NULL DEFAULT `now()` |
 | `updated_at` | `timestamptz` | NOT NULL DEFAULT `now()` |
 
 - `UNIQUE (student_id, academic_year_id)`
+- Partial UNIQUE `(academic_year_id, student_code) WHERE student_code IS NOT NULL`
 - INDEX `(academic_year_id, grade_id)`
 
 ### `fee_structures`

@@ -49,10 +49,11 @@ Private working file. Not part of AI context. When a decision is made, it migrat
 
 ## Pure decision-tracking (no doc impact)
 
-These are *not* in any authoritative doc because the AI wouldn't add them on its own. They're notes-to-self.
+Notes-to-self.
 
 - No Storybook
 - No Sentry / error monitoring (revisit if needed)
 - No analytics
 - No CI beyond Vercel preview deploys
 - No marketing site or public pages
+- "code" column currently added to "enrollments" table. Change to "students" table if the "code" persists to the next year.

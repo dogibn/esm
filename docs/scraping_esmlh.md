@@ -38,6 +38,35 @@ Why two stages:
 
 ---
 
+## Local setup
+
+All Python scripts (scrape, parse, load helpers, and the QA tools under `scripts/tools/`) share one virtualenv and one `scripts/requirements.txt`. From project root:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r scripts/requirements.txt
+```
+
+Run scripts as modules from the `scripts/` directory so that `lib.*` imports resolve:
+
+```bash
+cd scripts
+python -m scrape.students
+python -m scrape.teachers
+python -m parse.parse_tuition_excel
+python -m tools.cleaning --input parsed/tuition_25-26.json
+python -m tools.data_utils nulls scraped/students.json code
+```
+
+Override the academic year via env var when needed:
+
+```bash
+ACADEMIC_YEAR=2026-2027 python -m scrape.teachers
+```
+
+---
+
 ## Authentication
 
 Login is form-based, session-cookie-based.

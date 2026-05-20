@@ -126,6 +126,7 @@ export const enrollments = pgTable(
     status: text("status").notNull(),
     studentCategory: text("student_category").notNull(),
     tuitionContractId: text("tuition_contract_id"),
+    studentCode: text("student_code"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
@@ -134,6 +135,9 @@ export const enrollments = pgTable(
       t.studentId,
       t.academicYearId
     ),
+    uniqueIndex("enrollments_academic_year_id_student_code_unique")
+      .on(t.academicYearId, t.studentCode)
+      .where(sql`${t.studentCode} IS NOT NULL`),
     index("enrollments_academic_year_id_grade_id_idx").on(t.academicYearId, t.gradeId),
     check("enrollments_status_check", sql`${t.status} IN ('active', 'inactive', 'withdrawn')`),
     check("enrollments_student_category_check", sql`${t.studentCategory} IN ('new', 'old')`),

@@ -2,30 +2,30 @@
 Scrapes https://esmlh.edu.mn/teacher/student_directory and writes
 scripts/scraped/students.json. See docs/scraping_esmlh.md for the full spec.
 
-Usage:
-    python scripts/scrape/students.py
+Usage (from the scripts/ directory):
+    python -m scrape.students
 
 Requires env vars:
     ESMLH_LOGIN_EMAIL
     ESMLH_LOGIN_PASSWORD
 """
 
-import json
 import os
 import re
 import sys
-from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 
-# Load .env.local (project convention) then fall back to shell env.
-load_dotenv(Path(__file__).parents[2] / ".env.local")
+from lib.io import write_json
+from lib.paths import PROJECT_ROOT, SCRAPED_DIR
+
+load_dotenv(PROJECT_ROOT / ".env.local")
 
 LOGIN_URL = "https://esmlh.edu.mn/login/validate_login"
 DIRECTORY_URL = "https://esmlh.edu.mn/teacher/student_directory"
-OUTPUT_PATH = Path(__file__).parents[2] / "scripts" / "scraped" / "students.json"
+OUTPUT_PATH = SCRAPED_DIR / "students.json"
 
 CLASS_RE = re.compile(r"^(?P<grade>[^ ]+) \((?P<year>\d{4}-\d{4})\)$")
 
@@ -127,8 +127,7 @@ def main() -> None:
     session = authenticate()
     records = scrape(session)
 
-    OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT_PATH.write_text(json.dumps(records, ensure_ascii=False, indent=2))
+    write_json(OUTPUT_PATH, records, indent=2)
     print(f"Wrote {len(records)} records to {OUTPUT_PATH}", file=sys.stderr)
 
 

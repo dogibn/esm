@@ -1,0 +1,5490 @@
+[
+    {
+        "student_id": 53,
+        "code": "184+22"
+    },
+    {
+        "student_id": 55,
+        "code": "181A17"
+    },
+    {
+        "student_id": 58,
+        "code": "181C01"
+    },
+    {
+        "student_id": 59,
+        "code": "185+01"
+    },
+    {
+        "student_id": 60,
+        "code": "181C25"
+    },
+    {
+        "student_id": 61,
+        "code": "184+05"
+    },
+    {
+        "student_id": 62,
+        "code": "191B03"
+    },
+    {
+        "student_id": 67,
+        "code": "181C20"
+    },
+    {
+        "student_id": 73,
+        "code": "181C05"
+    },
+    {
+        "student_id": 74,
+        "code": "181C06"
+    },
+    {
+        "student_id": 75,
+        "code": "181B05"
+    },
+    {
+        "student_id": 76,
+        "code": "192А03"
+    },
+    {
+        "student_id": 77,
+        "code": "191C08"
+    },
+    {
+        "student_id": 78,
+        "code": "181B06"
+    },
+    {
+        "student_id": 79,
+        "code": "195+18"
+    },
+    {
+        "student_id": 81,
+        "code": "181A23"
+    },
+    {
+        "student_id": 82,
+        "code": "192A01"
+    },
+    {
+        "student_id": 84,
+        "code": "192В01"
+    },
+    {
+        "student_id": 86,
+        "code": "191 E06"
+    },
+    {
+        "student_id": 87,
+        "code": "185+34"
+    },
+    {
+        "student_id": 93,
+        "code": "181A06"
+    },
+    {
+        "student_id": 95,
+        "code": "185+02"
+    },
+    {
+        "student_id": 97,
+        "code": "181A20"
+    },
+    {
+        "student_id": 98,
+        "code": "192А02"
+    },
+    {
+        "student_id": 99,
+        "code": "185+06"
+    },
+    {
+        "student_id": 100,
+        "code": "191C02"
+    },
+    {
+        "student_id": 101,
+        "code": "247C02"
+    },
+    {
+        "student_id": 102,
+        "code": "181A05"
+    },
+    {
+        "student_id": 103,
+        "code": "185+07"
+    },
+    {
+        "student_id": 105,
+        "code": "181C24"
+    },
+    {
+        "student_id": 106,
+        "code": "185+16"
+    },
+    {
+        "student_id": 107,
+        "code": "181B10"
+    },
+    {
+        "student_id": 108,
+        "code": "191A06"
+    },
+    {
+        "student_id": 109,
+        "code": "181B30"
+    },
+    {
+        "student_id": 110,
+        "code": "191C14"
+    },
+    {
+        "student_id": 112,
+        "code": "181B23"
+    },
+    {
+        "student_id": 114,
+        "code": "181A16"
+    },
+    {
+        "student_id": 116,
+        "code": "181A19"
+    },
+    {
+        "student_id": 120,
+        "code": "181B12"
+    },
+    {
+        "student_id": 124,
+        "code": "181A10"
+    },
+    {
+        "student_id": 125,
+        "code": "181C11"
+    },
+    {
+        "student_id": 128,
+        "code": "192C02"
+    },
+    {
+        "student_id": 130,
+        "code": "247C03"
+    },
+    {
+        "student_id": 131,
+        "code": "181A02"
+    },
+    {
+        "student_id": 133,
+        "code": "195+22"
+    },
+    {
+        "student_id": 134,
+        "code": "181A18"
+    },
+    {
+        "student_id": 135,
+        "code": "181B11"
+    },
+    {
+        "student_id": 137,
+        "code": "202B03"
+    },
+    {
+        "student_id": 140,
+        "code": "181C12"
+    },
+    {
+        "student_id": 142,
+        "code": "181A09"
+    },
+    {
+        "student_id": 143,
+        "code": "181C13"
+    },
+    {
+        "student_id": 145,
+        "code": "191C04"
+    },
+    {
+        "student_id": 147,
+        "code": "184+07"
+    },
+    {
+        "student_id": 149,
+        "code": "203A01"
+    },
+    {
+        "student_id": 150,
+        "code": "191A13"
+    },
+    {
+        "student_id": 151,
+        "code": "181B17"
+    },
+    {
+        "student_id": 152,
+        "code": "202C06"
+    },
+    {
+        "student_id": 154,
+        "code": "191C17"
+    },
+    {
+        "student_id": 156,
+        "code": "191 E15"
+    },
+    {
+        "student_id": 157,
+        "code": "246C05"
+    },
+    {
+        "student_id": 160,
+        "code": "201B01"
+    },
+    {
+        "student_id": 161,
+        "code": "192В02"
+    },
+    {
+        "student_id": 162,
+        "code": "181C16"
+    },
+    {
+        "student_id": 167,
+        "code": "181A15"
+    },
+    {
+        "student_id": 170,
+        "code": "201B04"
+    },
+    {
+        "student_id": 171,
+        "code": "185+11"
+    },
+    {
+        "student_id": 173,
+        "code": "201D03"
+    },
+    {
+        "student_id": 175,
+        "code": "181A04"
+    },
+    {
+        "student_id": 176,
+        "code": "245LM01"
+    },
+    {
+        "student_id": 177,
+        "code": "184+21"
+    },
+    {
+        "student_id": 180,
+        "code": "201B20"
+    },
+    {
+        "student_id": 181,
+        "code": "195+07"
+    },
+    {
+        "student_id": 182,
+        "code": "184+03"
+    },
+    {
+        "student_id": 189,
+        "code": "195+12"
+    },
+    {
+        "student_id": 190,
+        "code": "201C16"
+    },
+    {
+        "student_id": 194,
+        "code": "201C08"
+    },
+    {
+        "student_id": 196,
+        "code": "195+03"
+    },
+    {
+        "student_id": 197,
+        "code": "184+11"
+    },
+    {
+        "student_id": 198,
+        "code": "201B09"
+    },
+    {
+        "student_id": 199,
+        "code": "201C07"
+    },
+    {
+        "student_id": 202,
+        "code": "184+01"
+    },
+    {
+        "student_id": 207,
+        "code": "195+06"
+    },
+    {
+        "student_id": 213,
+        "code": "201C01"
+    },
+    {
+        "student_id": 214,
+        "code": "201B13"
+    },
+    {
+        "student_id": 218,
+        "code": "201B12"
+    },
+    {
+        "student_id": 219,
+        "code": "195+04"
+    },
+    {
+        "student_id": 222,
+        "code": "201C15"
+    },
+    {
+        "student_id": 226,
+        "code": "201B10"
+    },
+    {
+        "student_id": 231,
+        "code": "195+11"
+    },
+    {
+        "student_id": 232,
+        "code": "201C05"
+    },
+    {
+        "student_id": 233,
+        "code": "201B22"
+    },
+    {
+        "student_id": 235,
+        "code": "195+17"
+    },
+    {
+        "student_id": 236,
+        "code": "201C10"
+    },
+    {
+        "student_id": 238,
+        "code": "201B03"
+    },
+    {
+        "student_id": 244,
+        "code": "195+05"
+    },
+    {
+        "student_id": 245,
+        "code": "185+26"
+    },
+    {
+        "student_id": 248,
+        "code": "201B18"
+    },
+    {
+        "student_id": 250,
+        "code": "195+14"
+    },
+    {
+        "student_id": 251,
+        "code": "185+03"
+    },
+    {
+        "student_id": 253,
+        "code": "201C12"
+    },
+    {
+        "student_id": 254,
+        "code": "201C20"
+    },
+    {
+        "student_id": 259,
+        "code": "201C02"
+    },
+    {
+        "student_id": 261,
+        "code": "195+09"
+    },
+    {
+        "student_id": 262,
+        "code": "191 E09"
+    },
+    {
+        "student_id": 263,
+        "code": "191C13"
+    },
+    {
+        "student_id": 265,
+        "code": "195+01"
+    },
+    {
+        "student_id": 266,
+        "code": "191 E07"
+    },
+    {
+        "student_id": 267,
+        "code": "195+21"
+    },
+    {
+        "student_id": 273,
+        "code": "185+23"
+    },
+    {
+        "student_id": 274,
+        "code": "184+10"
+    },
+    {
+        "student_id": 276,
+        "code": "191C10"
+    },
+    {
+        "student_id": 277,
+        "code": "195+16"
+    },
+    {
+        "student_id": 278,
+        "code": "202B02"
+    },
+    {
+        "student_id": 279,
+        "code": "202D01"
+    },
+    {
+        "student_id": 280,
+        "code": "202A03"
+    },
+    {
+        "student_id": 281,
+        "code": "182C02"
+    },
+    {
+        "student_id": 282,
+        "code": "185+20"
+    },
+    {
+        "student_id": 283,
+        "code": "184+14"
+    },
+    {
+        "student_id": 285,
+        "code": "195+02"
+    },
+    {
+        "student_id": 287,
+        "code": "182A01"
+    },
+    {
+        "student_id": 290,
+        "code": "182C04"
+    },
+    {
+        "student_id": 291,
+        "code": "183A01"
+    },
+    {
+        "student_id": 292,
+        "code": "182B11"
+    },
+    {
+        "student_id": 294,
+        "code": "193C01"
+    },
+    {
+        "student_id": 295,
+        "code": "184C15"
+    },
+    {
+        "student_id": 296,
+        "code": "182B06"
+    },
+    {
+        "student_id": 299,
+        "code": "194А02"
+    },
+    {
+        "student_id": 300,
+        "code": "183B05"
+    },
+    {
+        "student_id": 301,
+        "code": "183A03"
+    },
+    {
+        "student_id": 302,
+        "code": "182A02"
+    },
+    {
+        "student_id": 303,
+        "code": "182B02"
+    },
+    {
+        "student_id": 304,
+        "code": "2510C01"
+    },
+    {
+        "student_id": 308,
+        "code": "182C06"
+    },
+    {
+        "student_id": 310,
+        "code": "183C16"
+    },
+    {
+        "student_id": 311,
+        "code": "182A03"
+    },
+    {
+        "student_id": 312,
+        "code": "183A07"
+    },
+    {
+        "student_id": 313,
+        "code": "182C07"
+    },
+    {
+        "student_id": 315,
+        "code": "182A04"
+    },
+    {
+        "student_id": 318,
+        "code": "193B01"
+    },
+    {
+        "student_id": 319,
+        "code": "183C15"
+    },
+    {
+        "student_id": 320,
+        "code": "183A09"
+    },
+    {
+        "student_id": 322,
+        "code": "184B04"
+    },
+    {
+        "student_id": 326,
+        "code": "183C08"
+    },
+    {
+        "student_id": 327,
+        "code": "182A06"
+    },
+    {
+        "student_id": 328,
+        "code": "183C18"
+    },
+    {
+        "student_id": 330,
+        "code": "182C09"
+    },
+    {
+        "student_id": 331,
+        "code": "182A07"
+    },
+    {
+        "student_id": 335,
+        "code": "183A11"
+    },
+    {
+        "student_id": 336,
+        "code": "183A17"
+    },
+    {
+        "student_id": 337,
+        "code": "182B09"
+    },
+    {
+        "student_id": 339,
+        "code": "184C05"
+    },
+    {
+        "student_id": 340,
+        "code": "183B12"
+    },
+    {
+        "student_id": 343,
+        "code": "182A09"
+    },
+    {
+        "student_id": 344,
+        "code": "194В01"
+    },
+    {
+        "student_id": 345,
+        "code": "182A10"
+    },
+    {
+        "student_id": 346,
+        "code": "205C05"
+    },
+    {
+        "student_id": 347,
+        "code": "195+27"
+    },
+    {
+        "student_id": 348,
+        "code": "193А04"
+    },
+    {
+        "student_id": 349,
+        "code": "194А04"
+    },
+    {
+        "student_id": 350,
+        "code": "184С09"
+    },
+    {
+        "student_id": 351,
+        "code": "205C01"
+    },
+    {
+        "student_id": 352,
+        "code": "182A11"
+    },
+    {
+        "student_id": 354,
+        "code": "182C12"
+    },
+    {
+        "student_id": 357,
+        "code": "205C04"
+    },
+    {
+        "student_id": 364,
+        "code": "193В06"
+    },
+    {
+        "student_id": 365,
+        "code": "182A15"
+    },
+    {
+        "student_id": 366,
+        "code": "184A12"
+    },
+    {
+        "student_id": 367,
+        "code": "183B09"
+    },
+    {
+        "student_id": 370,
+        "code": "183C02"
+    },
+    {
+        "student_id": 373,
+        "code": "183B13"
+    },
+    {
+        "student_id": 374,
+        "code": "183C19"
+    },
+    {
+        "student_id": 378,
+        "code": "183C04"
+    },
+    {
+        "student_id": 380,
+        "code": "182C15"
+    },
+    {
+        "student_id": 381,
+        "code": "195А02"
+    },
+    {
+        "student_id": 384,
+        "code": "182C18"
+    },
+    {
+        "student_id": 385,
+        "code": "185C19"
+    },
+    {
+        "student_id": 386,
+        "code": "184B12"
+    },
+    {
+        "student_id": 387,
+        "code": "183C01"
+    },
+    {
+        "student_id": 388,
+        "code": "182B01"
+    },
+    {
+        "student_id": 389,
+        "code": "182C16"
+    },
+    {
+        "student_id": 391,
+        "code": "183B06"
+    },
+    {
+        "student_id": 392,
+        "code": "206A02"
+    },
+    {
+        "student_id": 394,
+        "code": "204B01"
+    },
+    {
+        "student_id": 396,
+        "code": "2510B01"
+    },
+    {
+        "student_id": 397,
+        "code": "185B10"
+    },
+    {
+        "student_id": 398,
+        "code": "196D01"
+    },
+    {
+        "student_id": 399,
+        "code": "184C13"
+    },
+    {
+        "student_id": 401,
+        "code": "205B04"
+    },
+    {
+        "student_id": 402,
+        "code": "184C16"
+    },
+    {
+        "student_id": 405,
+        "code": "185C02"
+    },
+    {
+        "student_id": 406,
+        "code": "184B19"
+    },
+    {
+        "student_id": 407,
+        "code": "205B03"
+    },
+    {
+        "student_id": 409,
+        "code": "185B23"
+    },
+    {
+        "student_id": 410,
+        "code": "183C17"
+    },
+    {
+        "student_id": 412,
+        "code": "184B18"
+    },
+    {
+        "student_id": 414,
+        "code": "185B03"
+    },
+    {
+        "student_id": 415,
+        "code": "185C13"
+    },
+    {
+        "student_id": 416,
+        "code": "206A01"
+    },
+    {
+        "student_id": 418,
+        "code": "185C18"
+    },
+    {
+        "student_id": 421,
+        "code": "185A18"
+    },
+    {
+        "student_id": 424,
+        "code": "185C10"
+    },
+    {
+        "student_id": 425,
+        "code": "185A05"
+    },
+    {
+        "student_id": 428,
+        "code": "185C01"
+    },
+    {
+        "student_id": 429,
+        "code": "184B13"
+    },
+    {
+        "student_id": 430,
+        "code": "185C15"
+    },
+    {
+        "student_id": 431,
+        "code": "183C12"
+    },
+    {
+        "student_id": 432,
+        "code": "185C08"
+    },
+    {
+        "student_id": 433,
+        "code": "185B27"
+    },
+    {
+        "student_id": 437,
+        "code": "185B24"
+    },
+    {
+        "student_id": 438,
+        "code": "184B21"
+    },
+    {
+        "student_id": 440,
+        "code": "185B12"
+    },
+    {
+        "student_id": 441,
+        "code": "196D03"
+    },
+    {
+        "student_id": 443,
+        "code": "183B03"
+    },
+    {
+        "student_id": 446,
+        "code": "184A06"
+    },
+    {
+        "student_id": 448,
+        "code": "196C01"
+    },
+    {
+        "student_id": 453,
+        "code": "184A19"
+    },
+    {
+        "student_id": 455,
+        "code": "184A07"
+    },
+    {
+        "student_id": 457,
+        "code": "185B06"
+    },
+    {
+        "student_id": 458,
+        "code": "183B04"
+    },
+    {
+        "student_id": 461,
+        "code": "184A16"
+    },
+    {
+        "student_id": 463,
+        "code": "229A01"
+    },
+    {
+        "student_id": 464,
+        "code": "185C03"
+    },
+    {
+        "student_id": 465,
+        "code": "184A11"
+    },
+    {
+        "student_id": 466,
+        "code": "185A06"
+    },
+    {
+        "student_id": 468,
+        "code": "195С03"
+    },
+    {
+        "student_id": 469,
+        "code": "185A03"
+    },
+    {
+        "student_id": 470,
+        "code": "196D02"
+    },
+    {
+        "student_id": 473,
+        "code": "185B18"
+    },
+    {
+        "student_id": 474,
+        "code": "184C12"
+    },
+    {
+        "student_id": 478,
+        "code": "184C14"
+    },
+    {
+        "student_id": 479,
+        "code": "185C06"
+    },
+    {
+        "student_id": 481,
+        "code": "185A08"
+    },
+    {
+        "student_id": 486,
+        "code": "194А01"
+    },
+    {
+        "student_id": 487,
+        "code": "207A01"
+    },
+    {
+        "student_id": 489,
+        "code": "206C02"
+    },
+    {
+        "student_id": 490,
+        "code": "196C07"
+    },
+    {
+        "student_id": 492,
+        "code": "185A01"
+    },
+    {
+        "student_id": 496,
+        "code": "196C02"
+    },
+    {
+        "student_id": 508,
+        "code": "239A02"
+    },
+    {
+        "student_id": 509,
+        "code": "185C07"
+    },
+    {
+        "student_id": 511,
+        "code": "206C01"
+    },
+    {
+        "student_id": 514,
+        "code": "185A13"
+    },
+    {
+        "student_id": 523,
+        "code": "196Cc4"
+    },
+    {
+        "student_id": 528,
+        "code": "185C12"
+    },
+    {
+        "student_id": 537,
+        "code": "185A10"
+    },
+    {
+        "student_id": 546,
+        "code": "185B08"
+    },
+    {
+        "student_id": 554,
+        "code": "196Cc1"
+    },
+    {
+        "student_id": 558,
+        "code": "183B08"
+    },
+    {
+        "student_id": 560,
+        "code": "185B16"
+    },
+    {
+        "student_id": 569,
+        "code": "196Cc3"
+    },
+    {
+        "student_id": 572,
+        "code": "185A09"
+    },
+    {
+        "student_id": 579,
+        "code": "185A16"
+    },
+    {
+        "student_id": 611,
+        "code": "183A13"
+    },
+    {
+        "student_id": 629,
+        "code": "205A02"
+    },
+    {
+        "student_id": 710,
+        "code": "184C03"
+    },
+    {
+        "student_id": 715,
+        "code": "184C06"
+    },
+    {
+        "student_id": 727,
+        "code": "184A09"
+    },
+    {
+        "student_id": 733,
+        "code": "184B20"
+    },
+    {
+        "student_id": 738,
+        "code": "184A10"
+    },
+    {
+        "student_id": 745,
+        "code": "195В02"
+    },
+    {
+        "student_id": 746,
+        "code": "185B01"
+    },
+    {
+        "student_id": 749,
+        "code": "196Cc2"
+    },
+    {
+        "student_id": 752,
+        "code": "239A01"
+    },
+    {
+        "student_id": 760,
+        "code": "184A15"
+    },
+    {
+        "student_id": 761,
+        "code": "185A21"
+    },
+    {
+        "student_id": 764,
+        "code": "207C03"
+    },
+    {
+        "student_id": 766,
+        "code": "184B15"
+    },
+    {
+        "student_id": 769,
+        "code": "195В01"
+    },
+    {
+        "student_id": 771,
+        "code": "185C11"
+    },
+    {
+        "student_id": 781,
+        "code": "185B14"
+    },
+    {
+        "student_id": 791,
+        "code": "2411C02"
+    },
+    {
+        "student_id": 810,
+        "code": "183A12"
+    },
+    {
+        "student_id": 917,
+        "code": "185+05"
+    },
+    {
+        "student_id": 927,
+        "code": "222OB08"
+    },
+    {
+        "student_id": 1100,
+        "code": "185A07"
+    },
+    {
+        "student_id": 1163,
+        "code": "186A04"
+    },
+    {
+        "student_id": 1494,
+        "code": "211A12"
+    },
+    {
+        "student_id": 1496,
+        "code": "183+01"
+    },
+    {
+        "student_id": 1497,
+        "code": "213+02"
+    },
+    {
+        "student_id": 1500,
+        "code": "213C03"
+    },
+    {
+        "student_id": 1506,
+        "code": "241DR13"
+    },
+    {
+        "student_id": 1507,
+        "code": "211A07"
+    },
+    {
+        "student_id": 1508,
+        "code": "211A01"
+    },
+    {
+        "student_id": 1509,
+        "code": "211A02"
+    },
+    {
+        "student_id": 1513,
+        "code": "211A04"
+    },
+    {
+        "student_id": 1515,
+        "code": "211A05"
+    },
+    {
+        "student_id": 1522,
+        "code": "211B02"
+    },
+    {
+        "student_id": 1524,
+        "code": "211B03"
+    },
+    {
+        "student_id": 1526,
+        "code": "214+02"
+    },
+    {
+        "student_id": 1527,
+        "code": "211B07"
+    },
+    {
+        "student_id": 1533,
+        "code": "211B05"
+    },
+    {
+        "student_id": 1534,
+        "code": "214+05"
+    },
+    {
+        "student_id": 1535,
+        "code": "211B04"
+    },
+    {
+        "student_id": 1536,
+        "code": "211B08"
+    },
+    {
+        "student_id": 1537,
+        "code": "214+12"
+    },
+    {
+        "student_id": 1538,
+        "code": "211B06"
+    },
+    {
+        "student_id": 1541,
+        "code": "214+07"
+    },
+    {
+        "student_id": 1543,
+        "code": "214+09"
+    },
+    {
+        "student_id": 1544,
+        "code": "211C23"
+    },
+    {
+        "student_id": 1546,
+        "code": "211C24"
+    },
+    {
+        "student_id": 1548,
+        "code": "211C03"
+    },
+    {
+        "student_id": 1553,
+        "code": "212A04"
+    },
+    {
+        "student_id": 1555,
+        "code": "211C04"
+    },
+    {
+        "student_id": 1556,
+        "code": "212A02"
+    },
+    {
+        "student_id": 1557,
+        "code": "255CB04"
+    },
+    {
+        "student_id": 1558,
+        "code": "211C06"
+    },
+    {
+        "student_id": 1560,
+        "code": "211C07"
+    },
+    {
+        "student_id": 1563,
+        "code": "212C04"
+    },
+    {
+        "student_id": 1565,
+        "code": "212C03"
+    },
+    {
+        "student_id": 1572,
+        "code": "213C04"
+    },
+    {
+        "student_id": 1573,
+        "code": "211C22"
+    },
+    {
+        "student_id": 1576,
+        "code": "214B02"
+    },
+    {
+        "student_id": 1577,
+        "code": "211C13"
+    },
+    {
+        "student_id": 1580,
+        "code": "211C14"
+    },
+    {
+        "student_id": 1581,
+        "code": "214C01"
+    },
+    {
+        "student_id": 1582,
+        "code": "211C15"
+    },
+    {
+        "student_id": 1583,
+        "code": "214C02"
+    },
+    {
+        "student_id": 1586,
+        "code": "215C01"
+    },
+    {
+        "student_id": 1588,
+        "code": "215C03"
+    },
+    {
+        "student_id": 1589,
+        "code": "215C06"
+    },
+    {
+        "student_id": 1593,
+        "code": "216D02"
+    },
+    {
+        "student_id": 1595,
+        "code": "216A02"
+    },
+    {
+        "student_id": 1596,
+        "code": "216D03"
+    },
+    {
+        "student_id": 1597,
+        "code": "217A01"
+    },
+    {
+        "student_id": 1599,
+        "code": "211C18"
+    },
+    {
+        "student_id": 1601,
+        "code": "211C20"
+    },
+    {
+        "student_id": 1604,
+        "code": "217C01"
+    },
+    {
+        "student_id": 1605,
+        "code": "184B05"
+    },
+    {
+        "student_id": 1606,
+        "code": "184C04"
+    },
+    {
+        "student_id": 1607,
+        "code": "211D01"
+    },
+    {
+        "student_id": 1608,
+        "code": "217C02"
+    },
+    {
+        "student_id": 1611,
+        "code": "217C03"
+    },
+    {
+        "student_id": 1613,
+        "code": "211D04"
+    },
+    {
+        "student_id": 1614,
+        "code": "218C01"
+    },
+    {
+        "student_id": 1616,
+        "code": "211D06"
+    },
+    {
+        "student_id": 1617,
+        "code": "211D07"
+    },
+    {
+        "student_id": 1618,
+        "code": "211D08"
+    },
+    {
+        "student_id": 1619,
+        "code": "218D02"
+    },
+    {
+        "student_id": 1622,
+        "code": "211D10"
+    },
+    {
+        "student_id": 1623,
+        "code": "211D11"
+    },
+    {
+        "student_id": 1626,
+        "code": "218Cc4"
+    },
+    {
+        "student_id": 1627,
+        "code": "218Cc1"
+    },
+    {
+        "student_id": 1628,
+        "code": "211D13"
+    },
+    {
+        "student_id": 1629,
+        "code": "211D14"
+    },
+    {
+        "student_id": 1630,
+        "code": "218Cc2"
+    },
+    {
+        "student_id": 1632,
+        "code": "211D15"
+    },
+    {
+        "student_id": 1636,
+        "code": "211D19"
+    },
+    {
+        "student_id": 1641,
+        "code": "212B04"
+    },
+    {
+        "student_id": 1643,
+        "code": "211D18"
+    },
+    {
+        "student_id": 1645,
+        "code": "211B10"
+    },
+    {
+        "student_id": 1649,
+        "code": "212B01"
+    },
+    {
+        "student_id": 1650,
+        "code": "191 E02"
+    },
+    {
+        "student_id": 1652,
+        "code": "213D01"
+    },
+    {
+        "student_id": 1654,
+        "code": "213B01"
+    },
+    {
+        "student_id": 1656,
+        "code": "212B02"
+    },
+    {
+        "student_id": 1657,
+        "code": "215A01"
+    },
+    {
+        "student_id": 1659,
+        "code": "212B05"
+    },
+    {
+        "student_id": 1660,
+        "code": "214A02"
+    },
+    {
+        "student_id": 1661,
+        "code": "216C01"
+    },
+    {
+        "student_id": 1662,
+        "code": "215B02"
+    },
+    {
+        "student_id": 1674,
+        "code": "193+04"
+    },
+    {
+        "student_id": 1684,
+        "code": "193+05"
+    },
+    {
+        "student_id": 1688,
+        "code": "193+17"
+    },
+    {
+        "student_id": 1689,
+        "code": "213+01"
+    },
+    {
+        "student_id": 1690,
+        "code": "243VE03"
+    },
+    {
+        "student_id": 1693,
+        "code": "204+08"
+    },
+    {
+        "student_id": 1694,
+        "code": "204+01"
+    },
+    {
+        "student_id": 1697,
+        "code": "221JB24"
+    },
+    {
+        "student_id": 1700,
+        "code": "193+18"
+    },
+    {
+        "student_id": 1701,
+        "code": "204+02"
+    },
+    {
+        "student_id": 1702,
+        "code": "193+06"
+    },
+    {
+        "student_id": 1706,
+        "code": "193+19"
+    },
+    {
+        "student_id": 1707,
+        "code": "203+09"
+    },
+    {
+        "student_id": 1710,
+        "code": "215+02"
+    },
+    {
+        "student_id": 1713,
+        "code": "183+07"
+    },
+    {
+        "student_id": 1714,
+        "code": "204+09"
+    },
+    {
+        "student_id": 1715,
+        "code": "193+03"
+    },
+    {
+        "student_id": 1716,
+        "code": "193+07"
+    },
+    {
+        "student_id": 1719,
+        "code": "215+10"
+    },
+    {
+        "student_id": 1721,
+        "code": "203+05"
+    },
+    {
+        "student_id": 1722,
+        "code": "215+11"
+    },
+    {
+        "student_id": 1723,
+        "code": "221JB05"
+    },
+    {
+        "student_id": 1725,
+        "code": "215+04"
+    },
+    {
+        "student_id": 1726,
+        "code": "203+12"
+    },
+    {
+        "student_id": 1727,
+        "code": "215+05"
+    },
+    {
+        "student_id": 1728,
+        "code": "215+17"
+    },
+    {
+        "student_id": 1731,
+        "code": "204+03"
+    },
+    {
+        "student_id": 1732,
+        "code": "203+06"
+    },
+    {
+        "student_id": 1736,
+        "code": "215+14"
+    },
+    {
+        "student_id": 1739,
+        "code": "215+13"
+    },
+    {
+        "student_id": 1741,
+        "code": "203+03"
+    },
+    {
+        "student_id": 1746,
+        "code": "183+12"
+    },
+    {
+        "student_id": 1748,
+        "code": "193+01"
+    },
+    {
+        "student_id": 1749,
+        "code": "194+02"
+    },
+    {
+        "student_id": 1750,
+        "code": "194+07"
+    },
+    {
+        "student_id": 1753,
+        "code": "205+07"
+    },
+    {
+        "student_id": 1755,
+        "code": "194+05"
+    },
+    {
+        "student_id": 1756,
+        "code": "185+28"
+    },
+    {
+        "student_id": 1757,
+        "code": "183+17"
+    },
+    {
+        "student_id": 1758,
+        "code": "205+04"
+    },
+    {
+        "student_id": 1759,
+        "code": "183+13"
+    },
+    {
+        "student_id": 1760,
+        "code": "191 E05"
+    },
+    {
+        "student_id": 1761,
+        "code": "183+05"
+    },
+    {
+        "student_id": 1762,
+        "code": "191D01"
+    },
+    {
+        "student_id": 1763,
+        "code": "191A01"
+    },
+    {
+        "student_id": 1765,
+        "code": "205+14"
+    },
+    {
+        "student_id": 1767,
+        "code": "205+01"
+    },
+    {
+        "student_id": 1769,
+        "code": "191Е10"
+    },
+    {
+        "student_id": 1770,
+        "code": "205+08"
+    },
+    {
+        "student_id": 1771,
+        "code": "202A01"
+    },
+    {
+        "student_id": 1772,
+        "code": "255CB15"
+    },
+    {
+        "student_id": 1773,
+        "code": "202A02"
+    },
+    {
+        "student_id": 1774,
+        "code": "205+10"
+    },
+    {
+        "student_id": 1775,
+        "code": "183+18"
+    },
+    {
+        "student_id": 1776,
+        "code": "183+10"
+    },
+    {
+        "student_id": 1777,
+        "code": "194+04"
+    },
+    {
+        "student_id": 1778,
+        "code": "183+09"
+    },
+    {
+        "student_id": 1781,
+        "code": "195+08"
+    },
+    {
+        "student_id": 1782,
+        "code": "191A02"
+    },
+    {
+        "student_id": 1783,
+        "code": "205+15"
+    },
+    {
+        "student_id": 1785,
+        "code": "211B09"
+    },
+    {
+        "student_id": 1786,
+        "code": "185+31"
+    },
+    {
+        "student_id": 1787,
+        "code": "185+08"
+    },
+    {
+        "student_id": 1788,
+        "code": "191A11"
+    },
+    {
+        "student_id": 1791,
+        "code": "185+12"
+    },
+    {
+        "student_id": 1792,
+        "code": "185+17"
+    },
+    {
+        "student_id": 1795,
+        "code": "211D20"
+    },
+    {
+        "student_id": 1796,
+        "code": "191A10"
+    },
+    {
+        "student_id": 1797,
+        "code": "213B02"
+    },
+    {
+        "student_id": 1798,
+        "code": "201C03"
+    },
+    {
+        "student_id": 1800,
+        "code": "201A01"
+    },
+    {
+        "student_id": 1802,
+        "code": "201C09"
+    },
+    {
+        "student_id": 1803,
+        "code": "184+15"
+    },
+    {
+        "student_id": 1810,
+        "code": "215C02"
+    },
+    {
+        "student_id": 1820,
+        "code": "213+07"
+    },
+    {
+        "student_id": 1822,
+        "code": "213+14"
+    },
+    {
+        "student_id": 1825,
+        "code": "213+19"
+    },
+    {
+        "student_id": 1827,
+        "code": "213+18"
+    },
+    {
+        "student_id": 1829,
+        "code": "213+10"
+    },
+    {
+        "student_id": 1830,
+        "code": "213+11"
+    },
+    {
+        "student_id": 1832,
+        "code": "214+13"
+    },
+    {
+        "student_id": 1840,
+        "code": "234JC03"
+    },
+    {
+        "student_id": 1843,
+        "code": "213A01"
+    },
+    {
+        "student_id": 1852,
+        "code": "217D04"
+    },
+    {
+        "student_id": 1855,
+        "code": "215A02"
+    },
+    {
+        "student_id": 1859,
+        "code": "215+08"
+    },
+    {
+        "student_id": 1865,
+        "code": "243ID06"
+    },
+    {
+        "student_id": 1870,
+        "code": "213A02"
+    },
+    {
+        "student_id": 1873,
+        "code": "214+15"
+    },
+    {
+        "student_id": 1876,
+        "code": "215B04"
+    },
+    {
+        "student_id": 1877,
+        "code": "216D05"
+    },
+    {
+        "student_id": 1878,
+        "code": "215+09"
+    },
+    {
+        "student_id": 1881,
+        "code": "213+15"
+    },
+    {
+        "student_id": 1883,
+        "code": "215+19"
+    },
+    {
+        "student_id": 1886,
+        "code": "211D23"
+    },
+    {
+        "student_id": 1887,
+        "code": "218C02"
+    },
+    {
+        "student_id": 1888,
+        "code": "217A02"
+    },
+    {
+        "student_id": 1892,
+        "code": "182C20"
+    },
+    {
+        "student_id": 1894,
+        "code": "214B04"
+    },
+    {
+        "student_id": 1896,
+        "code": "257D05"
+    },
+    {
+        "student_id": 1897,
+        "code": "212D03"
+    },
+    {
+        "student_id": 1898,
+        "code": "212A06"
+    },
+    {
+        "student_id": 1901,
+        "code": "215B05"
+    },
+    {
+        "student_id": 1902,
+        "code": "212D04"
+    },
+    {
+        "student_id": 1904,
+        "code": "257B02"
+    },
+    {
+        "student_id": 1905,
+        "code": "217D05"
+    },
+    {
+        "student_id": 1906,
+        "code": "211A11"
+    },
+    {
+        "student_id": 1907,
+        "code": "218C03"
+    },
+    {
+        "student_id": 1908,
+        "code": "216A03"
+    },
+    {
+        "student_id": 1915,
+        "code": "221JK01"
+    },
+    {
+        "student_id": 1917,
+        "code": "223+02"
+    },
+    {
+        "student_id": 1918,
+        "code": "251JA03"
+    },
+    {
+        "student_id": 1920,
+        "code": "223+01"
+    },
+    {
+        "student_id": 1921,
+        "code": "223+06"
+    },
+    {
+        "student_id": 1923,
+        "code": "223+09"
+    },
+    {
+        "student_id": 1925,
+        "code": "251PB01"
+    },
+    {
+        "student_id": 1927,
+        "code": "223+12"
+    },
+    {
+        "student_id": 1928,
+        "code": "223+11"
+    },
+    {
+        "student_id": 1932,
+        "code": "223+14"
+    },
+    {
+        "student_id": 1933,
+        "code": "223+15"
+    },
+    {
+        "student_id": 1940,
+        "code": "234+A12"
+    },
+    {
+        "student_id": 1945,
+        "code": "224+11"
+    },
+    {
+        "student_id": 1946,
+        "code": "224+09"
+    },
+    {
+        "student_id": 1947,
+        "code": "224+02"
+    },
+    {
+        "student_id": 1948,
+        "code": "224+10"
+    },
+    {
+        "student_id": 1949,
+        "code": "224+06"
+    },
+    {
+        "student_id": 1950,
+        "code": "224+04"
+    },
+    {
+        "student_id": 1951,
+        "code": "224+05"
+    },
+    {
+        "student_id": 1957,
+        "code": "225+25"
+    },
+    {
+        "student_id": 1961,
+        "code": "225+19"
+    },
+    {
+        "student_id": 1962,
+        "code": "225+28"
+    },
+    {
+        "student_id": 1963,
+        "code": "225+23"
+    },
+    {
+        "student_id": 1964,
+        "code": "225+24"
+    },
+    {
+        "student_id": 1965,
+        "code": "225+17"
+    },
+    {
+        "student_id": 1970,
+        "code": "225+20"
+    },
+    {
+        "student_id": 1971,
+        "code": "225+07"
+    },
+    {
+        "student_id": 1972,
+        "code": "225+14"
+    },
+    {
+        "student_id": 1973,
+        "code": "225+09"
+    },
+    {
+        "student_id": 1976,
+        "code": "225+13"
+    },
+    {
+        "student_id": 1977,
+        "code": "225+05"
+    },
+    {
+        "student_id": 1979,
+        "code": "225+04"
+    },
+    {
+        "student_id": 1981,
+        "code": "225+06"
+    },
+    {
+        "student_id": 1982,
+        "code": "225+01"
+    },
+    {
+        "student_id": 1987,
+        "code": "221CB02"
+    },
+    {
+        "student_id": 1988,
+        "code": "221VA01"
+    },
+    {
+        "student_id": 1989,
+        "code": "221VA04"
+    },
+    {
+        "student_id": 1990,
+        "code": "221VA20"
+    },
+    {
+        "student_id": 1991,
+        "code": "221VA19"
+    },
+    {
+        "student_id": 2421,
+        "code": "221VA07"
+    },
+    {
+        "student_id": 2422,
+        "code": "221VA21"
+    },
+    {
+        "student_id": 2423,
+        "code": "221VA11"
+    },
+    {
+        "student_id": 2424,
+        "code": "221VA22"
+    },
+    {
+        "student_id": 2425,
+        "code": "221VA12"
+    },
+    {
+        "student_id": 2426,
+        "code": "221LB24"
+    },
+    {
+        "student_id": 2430,
+        "code": "221VA02"
+    },
+    {
+        "student_id": 2431,
+        "code": "221VA15"
+    },
+    {
+        "student_id": 2432,
+        "code": "221VA05"
+    },
+    {
+        "student_id": 2433,
+        "code": "221VA17"
+    },
+    {
+        "student_id": 2434,
+        "code": "221VA18"
+    },
+    {
+        "student_id": 2435,
+        "code": "221JB13"
+    },
+    {
+        "student_id": 2436,
+        "code": "221VA24"
+    },
+    {
+        "student_id": 2437,
+        "code": "221VA06"
+    },
+    {
+        "student_id": 2438,
+        "code": "221JB02"
+    },
+    {
+        "student_id": 2439,
+        "code": "221VA03"
+    },
+    {
+        "student_id": 2440,
+        "code": "221JB04"
+    },
+    {
+        "student_id": 2441,
+        "code": "221LB14"
+    },
+    {
+        "student_id": 2444,
+        "code": "221VA08"
+    },
+    {
+        "student_id": 2445,
+        "code": "221VA10"
+    },
+    {
+        "student_id": 2446,
+        "code": "221JB19"
+    },
+    {
+        "student_id": 2448,
+        "code": "221JB17"
+    },
+    {
+        "student_id": 2449,
+        "code": "221JB09"
+    },
+    {
+        "student_id": 2450,
+        "code": "221JB15"
+    },
+    {
+        "student_id": 2453,
+        "code": "221JB23"
+    },
+    {
+        "student_id": 2454,
+        "code": "221JB11"
+    },
+    {
+        "student_id": 2455,
+        "code": "221JB01"
+    },
+    {
+        "student_id": 2457,
+        "code": "221LB20"
+    },
+    {
+        "student_id": 2458,
+        "code": "221LB05"
+    },
+    {
+        "student_id": 2459,
+        "code": "221JB12"
+    },
+    {
+        "student_id": 2460,
+        "code": "221JB22"
+    },
+    {
+        "student_id": 2461,
+        "code": "221VA16"
+    },
+    {
+        "student_id": 2462,
+        "code": "221JB20"
+    },
+    {
+        "student_id": 2463,
+        "code": "221JB18"
+    },
+    {
+        "student_id": 2464,
+        "code": "221LB09"
+    },
+    {
+        "student_id": 2465,
+        "code": "221LB06"
+    },
+    {
+        "student_id": 2466,
+        "code": "221LB18"
+    },
+    {
+        "student_id": 2467,
+        "code": "221LB10"
+    },
+    {
+        "student_id": 2468,
+        "code": "221JB14"
+    },
+    {
+        "student_id": 2470,
+        "code": "221LB11"
+    },
+    {
+        "student_id": 2471,
+        "code": "221LB22"
+    },
+    {
+        "student_id": 2472,
+        "code": "221LB17"
+    },
+    {
+        "student_id": 2473,
+        "code": "221LB16"
+    },
+    {
+        "student_id": 2474,
+        "code": "221LB12"
+    },
+    {
+        "student_id": 2477,
+        "code": "221LB08"
+    },
+    {
+        "student_id": 2478,
+        "code": "221LB13"
+    },
+    {
+        "student_id": 2479,
+        "code": "221LB19"
+    },
+    {
+        "student_id": 2480,
+        "code": "221VA23"
+    },
+    {
+        "student_id": 2481,
+        "code": "221LB21"
+    },
+    {
+        "student_id": 2484,
+        "code": "221JB07"
+    },
+    {
+        "student_id": 2486,
+        "code": "221LB23"
+    },
+    {
+        "student_id": 2487,
+        "code": "221LB07"
+    },
+    {
+        "student_id": 2488,
+        "code": "222OB06"
+    },
+    {
+        "student_id": 2490,
+        "code": "222AI02"
+    },
+    {
+        "student_id": 2491,
+        "code": "222NH01"
+    },
+    {
+        "student_id": 2494,
+        "code": "222OB04"
+    },
+    {
+        "student_id": 2497,
+        "code": "222OB02"
+    },
+    {
+        "student_id": 2498,
+        "code": "222OB01"
+    },
+    {
+        "student_id": 2500,
+        "code": "223AI02"
+    },
+    {
+        "student_id": 2501,
+        "code": "223MG01"
+    },
+    {
+        "student_id": 2502,
+        "code": "245ED04"
+    },
+    {
+        "student_id": 2504,
+        "code": "223AI04"
+    },
+    {
+        "student_id": 2505,
+        "code": "223SC03"
+    },
+    {
+        "student_id": 2506,
+        "code": "223TD02"
+    },
+    {
+        "student_id": 2509,
+        "code": "223AI05"
+    },
+    {
+        "student_id": 2512,
+        "code": "224GS01"
+    },
+    {
+        "student_id": 2513,
+        "code": "224GS03"
+    },
+    {
+        "student_id": 2514,
+        "code": "224LD01"
+    },
+    {
+        "student_id": 2515,
+        "code": "224LD04"
+    },
+    {
+        "student_id": 2516,
+        "code": "224LD06"
+    },
+    {
+        "student_id": 2518,
+        "code": "224LD07"
+    },
+    {
+        "student_id": 2519,
+        "code": "224LD02"
+    },
+    {
+        "student_id": 2520,
+        "code": "224LD05"
+    },
+    {
+        "student_id": 2521,
+        "code": "224SK01"
+    },
+    {
+        "student_id": 2522,
+        "code": "224SK02"
+    },
+    {
+        "student_id": 2523,
+        "code": "224TA02"
+    },
+    {
+        "student_id": 2528,
+        "code": "225JW04"
+    },
+    {
+        "student_id": 2530,
+        "code": "225CB02"
+    },
+    {
+        "student_id": 2531,
+        "code": "225JW01"
+    },
+    {
+        "student_id": 2532,
+        "code": "225IO03"
+    },
+    {
+        "student_id": 2533,
+        "code": "225JW03"
+    },
+    {
+        "student_id": 2535,
+        "code": "225IO02"
+    },
+    {
+        "student_id": 2538,
+        "code": "226C04"
+    },
+    {
+        "student_id": 2541,
+        "code": "226A05"
+    },
+    {
+        "student_id": 2546,
+        "code": "226D03"
+    },
+    {
+        "student_id": 2550,
+        "code": "226C02"
+    },
+    {
+        "student_id": 2555,
+        "code": "227A02"
+    },
+    {
+        "student_id": 2559,
+        "code": "225CB01"
+    },
+    {
+        "student_id": 2561,
+        "code": "215+25"
+    },
+    {
+        "student_id": 2565,
+        "code": "254BA02"
+    },
+    {
+        "student_id": 2569,
+        "code": "215+27"
+    },
+    {
+        "student_id": 2572,
+        "code": "221JK02"
+    },
+    {
+        "student_id": 2581,
+        "code": "221JB08"
+    },
+    {
+        "student_id": 2583,
+        "code": "229D05"
+    },
+    {
+        "student_id": 2584,
+        "code": "229D03"
+    },
+    {
+        "student_id": 2585,
+        "code": "229D06"
+    },
+    {
+        "student_id": 2589,
+        "code": "229C01"
+    },
+    {
+        "student_id": 2590,
+        "code": "229C04"
+    },
+    {
+        "student_id": 2593,
+        "code": "228D05"
+    },
+    {
+        "student_id": 2594,
+        "code": "228D07"
+    },
+    {
+        "student_id": 2595,
+        "code": "228D02"
+    },
+    {
+        "student_id": 2598,
+        "code": "228D03"
+    },
+    {
+        "student_id": 2599,
+        "code": "225CB04"
+    },
+    {
+        "student_id": 2600,
+        "code": "228C01"
+    },
+    {
+        "student_id": 2601,
+        "code": "228C05"
+    },
+    {
+        "student_id": 2602,
+        "code": "228C04"
+    },
+    {
+        "student_id": 2603,
+        "code": "228C02"
+    },
+    {
+        "student_id": 2605,
+        "code": "225JW02"
+    },
+    {
+        "student_id": 2606,
+        "code": "228A02"
+    },
+    {
+        "student_id": 2607,
+        "code": "228A01"
+    },
+    {
+        "student_id": 2609,
+        "code": "183B11"
+    },
+    {
+        "student_id": 2610,
+        "code": "227C02"
+    },
+    {
+        "student_id": 2611,
+        "code": "227C01"
+    },
+    {
+        "student_id": 2612,
+        "code": "227A03"
+    },
+    {
+        "student_id": 2613,
+        "code": "227A01"
+    },
+    {
+        "student_id": 2614,
+        "code": "226C01"
+    },
+    {
+        "student_id": 2615,
+        "code": "223SC02"
+    },
+    {
+        "student_id": 2616,
+        "code": "222AI03"
+    },
+    {
+        "student_id": 2618,
+        "code": "226D01"
+    },
+    {
+        "student_id": 2619,
+        "code": "226D02"
+    },
+    {
+        "student_id": 2621,
+        "code": "226C03"
+    },
+    {
+        "student_id": 2622,
+        "code": "226A02"
+    },
+    {
+        "student_id": 2623,
+        "code": "182C19"
+    },
+    {
+        "student_id": 2625,
+        "code": "222OB07"
+    },
+    {
+        "student_id": 2629,
+        "code": "229Cc1"
+    },
+    {
+        "student_id": 2630,
+        "code": "229Cc5"
+    },
+    {
+        "student_id": 2632,
+        "code": "229Cc6"
+    },
+    {
+        "student_id": 2635,
+        "code": "224+01"
+    },
+    {
+        "student_id": 2636,
+        "code": "225+29"
+    },
+    {
+        "student_id": 2637,
+        "code": "225+12"
+    },
+    {
+        "student_id": 2640,
+        "code": "229D08"
+    },
+    {
+        "student_id": 2642,
+        "code": "229D02"
+    },
+    {
+        "student_id": 2647,
+        "code": "223+17"
+    },
+    {
+        "student_id": 2648,
+        "code": "224TA03"
+    },
+    {
+        "student_id": 2649,
+        "code": "221CB04"
+    },
+    {
+        "student_id": 2651,
+        "code": "225CB05"
+    },
+    {
+        "student_id": 2652,
+        "code": "222AB02"
+    },
+    {
+        "student_id": 2654,
+        "code": "229A02"
+    },
+    {
+        "student_id": 2655,
+        "code": "225IO01"
+    },
+    {
+        "student_id": 2656,
+        "code": "238C01"
+    },
+    {
+        "student_id": 2657,
+        "code": "231JK01"
+    },
+    {
+        "student_id": 2659,
+        "code": "228D08"
+    },
+    {
+        "student_id": 2660,
+        "code": "231CM01"
+    },
+    {
+        "student_id": 2664,
+        "code": "225CB06"
+    },
+    {
+        "student_id": 2665,
+        "code": "224GS05"
+    },
+    {
+        "student_id": 2669,
+        "code": "227A04"
+    },
+    {
+        "student_id": 2670,
+        "code": "205+03"
+    },
+    {
+        "student_id": 2672,
+        "code": "222AI04"
+    },
+    {
+        "student_id": 2673,
+        "code": "229A04"
+    },
+    {
+        "student_id": 2674,
+        "code": "227D08"
+    },
+    {
+        "student_id": 2683,
+        "code": "225JW06"
+    },
+    {
+        "student_id": 2684,
+        "code": "222AI05"
+    },
+    {
+        "student_id": 2685,
+        "code": "234+B12"
+    },
+    {
+        "student_id": 2702,
+        "code": "233+08"
+    },
+    {
+        "student_id": 2703,
+        "code": "233+12"
+    },
+    {
+        "student_id": 2704,
+        "code": "233+02"
+    },
+    {
+        "student_id": 2705,
+        "code": "233+07"
+    },
+    {
+        "student_id": 2706,
+        "code": "233+01"
+    },
+    {
+        "student_id": 2708,
+        "code": "233+10"
+    },
+    {
+        "student_id": 2711,
+        "code": "233+17"
+    },
+    {
+        "student_id": 2712,
+        "code": "233+11"
+    },
+    {
+        "student_id": 2713,
+        "code": "233+14"
+    },
+    {
+        "student_id": 2714,
+        "code": "233+05"
+    },
+    {
+        "student_id": 2715,
+        "code": "233+04"
+    },
+    {
+        "student_id": 2716,
+        "code": "233+19"
+    },
+    {
+        "student_id": 2717,
+        "code": "233+13"
+    },
+    {
+        "student_id": 2718,
+        "code": "233+18"
+    },
+    {
+        "student_id": 2720,
+        "code": "234+A08"
+    },
+    {
+        "student_id": 2721,
+        "code": "234+A04"
+    },
+    {
+        "student_id": 2723,
+        "code": "234+A09"
+    },
+    {
+        "student_id": 2726,
+        "code": "234+A01"
+    },
+    {
+        "student_id": 2727,
+        "code": "234+A13"
+    },
+    {
+        "student_id": 2728,
+        "code": "234+A15"
+    },
+    {
+        "student_id": 2730,
+        "code": "251JB01"
+    },
+    {
+        "student_id": 2734,
+        "code": "234+B06"
+    },
+    {
+        "student_id": 2735,
+        "code": "234+B02"
+    },
+    {
+        "student_id": 2736,
+        "code": "251BO23"
+    },
+    {
+        "student_id": 2737,
+        "code": "234+B14"
+    },
+    {
+        "student_id": 2738,
+        "code": "234+B03"
+    },
+    {
+        "student_id": 2739,
+        "code": "234+B05"
+    },
+    {
+        "student_id": 2740,
+        "code": "234+B15"
+    },
+    {
+        "student_id": 2742,
+        "code": "234+B01"
+    },
+    {
+        "student_id": 2743,
+        "code": "234+B13"
+    },
+    {
+        "student_id": 2746,
+        "code": "234+B08"
+    },
+    {
+        "student_id": 2747,
+        "code": "235+A03"
+    },
+    {
+        "student_id": 2748,
+        "code": "235+A01"
+    },
+    {
+        "student_id": 2752,
+        "code": "235+A10"
+    },
+    {
+        "student_id": 2754,
+        "code": "235+A08"
+    },
+    {
+        "student_id": 2756,
+        "code": "235+A11"
+    },
+    {
+        "student_id": 2759,
+        "code": "235+A09"
+    },
+    {
+        "student_id": 2762,
+        "code": "235+B06"
+    },
+    {
+        "student_id": 2765,
+        "code": "235+B09"
+    },
+    {
+        "student_id": 2766,
+        "code": "235+B01"
+    },
+    {
+        "student_id": 2767,
+        "code": "235+B02"
+    },
+    {
+        "student_id": 2769,
+        "code": "235+B04"
+    },
+    {
+        "student_id": 2770,
+        "code": "235+B03"
+    },
+    {
+        "student_id": 2771,
+        "code": "235+B07"
+    },
+    {
+        "student_id": 2774,
+        "code": "231CM02"
+    },
+    {
+        "student_id": 2776,
+        "code": "231VA12"
+    },
+    {
+        "student_id": 2777,
+        "code": "231VA08"
+    },
+    {
+        "student_id": 2778,
+        "code": "231VA03"
+    },
+    {
+        "student_id": 2779,
+        "code": "231VA09"
+    },
+    {
+        "student_id": 2780,
+        "code": "231VA07"
+    },
+    {
+        "student_id": 2781,
+        "code": "231VA13"
+    },
+    {
+        "student_id": 2782,
+        "code": "231VA14"
+    },
+    {
+        "student_id": 2783,
+        "code": "231JK02"
+    },
+    {
+        "student_id": 2784,
+        "code": "231VA16"
+    },
+    {
+        "student_id": 2787,
+        "code": "231VA20"
+    },
+    {
+        "student_id": 2788,
+        "code": "231VA10"
+    },
+    {
+        "student_id": 2790,
+        "code": "231VA04"
+    },
+    {
+        "student_id": 2792,
+        "code": "231VA15"
+    },
+    {
+        "student_id": 2793,
+        "code": "231VA19"
+    },
+    {
+        "student_id": 2794,
+        "code": "231VA02"
+    },
+    {
+        "student_id": 2796,
+        "code": "231VA05"
+    },
+    {
+        "student_id": 2797,
+        "code": "231VA06"
+    },
+    {
+        "student_id": 2798,
+        "code": "231TB07"
+    },
+    {
+        "student_id": 2799,
+        "code": "231TB05"
+    },
+    {
+        "student_id": 2800,
+        "code": "231TB06"
+    },
+    {
+        "student_id": 2801,
+        "code": "231TB08"
+    },
+    {
+        "student_id": 2804,
+        "code": "231TB10"
+    },
+    {
+        "student_id": 2805,
+        "code": "231TB11"
+    },
+    {
+        "student_id": 2806,
+        "code": "231TB14"
+    },
+    {
+        "student_id": 2808,
+        "code": "231TB03"
+    },
+    {
+        "student_id": 2809,
+        "code": "231TB04"
+    },
+    {
+        "student_id": 2811,
+        "code": "231TB13"
+    },
+    {
+        "student_id": 2815,
+        "code": "231TB16"
+    },
+    {
+        "student_id": 2816,
+        "code": "231TB01"
+    },
+    {
+        "student_id": 2818,
+        "code": "231TB19"
+    },
+    {
+        "student_id": 2819,
+        "code": "231OS01"
+    },
+    {
+        "student_id": 2821,
+        "code": "231JB09"
+    },
+    {
+        "student_id": 2823,
+        "code": "231OS04"
+    },
+    {
+        "student_id": 2826,
+        "code": "231OS12"
+    },
+    {
+        "student_id": 2828,
+        "code": "231JB11"
+    },
+    {
+        "student_id": 2830,
+        "code": "231OS09"
+    },
+    {
+        "student_id": 2831,
+        "code": "231OS02"
+    },
+    {
+        "student_id": 2832,
+        "code": "231OS11"
+    },
+    {
+        "student_id": 2833,
+        "code": "231OS13"
+    },
+    {
+        "student_id": 2835,
+        "code": "231OS14"
+    },
+    {
+        "student_id": 2838,
+        "code": "231OS15"
+    },
+    {
+        "student_id": 2839,
+        "code": "231JB05"
+    },
+    {
+        "student_id": 2840,
+        "code": "231JB07"
+    },
+    {
+        "student_id": 2842,
+        "code": "231JB02"
+    },
+    {
+        "student_id": 2843,
+        "code": "231JB08"
+    },
+    {
+        "student_id": 2844,
+        "code": "231JB10"
+    },
+    {
+        "student_id": 2845,
+        "code": "231JB14"
+    },
+    {
+        "student_id": 2846,
+        "code": "231JB18"
+    },
+    {
+        "student_id": 2847,
+        "code": "231JB19"
+    },
+    {
+        "student_id": 2848,
+        "code": "231JB16"
+    },
+    {
+        "student_id": 2851,
+        "code": "231JB12"
+    },
+    {
+        "student_id": 2852,
+        "code": "203+11"
+    },
+    {
+        "student_id": 2854,
+        "code": "231JB01"
+    },
+    {
+        "student_id": 2857,
+        "code": "231VA21"
+    },
+    {
+        "student_id": 2863,
+        "code": "232OB02"
+    },
+    {
+        "student_id": 2864,
+        "code": "232OB01"
+    },
+    {
+        "student_id": 2866,
+        "code": "232IA02"
+    },
+    {
+        "student_id": 2867,
+        "code": "232IA03"
+    },
+    {
+        "student_id": 2869,
+        "code": "232MG02"
+    },
+    {
+        "student_id": 2870,
+        "code": "232MG01"
+    },
+    {
+        "student_id": 2873,
+        "code": "232CB03"
+    },
+    {
+        "student_id": 2874,
+        "code": "232CB01"
+    },
+    {
+        "student_id": 2875,
+        "code": "232CB02"
+    },
+    {
+        "student_id": 2878,
+        "code": "233NT01"
+    },
+    {
+        "student_id": 2879,
+        "code": "233JB01"
+    },
+    {
+        "student_id": 2881,
+        "code": "233NT03"
+    },
+    {
+        "student_id": 2882,
+        "code": "233NT05"
+    },
+    {
+        "student_id": 2883,
+        "code": "233NT04"
+    },
+    {
+        "student_id": 2884,
+        "code": "233NT02"
+    },
+    {
+        "student_id": 2885,
+        "code": "211B01"
+    },
+    {
+        "student_id": 2886,
+        "code": "234TA02"
+    },
+    {
+        "student_id": 2887,
+        "code": "234LM02"
+    },
+    {
+        "student_id": 2888,
+        "code": "234TA01"
+    },
+    {
+        "student_id": 2889,
+        "code": "234LM01"
+    },
+    {
+        "student_id": 2890,
+        "code": "234JC02"
+    },
+    {
+        "student_id": 2892,
+        "code": "234JC01"
+    },
+    {
+        "student_id": 2893,
+        "code": "234LM03"
+    },
+    {
+        "student_id": 2895,
+        "code": "234TG04"
+    },
+    {
+        "student_id": 2896,
+        "code": "234TG06"
+    },
+    {
+        "student_id": 2897,
+        "code": "235IO02"
+    },
+    {
+        "student_id": 2898,
+        "code": "235CG02"
+    },
+    {
+        "student_id": 2900,
+        "code": "235GS02"
+    },
+    {
+        "student_id": 2901,
+        "code": "235IO01"
+    },
+    {
+        "student_id": 2904,
+        "code": "236D09"
+    },
+    {
+        "student_id": 2905,
+        "code": "236D15"
+    },
+    {
+        "student_id": 2906,
+        "code": "236D03"
+    },
+    {
+        "student_id": 2908,
+        "code": "236D08"
+    },
+    {
+        "student_id": 2909,
+        "code": "236D10"
+    },
+    {
+        "student_id": 2910,
+        "code": "236D14"
+    },
+    {
+        "student_id": 2911,
+        "code": "236D13"
+    },
+    {
+        "student_id": 2912,
+        "code": "236D11"
+    },
+    {
+        "student_id": 2913,
+        "code": "236D07"
+    },
+    {
+        "student_id": 2914,
+        "code": "237A03"
+    },
+    {
+        "student_id": 2915,
+        "code": "237A02"
+    },
+    {
+        "student_id": 2916,
+        "code": "182B07"
+    },
+    {
+        "student_id": 2919,
+        "code": "237B02"
+    },
+    {
+        "student_id": 2923,
+        "code": "237C01"
+    },
+    {
+        "student_id": 2924,
+        "code": "238B03"
+    },
+    {
+        "student_id": 2925,
+        "code": "238B01"
+    },
+    {
+        "student_id": 2926,
+        "code": "238B02"
+    },
+    {
+        "student_id": 2928,
+        "code": "239A03"
+    },
+    {
+        "student_id": 2930,
+        "code": "239C01"
+    },
+    {
+        "student_id": 2934,
+        "code": "239C02"
+    },
+    {
+        "student_id": 2935,
+        "code": "239B01"
+    },
+    {
+        "student_id": 2937,
+        "code": "239C03"
+    },
+    {
+        "student_id": 2938,
+        "code": "184C22"
+    },
+    {
+        "student_id": 2939,
+        "code": "2310A01"
+    },
+    {
+        "student_id": 2943,
+        "code": "2310C02"
+    },
+    {
+        "student_id": 2959,
+        "code": "223+20"
+    },
+    {
+        "student_id": 2961,
+        "code": "236D18"
+    },
+    {
+        "student_id": 2962,
+        "code": "236D16"
+    },
+    {
+        "student_id": 2963,
+        "code": "236D23"
+    },
+    {
+        "student_id": 2964,
+        "code": "236D12"
+    },
+    {
+        "student_id": 2965,
+        "code": "236D02"
+    },
+    {
+        "student_id": 2969,
+        "code": "237C05"
+    },
+    {
+        "student_id": 2970,
+        "code": "234TG03"
+    },
+    {
+        "student_id": 2971,
+        "code": "234TG01"
+    },
+    {
+        "student_id": 2972,
+        "code": "234TG02"
+    },
+    {
+        "student_id": 2973,
+        "code": "235GS01"
+    },
+    {
+        "student_id": 2974,
+        "code": "235GS03"
+    },
+    {
+        "student_id": 2975,
+        "code": "235ED01"
+    },
+    {
+        "student_id": 2976,
+        "code": "231JB04"
+    },
+    {
+        "student_id": 2980,
+        "code": "231TB20"
+    },
+    {
+        "student_id": 2983,
+        "code": "234+A10"
+    },
+    {
+        "student_id": 2986,
+        "code": "234+B10"
+    },
+    {
+        "student_id": 2988,
+        "code": "2310C01"
+    },
+    {
+        "student_id": 2989,
+        "code": "236D01"
+    },
+    {
+        "student_id": 2990,
+        "code": "236D19"
+    },
+    {
+        "student_id": 2991,
+        "code": "231TB17"
+    },
+    {
+        "student_id": 2994,
+        "code": "236D04"
+    },
+    {
+        "student_id": 2996,
+        "code": "233LB01"
+    },
+    {
+        "student_id": 2997,
+        "code": "233DR03"
+    },
+    {
+        "student_id": 2998,
+        "code": "233+16"
+    },
+    {
+        "student_id": 2999,
+        "code": "238A01"
+    },
+    {
+        "student_id": 3001,
+        "code": "236D20"
+    },
+    {
+        "student_id": 3002,
+        "code": "232IA04"
+    },
+    {
+        "student_id": 3006,
+        "code": "234+A11"
+    },
+    {
+        "student_id": 3008,
+        "code": "237B03"
+    },
+    {
+        "student_id": 3009,
+        "code": "236D06"
+    },
+    {
+        "student_id": 3010,
+        "code": "238A02"
+    },
+    {
+        "student_id": 3021,
+        "code": "214+04"
+    },
+    {
+        "student_id": 3022,
+        "code": "237B04"
+    },
+    {
+        "student_id": 3027,
+        "code": "235+B13"
+    },
+    {
+        "student_id": 3028,
+        "code": "232GS01"
+    },
+    {
+        "student_id": 3029,
+        "code": "244+B01"
+    },
+    {
+        "student_id": 3031,
+        "code": "231OS19"
+    },
+    {
+        "student_id": 3032,
+        "code": "236B01"
+    },
+    {
+        "student_id": 3033,
+        "code": "234JC05"
+    },
+    {
+        "student_id": 3035,
+        "code": "236C01"
+    },
+    {
+        "student_id": 3036,
+        "code": "243ID01"
+    },
+    {
+        "student_id": 3038,
+        "code": "245JW01"
+    },
+    {
+        "student_id": 3041,
+        "code": "235IO06"
+    },
+    {
+        "student_id": 3042,
+        "code": "244+A14"
+    },
+    {
+        "student_id": 3043,
+        "code": "234+B17"
+    },
+    {
+        "student_id": 3046,
+        "code": "235ED03"
+    },
+    {
+        "student_id": 3047,
+        "code": "243+05"
+    },
+    {
+        "student_id": 3050,
+        "code": "243+08"
+    },
+    {
+        "student_id": 3053,
+        "code": "243+12"
+    },
+    {
+        "student_id": 3054,
+        "code": "243+01"
+    },
+    {
+        "student_id": 3055,
+        "code": "243+18"
+    },
+    {
+        "student_id": 3056,
+        "code": "243+10"
+    },
+    {
+        "student_id": 3059,
+        "code": "243+15"
+    },
+    {
+        "student_id": 3060,
+        "code": "243+09"
+    },
+    {
+        "student_id": 3061,
+        "code": "243+07"
+    },
+    {
+        "student_id": 3062,
+        "code": "243+19"
+    },
+    {
+        "student_id": 3063,
+        "code": "243+14"
+    },
+    {
+        "student_id": 3064,
+        "code": "243+16"
+    },
+    {
+        "student_id": 3065,
+        "code": "243+20"
+    },
+    {
+        "student_id": 3066,
+        "code": "243+13"
+    },
+    {
+        "student_id": 3067,
+        "code": "243+11"
+    },
+    {
+        "student_id": 3069,
+        "code": "243+03"
+    },
+    {
+        "student_id": 3071,
+        "code": "244+A02"
+    },
+    {
+        "student_id": 3072,
+        "code": "244+A12"
+    },
+    {
+        "student_id": 3073,
+        "code": "244+A10"
+    },
+    {
+        "student_id": 3074,
+        "code": "244+A05"
+    },
+    {
+        "student_id": 3075,
+        "code": "244+A03"
+    },
+    {
+        "student_id": 3076,
+        "code": "244+A01"
+    },
+    {
+        "student_id": 3077,
+        "code": "244+A07"
+    },
+    {
+        "student_id": 3080,
+        "code": "244+A06"
+    },
+    {
+        "student_id": 3081,
+        "code": "244+A04"
+    },
+    {
+        "student_id": 3086,
+        "code": "244+B07"
+    },
+    {
+        "student_id": 3093,
+        "code": "244+B09"
+    },
+    {
+        "student_id": 3095,
+        "code": "245+B04"
+    },
+    {
+        "student_id": 3100,
+        "code": "245+A04"
+    },
+    {
+        "student_id": 3101,
+        "code": "245+A11"
+    },
+    {
+        "student_id": 3102,
+        "code": "245+A06"
+    },
+    {
+        "student_id": 3103,
+        "code": "245+A02"
+    },
+    {
+        "student_id": 3105,
+        "code": "245+A10"
+    },
+    {
+        "student_id": 3106,
+        "code": "245+A08"
+    },
+    {
+        "student_id": 3107,
+        "code": "245+A09"
+    },
+    {
+        "student_id": 3112,
+        "code": "245+B01"
+    },
+    {
+        "student_id": 3113,
+        "code": "245+B02"
+    },
+    {
+        "student_id": 3114,
+        "code": "245+B08"
+    },
+    {
+        "student_id": 3115,
+        "code": "245+B07"
+    },
+    {
+        "student_id": 3116,
+        "code": "245+B05"
+    },
+    {
+        "student_id": 3117,
+        "code": "241DR15"
+    },
+    {
+        "student_id": 3119,
+        "code": "245+C07"
+    },
+    {
+        "student_id": 3120,
+        "code": "245+C06"
+    },
+    {
+        "student_id": 3121,
+        "code": "245+C04"
+    },
+    {
+        "student_id": 3122,
+        "code": "245+C02"
+    },
+    {
+        "student_id": 3123,
+        "code": "245+C10"
+    },
+    {
+        "student_id": 3127,
+        "code": "241JK04"
+    },
+    {
+        "student_id": 3128,
+        "code": "241JK03"
+    },
+    {
+        "student_id": 3129,
+        "code": "241JK01"
+    },
+    {
+        "student_id": 3131,
+        "code": "241SA03"
+    },
+    {
+        "student_id": 3132,
+        "code": "241SA05"
+    },
+    {
+        "student_id": 3133,
+        "code": "241SA04"
+    },
+    {
+        "student_id": 3135,
+        "code": "241DR18"
+    },
+    {
+        "student_id": 3137,
+        "code": "241DR09"
+    },
+    {
+        "student_id": 3138,
+        "code": "241DR05"
+    },
+    {
+        "student_id": 3139,
+        "code": "241DR16"
+    },
+    {
+        "student_id": 3142,
+        "code": "241DR14"
+    },
+    {
+        "student_id": 3143,
+        "code": "241DR07"
+    },
+    {
+        "student_id": 3144,
+        "code": "241KG10"
+    },
+    {
+        "student_id": 3145,
+        "code": "241DR22"
+    },
+    {
+        "student_id": 3146,
+        "code": "241DR06"
+    },
+    {
+        "student_id": 3147,
+        "code": "241DR11"
+    },
+    {
+        "student_id": 3148,
+        "code": "241DR12"
+    },
+    {
+        "student_id": 3149,
+        "code": "241DR03"
+    },
+    {
+        "student_id": 3150,
+        "code": "241DR04"
+    },
+    {
+        "student_id": 3151,
+        "code": "241DR21"
+    },
+    {
+        "student_id": 3152,
+        "code": "241DR23"
+    },
+    {
+        "student_id": 3154,
+        "code": "241DR08"
+    },
+    {
+        "student_id": 3155,
+        "code": "241DR24"
+    },
+    {
+        "student_id": 3156,
+        "code": "241DR10"
+    },
+    {
+        "student_id": 3159,
+        "code": "241KG05"
+    },
+    {
+        "student_id": 3160,
+        "code": "241KG14"
+    },
+    {
+        "student_id": 3161,
+        "code": "241KG22"
+    },
+    {
+        "student_id": 3163,
+        "code": "241KG09"
+    },
+    {
+        "student_id": 3164,
+        "code": "241KG12"
+    },
+    {
+        "student_id": 3165,
+        "code": "241KG20"
+    },
+    {
+        "student_id": 3166,
+        "code": "241KG15"
+    },
+    {
+        "student_id": 3167,
+        "code": "241DR17"
+    },
+    {
+        "student_id": 3168,
+        "code": "241KG18"
+    },
+    {
+        "student_id": 3169,
+        "code": "241KG03"
+    },
+    {
+        "student_id": 3170,
+        "code": "241KG01"
+    },
+    {
+        "student_id": 3171,
+        "code": "241KG16"
+    },
+    {
+        "student_id": 3172,
+        "code": "241KG13"
+    },
+    {
+        "student_id": 3173,
+        "code": "241KG08"
+    },
+    {
+        "student_id": 3174,
+        "code": "241KG21"
+    },
+    {
+        "student_id": 3175,
+        "code": "241KG23"
+    },
+    {
+        "student_id": 3176,
+        "code": "241KG07"
+    },
+    {
+        "student_id": 3177,
+        "code": "241KG17"
+    },
+    {
+        "student_id": 3178,
+        "code": "241KG11"
+    },
+    {
+        "student_id": 3179,
+        "code": "241KG06"
+    },
+    {
+        "student_id": 3180,
+        "code": "241KG19"
+    },
+    {
+        "student_id": 3184,
+        "code": "241JK06"
+    },
+    {
+        "student_id": 3187,
+        "code": "242IA04"
+    },
+    {
+        "student_id": 3188,
+        "code": "242GB01"
+    },
+    {
+        "student_id": 3189,
+        "code": "242IA03"
+    },
+    {
+        "student_id": 3190,
+        "code": "242IA02"
+    },
+    {
+        "student_id": 3191,
+        "code": "242GB03"
+    },
+    {
+        "student_id": 3192,
+        "code": "242IA01"
+    },
+    {
+        "student_id": 3193,
+        "code": "242MG02"
+    },
+    {
+        "student_id": 3198,
+        "code": "243NT01"
+    },
+    {
+        "student_id": 3199,
+        "code": "243NT02"
+    },
+    {
+        "student_id": 3200,
+        "code": "243LE03"
+    },
+    {
+        "student_id": 3201,
+        "code": "243ID05"
+    },
+    {
+        "student_id": 3202,
+        "code": "243AK02"
+    },
+    {
+        "student_id": 3203,
+        "code": "243AK01"
+    },
+    {
+        "student_id": 3204,
+        "code": "243AK03"
+    },
+    {
+        "student_id": 3207,
+        "code": "243NT03"
+    },
+    {
+        "student_id": 3208,
+        "code": "243ID04"
+    },
+    {
+        "student_id": 3209,
+        "code": "243ID02"
+    },
+    {
+        "student_id": 3213,
+        "code": "244LM03"
+    },
+    {
+        "student_id": 3214,
+        "code": "244LM02"
+    },
+    {
+        "student_id": 3215,
+        "code": "244LM01"
+    },
+    {
+        "student_id": 3216,
+        "code": "244CM01"
+    },
+    {
+        "student_id": 3217,
+        "code": "244JC01"
+    },
+    {
+        "student_id": 3218,
+        "code": "244JC03"
+    },
+    {
+        "student_id": 3219,
+        "code": "244JC02"
+    },
+    {
+        "student_id": 3220,
+        "code": "244JC05"
+    },
+    {
+        "student_id": 3221,
+        "code": "244JC04"
+    },
+    {
+        "student_id": 3223,
+        "code": "245ED17"
+    },
+    {
+        "student_id": 3224,
+        "code": "245ED03"
+    },
+    {
+        "student_id": 3226,
+        "code": "245ED09"
+    },
+    {
+        "student_id": 3227,
+        "code": "245ED12"
+    },
+    {
+        "student_id": 3228,
+        "code": "245ED19"
+    },
+    {
+        "student_id": 3229,
+        "code": "245ED14"
+    },
+    {
+        "student_id": 3230,
+        "code": "245ED05"
+    },
+    {
+        "student_id": 3231,
+        "code": "245ED20"
+    },
+    {
+        "student_id": 3232,
+        "code": "245ED01"
+    },
+    {
+        "student_id": 3233,
+        "code": "245ED11"
+    },
+    {
+        "student_id": 3234,
+        "code": "245ED18"
+    },
+    {
+        "student_id": 3235,
+        "code": "245ED13"
+    },
+    {
+        "student_id": 3238,
+        "code": "245ED10"
+    },
+    {
+        "student_id": 3241,
+        "code": "246A04"
+    },
+    {
+        "student_id": 3242,
+        "code": "246A02"
+    },
+    {
+        "student_id": 3243,
+        "code": "247B01"
+    },
+    {
+        "student_id": 3245,
+        "code": "246B02"
+    },
+    {
+        "student_id": 3246,
+        "code": "246B01"
+    },
+    {
+        "student_id": 3247,
+        "code": "246D05"
+    },
+    {
+        "student_id": 3248,
+        "code": "246C01"
+    },
+    {
+        "student_id": 3249,
+        "code": "246C02"
+    },
+    {
+        "student_id": 3251,
+        "code": "246C04"
+    },
+    {
+        "student_id": 3253,
+        "code": "246D01"
+    },
+    {
+        "student_id": 3254,
+        "code": "246D02"
+    },
+    {
+        "student_id": 3255,
+        "code": "246D03"
+    },
+    {
+        "student_id": 3258,
+        "code": "247E16"
+    },
+    {
+        "student_id": 3259,
+        "code": "247E17"
+    },
+    {
+        "student_id": 3260,
+        "code": "247E03"
+    },
+    {
+        "student_id": 3261,
+        "code": "247E06"
+    },
+    {
+        "student_id": 3262,
+        "code": "247E01"
+    },
+    {
+        "student_id": 3263,
+        "code": "247E20"
+    },
+    {
+        "student_id": 3264,
+        "code": "247E09"
+    },
+    {
+        "student_id": 3265,
+        "code": "247E12"
+    },
+    {
+        "student_id": 3266,
+        "code": "247E07"
+    },
+    {
+        "student_id": 3268,
+        "code": "247E05"
+    },
+    {
+        "student_id": 3270,
+        "code": "247E13"
+    },
+    {
+        "student_id": 3271,
+        "code": "247E11"
+    },
+    {
+        "student_id": 3275,
+        "code": "247C01"
+    },
+    {
+        "student_id": 3277,
+        "code": "247A01"
+    },
+    {
+        "student_id": 3278,
+        "code": "248A03"
+    },
+    {
+        "student_id": 3280,
+        "code": "248A01"
+    },
+    {
+        "student_id": 3283,
+        "code": "248B02"
+    },
+    {
+        "student_id": 3284,
+        "code": "248B01"
+    },
+    {
+        "student_id": 3285,
+        "code": "248A05"
+    },
+    {
+        "student_id": 3286,
+        "code": "248A02"
+    },
+    {
+        "student_id": 3287,
+        "code": "248C02"
+    },
+    {
+        "student_id": 3289,
+        "code": "249A01"
+    },
+    {
+        "student_id": 3293,
+        "code": "249B03"
+    },
+    {
+        "student_id": 3294,
+        "code": "249B02"
+    },
+    {
+        "student_id": 3295,
+        "code": "249B04"
+    },
+    {
+        "student_id": 3296,
+        "code": "249B05"
+    },
+    {
+        "student_id": 3297,
+        "code": "249B01"
+    },
+    {
+        "student_id": 3298,
+        "code": "249C04"
+    },
+    {
+        "student_id": 3299,
+        "code": "249C07"
+    },
+    {
+        "student_id": 3300,
+        "code": "249C02"
+    },
+    {
+        "student_id": 3303,
+        "code": "2410A01"
+    },
+    {
+        "student_id": 3304,
+        "code": "2410A02"
+    },
+    {
+        "student_id": 3305,
+        "code": "2410A03"
+    },
+    {
+        "student_id": 3307,
+        "code": "2410B02"
+    },
+    {
+        "student_id": 3310,
+        "code": "2410C01"
+    },
+    {
+        "student_id": 3311,
+        "code": "2410C03"
+    },
+    {
+        "student_id": 3315,
+        "code": "2411A03"
+    },
+    {
+        "student_id": 3316,
+        "code": "2411C05"
+    },
+    {
+        "student_id": 3318,
+        "code": "2411D02"
+    },
+    {
+        "student_id": 3319,
+        "code": "2411A01"
+    },
+    {
+        "student_id": 3320,
+        "code": "2411A04"
+    },
+    {
+        "student_id": 3321,
+        "code": "2411B01"
+    },
+    {
+        "student_id": 3324,
+        "code": "2411C06"
+    },
+    {
+        "student_id": 3325,
+        "code": "2411C03"
+    },
+    {
+        "student_id": 3326,
+        "code": "2411C04"
+    },
+    {
+        "student_id": 3327,
+        "code": "2411C07"
+    },
+    {
+        "student_id": 3328,
+        "code": "2411C01"
+    },
+    {
+        "student_id": 3330,
+        "code": "2411D04"
+    },
+    {
+        "student_id": 3332,
+        "code": "243+04"
+    },
+    {
+        "student_id": 3333,
+        "code": "244JD02"
+    },
+    {
+        "student_id": 3334,
+        "code": "248C01"
+    },
+    {
+        "student_id": 3335,
+        "code": "249A02"
+    },
+    {
+        "student_id": 3336,
+        "code": "2411A02"
+    },
+    {
+        "student_id": 3337,
+        "code": "245ED16"
+    },
+    {
+        "student_id": 3338,
+        "code": "245ED02"
+    },
+    {
+        "student_id": 3339,
+        "code": "245ED15"
+    },
+    {
+        "student_id": 3342,
+        "code": "244+B04"
+    },
+    {
+        "student_id": 3343,
+        "code": "241SA06"
+    },
+    {
+        "student_id": 3344,
+        "code": "245+A05"
+    },
+    {
+        "student_id": 3345,
+        "code": "245+B11"
+    },
+    {
+        "student_id": 3346,
+        "code": "241DR20"
+    },
+    {
+        "student_id": 3347,
+        "code": "245+B09"
+    },
+    {
+        "student_id": 3349,
+        "code": "245+C08"
+    },
+    {
+        "student_id": 3350,
+        "code": "244+A11"
+    },
+    {
+        "student_id": 3351,
+        "code": "247E08"
+    },
+    {
+        "student_id": 3352,
+        "code": "245+B06"
+    },
+    {
+        "student_id": 3353,
+        "code": "2411D01"
+    },
+    {
+        "student_id": 3354,
+        "code": "247E02"
+    },
+    {
+        "student_id": 3355,
+        "code": "245ED07"
+    },
+    {
+        "student_id": 3357,
+        "code": "246A03"
+    },
+    {
+        "student_id": 3358,
+        "code": "246A01"
+    },
+    {
+        "student_id": 3359,
+        "code": "242GB02"
+    },
+    {
+        "student_id": 3360,
+        "code": "245ED06"
+    },
+    {
+        "student_id": 3361,
+        "code": "243ID03"
+    },
+    {
+        "student_id": 3362,
+        "code": "241SA02"
+    },
+    {
+        "student_id": 3363,
+        "code": "248C03"
+    },
+    {
+        "student_id": 3364,
+        "code": "247E04"
+    },
+    {
+        "student_id": 3365,
+        "code": "247E14"
+    },
+    {
+        "student_id": 3367,
+        "code": "245+C03"
+    },
+    {
+        "student_id": 3368,
+        "code": "245ED08"
+    },
+    {
+        "student_id": 3369,
+        "code": "243+06"
+    },
+    {
+        "student_id": 3370,
+        "code": "249C03"
+    },
+    {
+        "student_id": 3371,
+        "code": "244JD01"
+    },
+    {
+        "student_id": 3372,
+        "code": "244+B05"
+    },
+    {
+        "student_id": 3373,
+        "code": "241SA07"
+    },
+    {
+        "student_id": 3378,
+        "code": "2410C02"
+    },
+    {
+        "student_id": 3379,
+        "code": "245+C11"
+    },
+    {
+        "student_id": 3380,
+        "code": "245+A01"
+    },
+    {
+        "student_id": 3381,
+        "code": "243LE04"
+    },
+    {
+        "student_id": 3382,
+        "code": "245+C01"
+    },
+    {
+        "student_id": 3387,
+        "code": "243+17"
+    },
+    {
+        "student_id": 3388,
+        "code": "244+A15"
+    },
+    {
+        "student_id": 3391,
+        "code": "244+B12"
+    },
+    {
+        "student_id": 3392,
+        "code": "245+B10"
+    },
+    {
+        "student_id": 3394,
+        "code": "242OB01"
+    },
+    {
+        "student_id": 3395,
+        "code": "242MG03"
+    },
+    {
+        "student_id": 3396,
+        "code": "245+A12"
+    },
+    {
+        "student_id": 3400,
+        "code": "235+B15"
+    },
+    {
+        "student_id": 3402,
+        "code": "247D19"
+    },
+    {
+        "student_id": 3403,
+        "code": "243+22"
+    },
+    {
+        "student_id": 3405,
+        "code": "245ED22"
+    },
+    {
+        "student_id": 3407,
+        "code": "243+21"
+    },
+    {
+        "student_id": 3408,
+        "code": "247E22"
+    },
+    {
+        "student_id": 3409,
+        "code": "247E23"
+    },
+    {
+        "student_id": 3410,
+        "code": "247E24"
+    },
+    {
+        "student_id": 3411,
+        "code": "247E25"
+    },
+    {
+        "student_id": 3412,
+        "code": "245ED23"
+    },
+    {
+        "student_id": 3413,
+        "code": "244LM04"
+    },
+    {
+        "student_id": 3414,
+        "code": "242CS03"
+    },
+    {
+        "student_id": 3418,
+        "code": "242GB05"
+    },
+    {
+        "student_id": 3419,
+        "code": "248A06"
+    },
+    {
+        "student_id": 3420,
+        "code": "241JB08"
+    },
+    {
+        "student_id": 3423,
+        "code": "245+C13"
+    },
+    {
+        "student_id": 3424,
+        "code": "245+C14"
+    },
+    {
+        "student_id": 3425,
+        "code": "245+C15"
+    },
+    {
+        "student_id": 3427,
+        "code": "249B06"
+    },
+    {
+        "student_id": 3430,
+        "code": "244+B15"
+    },
+    {
+        "student_id": 3467,
+        "code": "244+A13"
+    },
+    {
+        "student_id": 3476,
+        "code": "244+B08"
+    },
+    {
+        "student_id": 3479,
+        "code": "244+B14"
+    },
+    {
+        "student_id": 3484,
+        "code": "245+A03"
+    },
+    {
+        "student_id": 3518,
+        "code": "241DR02"
+    },
+    {
+        "student_id": 3535,
+        "code": "241DR19"
+    },
+    {
+        "student_id": 4111,
+        "code": "242GB04"
+    },
+    {
+        "student_id": 4126,
+        "code": "244JC06"
+    },
+    {
+        "student_id": 4315,
+        "code": "249C08"
+    },
+    {
+        "student_id": 4317,
+        "code": "249C06"
+    },
+    {
+        "student_id": 4318,
+        "code": "253+11"
+    },
+    {
+        "student_id": 4320,
+        "code": "253+09"
+    },
+    {
+        "student_id": 4321,
+        "code": "253+05"
+    },
+    {
+        "student_id": 4322,
+        "code": "253+10"
+    },
+    {
+        "student_id": 4323,
+        "code": "253+12"
+    },
+    {
+        "student_id": 4324,
+        "code": "253+06"
+    },
+    {
+        "student_id": 4326,
+        "code": "253+01"
+    },
+    {
+        "student_id": 4328,
+        "code": "253+02"
+    },
+    {
+        "student_id": 4329,
+        "code": "253+13"
+    },
+    {
+        "student_id": 4330,
+        "code": "254+B06"
+    },
+    {
+        "student_id": 4331,
+        "code": "253+14"
+    },
+    {
+        "student_id": 4332,
+        "code": "253+04"
+    },
+    {
+        "student_id": 4333,
+        "code": "253+07"
+    },
+    {
+        "student_id": 4338,
+        "code": "254+A01"
+    },
+    {
+        "student_id": 4339,
+        "code": "254+A06"
+    },
+    {
+        "student_id": 4340,
+        "code": "254+A03"
+    },
+    {
+        "student_id": 4341,
+        "code": "254+B10"
+    },
+    {
+        "student_id": 4342,
+        "code": "254+B02"
+    },
+    {
+        "student_id": 4344,
+        "code": "255+A02"
+    },
+    {
+        "student_id": 4345,
+        "code": "255+A03"
+    },
+    {
+        "student_id": 4346,
+        "code": "255+A04"
+    },
+    {
+        "student_id": 4348,
+        "code": "255+B05"
+    },
+    {
+        "student_id": 4349,
+        "code": "255+B06"
+    },
+    {
+        "student_id": 4350,
+        "code": "255+B08"
+    },
+    {
+        "student_id": 4351,
+        "code": "255+B01"
+    },
+    {
+        "student_id": 4352,
+        "code": "255+B02"
+    },
+    {
+        "student_id": 4353,
+        "code": "255+C03"
+    },
+    {
+        "student_id": 4354,
+        "code": "255+C01"
+    },
+    {
+        "student_id": 4356,
+        "code": "251JB03"
+    },
+    {
+        "student_id": 4357,
+        "code": "251JB13"
+    },
+    {
+        "student_id": 4359,
+        "code": "251JB02"
+    },
+    {
+        "student_id": 4360,
+        "code": "251JB07"
+    },
+    {
+        "student_id": 4361,
+        "code": "251JB14"
+    },
+    {
+        "student_id": 4362,
+        "code": "251JB05"
+    },
+    {
+        "student_id": 4363,
+        "code": "251JB19"
+    },
+    {
+        "student_id": 4365,
+        "code": "251JB11"
+    },
+    {
+        "student_id": 4367,
+        "code": "251JB15"
+    },
+    {
+        "student_id": 4368,
+        "code": "251JB06"
+    },
+    {
+        "student_id": 4369,
+        "code": "251JB17"
+    },
+    {
+        "student_id": 4370,
+        "code": "251JB12"
+    },
+    {
+        "student_id": 4371,
+        "code": "251JB20"
+    },
+    {
+        "student_id": 4372,
+        "code": "251JB16"
+    },
+    {
+        "student_id": 4373,
+        "code": "251JB08"
+    },
+    {
+        "student_id": 4374,
+        "code": "251JB04"
+    },
+    {
+        "student_id": 4376,
+        "code": "251JB21"
+    },
+    {
+        "student_id": 4379,
+        "code": "251JB10"
+    },
+    {
+        "student_id": 4380,
+        "code": "251BO03"
+    },
+    {
+        "student_id": 4381,
+        "code": "251BO06"
+    },
+    {
+        "student_id": 4383,
+        "code": "251BO09"
+    },
+    {
+        "student_id": 4384,
+        "code": "251BO15"
+    },
+    {
+        "student_id": 4385,
+        "code": "251BO02"
+    },
+    {
+        "student_id": 4386,
+        "code": "251BO01"
+    },
+    {
+        "student_id": 4388,
+        "code": "251BO04"
+    },
+    {
+        "student_id": 4389,
+        "code": "251BO13"
+    },
+    {
+        "student_id": 4390,
+        "code": "251BO08"
+    },
+    {
+        "student_id": 4392,
+        "code": "251BO20"
+    },
+    {
+        "student_id": 4393,
+        "code": "251BO12"
+    },
+    {
+        "student_id": 4394,
+        "code": "251BO16"
+    },
+    {
+        "student_id": 4395,
+        "code": "251BO05"
+    },
+    {
+        "student_id": 4396,
+        "code": "251BO22"
+    },
+    {
+        "student_id": 4397,
+        "code": "251BO18"
+    },
+    {
+        "student_id": 4398,
+        "code": "251BO19"
+    },
+    {
+        "student_id": 4399,
+        "code": "251BO10"
+    },
+    {
+        "student_id": 4400,
+        "code": "251BO07"
+    },
+    {
+        "student_id": 4401,
+        "code": "251BO11"
+    },
+    {
+        "student_id": 4402,
+        "code": "251BO14"
+    },
+    {
+        "student_id": 4403,
+        "code": "251BO21"
+    },
+    {
+        "student_id": 4411,
+        "code": "252GS03"
+    },
+    {
+        "student_id": 4412,
+        "code": "252GS02"
+    },
+    {
+        "student_id": 4413,
+        "code": "252GS04"
+    },
+    {
+        "student_id": 4414,
+        "code": "252GS01"
+    },
+    {
+        "student_id": 4415,
+        "code": "252AB02"
+    },
+    {
+        "student_id": 4417,
+        "code": "252AB03"
+    },
+    {
+        "student_id": 4418,
+        "code": "252OB03"
+    },
+    {
+        "student_id": 4419,
+        "code": "252OB01"
+    },
+    {
+        "student_id": 4420,
+        "code": "252MG03"
+    },
+    {
+        "student_id": 4421,
+        "code": "252MG01"
+    },
+    {
+        "student_id": 4422,
+        "code": "252MG04"
+    },
+    {
+        "student_id": 4425,
+        "code": "252GB01"
+    },
+    {
+        "student_id": 4426,
+        "code": "252GB02"
+    },
+    {
+        "student_id": 4428,
+        "code": "253SE03"
+    },
+    {
+        "student_id": 4429,
+        "code": "253SE01"
+    },
+    {
+        "student_id": 4431,
+        "code": "253TM01"
+    },
+    {
+        "student_id": 4432,
+        "code": "253LM01"
+    },
+    {
+        "student_id": 4433,
+        "code": "253LM03"
+    },
+    {
+        "student_id": 4435,
+        "code": "254MK02"
+    },
+    {
+        "student_id": 4436,
+        "code": "254RR01"
+    },
+    {
+        "student_id": 4437,
+        "code": "254BA01"
+    },
+    {
+        "student_id": 4438,
+        "code": "254MK01"
+    },
+    {
+        "student_id": 4440,
+        "code": "255CB17"
+    },
+    {
+        "student_id": 4442,
+        "code": "255CB05"
+    },
+    {
+        "student_id": 4443,
+        "code": "255CB03"
+    },
+    {
+        "student_id": 4444,
+        "code": "255CB06"
+    },
+    {
+        "student_id": 4447,
+        "code": "255CB16"
+    },
+    {
+        "student_id": 4449,
+        "code": "255CB07"
+    },
+    {
+        "student_id": 4450,
+        "code": "255CB02"
+    },
+    {
+        "student_id": 4451,
+        "code": "255CB14"
+    },
+    {
+        "student_id": 4585,
+        "code": "255CB08"
+    },
+    {
+        "student_id": 4587,
+        "code": "254+B07"
+    },
+    {
+        "student_id": 4604,
+        "code": "253+16"
+    },
+    {
+        "student_id": 4615,
+        "code": "255+B07"
+    },
+    {
+        "student_id": 4631,
+        "code": "251JB22"
+    },
+    {
+        "student_id": 4633,
+        "code": "251JB18"
+    },
+    {
+        "student_id": 4644,
+        "code": "251JB09"
+    },
+    {
+        "student_id": 4649,
+        "code": "251JK02"
+    },
+    {
+        "student_id": 4713,
+        "code": "255CB11"
+    },
+    {
+        "student_id": 4986,
+        "code": "255CB10"
+    },
+    {
+        "student_id": 4990,
+        "code": "256A01"
+    },
+    {
+        "student_id": 4991,
+        "code": "256A02"
+    },
+    {
+        "student_id": 4992,
+        "code": "256A03"
+    },
+    {
+        "student_id": 4993,
+        "code": "256A05"
+    },
+    {
+        "student_id": 4994,
+        "code": "256A04"
+    },
+    {
+        "student_id": 4995,
+        "code": "256B06"
+    },
+    {
+        "student_id": 4996,
+        "code": "256B04"
+    },
+    {
+        "student_id": 5001,
+        "code": "256C01"
+    },
+    {
+        "student_id": 5002,
+        "code": "256C03"
+    },
+    {
+        "student_id": 5003,
+        "code": "256C02"
+    },
+    {
+        "student_id": 5005,
+        "code": "256D01"
+    },
+    {
+        "student_id": 5006,
+        "code": "256E01"
+    },
+    {
+        "student_id": 5008,
+        "code": "257A01"
+    },
+    {
+        "student_id": 5009,
+        "code": "257C02"
+    },
+    {
+        "student_id": 5010,
+        "code": "257D04"
+    },
+    {
+        "student_id": 5011,
+        "code": "257C01"
+    },
+    {
+        "student_id": 5012,
+        "code": "257C03"
+    },
+    {
+        "student_id": 5013,
+        "code": "257D03"
+    },
+    {
+        "student_id": 5014,
+        "code": "257D01"
+    },
+    {
+        "student_id": 5016,
+        "code": "257D02"
+    },
+    {
+        "student_id": 5017,
+        "code": "258A05"
+    },
+    {
+        "student_id": 5018,
+        "code": "258A03"
+    },
+    {
+        "student_id": 5019,
+        "code": "258A02"
+    },
+    {
+        "student_id": 5020,
+        "code": "258A01"
+    },
+    {
+        "student_id": 5022,
+        "code": "258B02"
+    },
+    {
+        "student_id": 5023,
+        "code": "258B03"
+    },
+    {
+        "student_id": 5024,
+        "code": "258B01"
+    },
+    {
+        "student_id": 5025,
+        "code": "258C01"
+    },
+    {
+        "student_id": 5027,
+        "code": "258B04"
+    },
+    {
+        "student_id": 5028,
+        "code": "258E01"
+    },
+    {
+        "student_id": 5029,
+        "code": "258E02"
+    },
+    {
+        "student_id": 5030,
+        "code": "259D14"
+    },
+    {
+        "student_id": 5031,
+        "code": "259D05"
+    },
+    {
+        "student_id": 5032,
+        "code": "259D11"
+    },
+    {
+        "student_id": 5034,
+        "code": "259D15"
+    },
+    {
+        "student_id": 5035,
+        "code": "259D12"
+    },
+    {
+        "student_id": 5036,
+        "code": "259D08"
+    },
+    {
+        "student_id": 5037,
+        "code": "259D07"
+    },
+    {
+        "student_id": 5038,
+        "code": "259D04"
+    },
+    {
+        "student_id": 5040,
+        "code": "259D01"
+    },
+    {
+        "student_id": 5041,
+        "code": "259D02"
+    },
+    {
+        "student_id": 5043,
+        "code": "259D03"
+    },
+    {
+        "student_id": 5044,
+        "code": "259B01"
+    },
+    {
+        "student_id": 5047,
+        "code": "259D09"
+    },
+    {
+        "student_id": 5051,
+        "code": "259D18"
+    },
+    {
+        "student_id": 5052,
+        "code": "2510A01"
+    },
+    {
+        "student_id": 5053,
+        "code": "2510A02"
+    },
+    {
+        "student_id": 5054,
+        "code": "2510B02"
+    },
+    {
+        "student_id": 5055,
+        "code": "2510C03"
+    },
+    {
+        "student_id": 5058,
+        "code": "2511D04"
+    },
+    {
+        "student_id": 5059,
+        "code": "2511D10"
+    },
+    {
+        "student_id": 5060,
+        "code": "2511D05"
+    },
+    {
+        "student_id": 5061,
+        "code": "2511D02"
+    },
+    {
+        "student_id": 5062,
+        "code": "2511D03"
+    },
+    {
+        "student_id": 5063,
+        "code": "2511D01"
+    },
+    {
+        "student_id": 5064,
+        "code": "2511D09"
+    },
+    {
+        "student_id": 5065,
+        "code": "2511D08"
+    },
+    {
+        "student_id": 5066,
+        "code": "2511C01"
+    },
+    {
+        "student_id": 5069,
+        "code": "259D16"
+    },
+    {
+        "student_id": 5070,
+        "code": "2511D11"
+    },
+    {
+        "student_id": 5076,
+        "code": "254+A02"
+    },
+    {
+        "student_id": 5077,
+        "code": "254+A07"
+    },
+    {
+        "student_id": 5078,
+        "code": "254+A04"
+    },
+    {
+        "student_id": 5079,
+        "code": "254+A05"
+    },
+    {
+        "student_id": 5080,
+        "code": "254+B01"
+    },
+    {
+        "student_id": 5081,
+        "code": "254+B05"
+    },
+    {
+        "student_id": 5085,
+        "code": "258A04"
+    },
+    {
+        "student_id": 5090,
+        "code": "2510C02"
+    },
+    {
+        "student_id": 5104,
+        "code": "259D20"
+    },
+    {
+        "student_id": 5254,
+        "code": "254+A08"
+    },
+    {
+        "student_id": 5255,
+        "code": "255+A01"
+    },
+    {
+        "student_id": 5256,
+        "code": "255+A05"
+    },
+    {
+        "student_id": 5257,
+        "code": "244+B03"
+    },
+    {
+        "student_id": 5262,
+        "code": "251JK01"
+    },
+    {
+        "student_id": 5263,
+        "code": "252MG02"
+    },
+    {
+        "student_id": 5264,
+        "code": "255CB12"
+    },
+    {
+        "student_id": 5269,
+        "code": "256B03"
+    },
+    {
+        "student_id": 5270,
+        "code": "257A02"
+    },
+    {
+        "student_id": 5272,
+        "code": "259D10"
+    },
+    {
+        "student_id": 5273,
+        "code": "2512D01"
+    },
+    {
+        "student_id": 5275,
+        "code": "254+B09"
+    },
+    {
+        "student_id": 5277,
+        "code": "254+B08"
+    },
+    {
+        "student_id": 5278,
+        "code": "255+B04"
+    },
+    {
+        "student_id": 5279,
+        "code": "255+B03"
+    },
+    {
+        "student_id": 5280,
+        "code": "251JA02"
+    },
+    {
+        "student_id": 5285,
+        "code": "2511D07"
+    },
+    {
+        "student_id": 5286,
+        "code": "256B01"
+    },
+    {
+        "student_id": 5287,
+        "code": "255+C02"
+    },
+    {
+        "student_id": 5289,
+        "code": "251JB23"
+    },
+    {
+        "student_id": 5291,
+        "code": "252OB02"
+    },
+    {
+        "student_id": 5292,
+        "code": "253SE02"
+    },
+    {
+        "student_id": 5293,
+        "code": "253LM02"
+    },
+    {
+        "student_id": 5294,
+        "code": "255CB13"
+    },
+    {
+        "student_id": 5295,
+        "code": "255CB18"
+    },
+    {
+        "student_id": 5296,
+        "code": "253+15"
+    },
+    {
+        "student_id": 5297,
+        "code": "252OB04"
+    },
+    {
+        "student_id": 5299,
+        "code": "259D19"
+    },
+    {
+        "student_id": 5300,
+        "code": "254+A09"
+    },
+    {
+        "student_id": 5301,
+        "code": "255+C04"
+    },
+    {
+        "student_id": 5302,
+        "code": "251BO24"
+    },
+    {
+        "student_id": 5303,
+        "code": "2511D12"
+    },
+    {
+        "student_id": 5304,
+        "code": "256B07"
+    },
+    {
+        "student_id": 5305,
+        "code": "254+B11"
+    },
+    {
+        "student_id": 5310,
+        "code": "253TM02"
+    },
+    {
+        "student_id": 5311,
+        "code": "259D21"
+    },
+    {
+        "student_id": 5312,
+        "code": "254+B12"
+    },
+    {
+        "student_id": 5313,
+        "code": "255+C05"
+    },
+    {
+        "student_id": 5314,
+        "code": "259D22"
+    },
+    {
+        "student_id": 5315,
+        "code": "259D23"
+    },
+    {
+        "student_id": 5316,
+        "code": "259A01"
+    },
+    {
+        "student_id": 5317,
+        "code": "253SE04"
+    },
+    {
+        "student_id": 5318,
+        "code": "253LM04"
+    },
+    {
+        "student_id": 5319,
+        "code": "2511D13"
+    },
+    {
+        "student_id": 5320,
+        "code": "255CB20"
+    },
+    {
+        "student_id": 5321,
+        "code": "255+C06"
+    },
+    {
+        "student_id": 5322,
+        "code": "2511D14"
+    },
+    {
+        "student_id": 5323,
+        "code": "251JK03"
+    },
+    {
+        "student_id": 5324,
+        "code": "255+A06"
+    },
+    {
+        "student_id": 5325,
+        "code": "255CB21"
+    },
+    {
+        "student_id": 5326,
+        "code": "252AB04"
+    },
+    {
+        "student_id": 5327,
+        "code": "255+C07"
+    },
+    {
+        "student_id": 5328,
+        "code": "255CB22"
+    },
+    {
+        "student_id": 5329,
+        "code": "257B01"
+    },
+    {
+        "student_id": 5330,
+        "code": "252GS05"
+    },
+    {
+        "student_id": 5331,
+        "code": "258E03"
+    },
+    {
+        "student_id": 5332,
+        "code": "255CB23"
+    },
+    {
+        "student_id": 5333,
+        "code": "254MK03"
+    },
+    {
+        "student_id": 5334,
+        "code": "253LM05"
+    },
+    {
+        "student_id": 5335,
+        "code": "252MG05"
+    },
+    {
+        "student_id": 5337,
+        "code": "256D02"
+    },
+    {
+        "student_id": 5338,
+        "code": "253+17"
+    },
+    {
+        "student_id": 5339,
+        "code": "258B05"
+    },
+    {
+        "student_id": 5340,
+        "code": "2510A03"
+    },
+    {
+        "student_id": 5341,
+        "code": "255CB24"
+    }
+]
