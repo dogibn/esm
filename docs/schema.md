@@ -1,4 +1,4 @@
-# Database schema
+-0# Database schema
 
 Authoritative reference for table names, column names, types, and constraints. The implementation lives in `db/schema.ts` (Drizzle); when this doc and the code disagree, fix the code.
 

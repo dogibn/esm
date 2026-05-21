@@ -14,7 +14,7 @@ import { resolve } from "node:path";
 import { sql } from "drizzle-orm";
 
 import { db } from "@/db/index";
-import { academicTerms, academicYears, gradeLevels } from "@/db/schema";
+import { academicTerms, academicYears, feeStructures, gradeLevels } from "@/db/schema";
 
 const DATA_DIR = resolve(process.cwd(), "scripts/data");
 
@@ -106,11 +106,42 @@ async function seedAcademicTerms(): Promise<void> {
   console.log(`  academic_terms: ${inserted} inserted, ${result.length - inserted} updated`);
 }
 
+async function seedFeeStructures(): Promise<void> {
+  type Row = {
+    feeName: string;
+    data: unknown;
+    academicTermId: number | null;
+    effectiveFrom: string;
+    supersededAt: null;
+  };
+  const rows = readSeed<Row>("fee_structure.json").map((r) => ({
+    feeName: r.feeName,
+    data: r.data,
+    academicTermId: r.academicTermId,
+    effectiveFrom: r.effectiveFrom,
+  }));
+
+  const result = await db
+    .insert(feeStructures)
+    .values(rows)
+    .onConflictDoUpdate({
+      target: [feeStructures.feeName, feeStructures.academicTermId, feeStructures.effectiveFrom],
+      set: {
+        data: sql`excluded.data`,
+      },
+    })
+    .returning({ xmax: sql<string>`xmax` });
+
+  const inserted = result.filter((r) => r.xmax === "0").length;
+  console.log(`  fee_structures: ${inserted} inserted, ${result.length - inserted} updated`);
+}
+
 async function main(): Promise<void> {
   console.log("Seeding from scripts/data/...");
   await seedGradeLevels();
   await seedAcademicYears();
   await seedAcademicTerms();
+  await seedFeeStructures();
   console.log("Done.");
   process.exit(0);
 }

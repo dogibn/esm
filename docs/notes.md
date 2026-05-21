@@ -56,4 +56,27 @@ Notes-to-self.
 - No analytics
 - No CI beyond Vercel preview deploys
 - No marketing site or public pages
+
 - "code" column currently added to "enrollments" table. Change to "students" table if the "code" persists to the next year.
+
+- currently, "charges" table has no unique constraint in the DB, so better to enforce with:
+Option A — two partial unique indexes (recommended). Split by scope, so the nullable column is never part of the comparison. This matches the partial-index style already used elsewhere in the schema and is self-documenting:
+uniqueIndex("charges_student_year_fee_unique")
+  .on(t.studentId, t.academicYearId, t.feeName)
+  .where(sql`${t.academicTermId} IS NULL`),
+uniqueIndex("charges_student_term_fee_unique")
+  .on(t.studentId, t.academicTermId, t.feeName)
+  .where(sql`${t.academicYearId} IS NULL`)
+
+- needs to be dealt with after getting response regarding the issue:
+grades without teacher : 5 rows (with empty teacher_name)
+grades without students : 2 rows, 4SB 5ED (grades are there with no students assigned)
+tuition invalid new/old : Verfied based on esmlh source. Expects to be re-verified once the app is running and gets delivered
+
+- For restructuring and cleaning codes later, script/parsing and report etc was mostly used for 1 time import of tuition_25-26 file BUT "scraping" scripts will be reused.
+
+- How to deal with "club fee, payment"?? It exists in esmlh but what if having 2 sources make conflicts? (Currently going to get only the enrolled club information)
+
+- consider making the "amount" and "fee" consistent by either using "fee" across all or using "amount" instead of "fee" when scraping or pushing the scraped club fee
+
+- IMPORTANT! Figure out how to deal with "Per Session" paid after clubs. How do we make charges for that? (Enrollment is one time so it's okay) But, "charge" amount should be 15000 x 4 times (need to calculate and check for attendance?)

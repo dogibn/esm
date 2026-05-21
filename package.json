@@ -15,7 +15,13 @@
     "load:students": "tsx --env-file=.env.local scripts/load/students.ts",
     "load:grades": "tsx --env-file=.env.local scripts/load/grades.ts",
     "load:enrollments": "tsx --env-file=.env.local scripts/load/enrollments.ts",
-    "load:missing-grades": "tsx --env-file=.env.local scripts/load/missing_grades.ts"
+    "load:missing-grades": "tsx --env-file=.env.local scripts/load/missing_grades.ts",
+    "load:charges-tuition": "tsx --env-file=.env.local scripts/load/charges_tuition.ts",
+    "load:discounts": "tsx --env-file=.env.local scripts/load/discounts.ts",
+    "load:charges-tuition-overrides": "tsx --env-file=.env.local scripts/load/charges_tuition_overrides.ts",
+    "load:after-clubs": "tsx --env-file=.env.local scripts/load/after_clubs.ts",
+    "load:club-enrollments": "tsx --env-file=.env.local scripts/load/club_enrollments.ts",
+    "load:charges-clubs": "tsx --env-file=.env.local scripts/load/charges_clubs.ts"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

@@ -54,6 +54,7 @@ Run scripts as modules from the `scripts/` directory so that `lib.*` imports res
 cd scripts
 python -m scrape.students
 python -m scrape.teachers
+python -m scrape.after_clubs
 python -m parse.parse_tuition_excel
 python -m tools.cleaning --input parsed/tuition_25-26.json
 python -m tools.data_utils nulls scraped/students.json code
@@ -209,6 +210,80 @@ Cells use `data-field` attributes. The scraper filters to rows where `<td data-f
 `grades` table is not populated yet. When it's populated:
 
 The loader reads this JSON, finds each `grades` row by `(grade_name, current academic year)`, and updates `teacher_name` and `teacher_email`. `teacher_phone` is not currently loaded — there's no column for it in `grades`.
+
+---
+
+## Source: After-school clubs
+
+URL: `https://esmlh.edu.mn/admin/after_clubs`
+
+Catalog of clubs offered by the school. Feeds the club rows of `fee_structures` (one per club per term). Separate from `club_enrollments`, which is the per-student membership data and is not produced by this scrape.
+
+Only rows whose status is `"Active"` are kept; inactive/archived clubs are silently dropped.
+
+### HTML structure
+
+A `<table id="example23">` (same DataTables widget the student directory uses). Columns:
+
+| HTML column | Use? | Maps to |
+|---|---|---|
+| # (row counter) | ignore | — |
+| Club Name | use | `name` |
+| Teacher | use | `teacher` |
+| Schedule | use | `schedule` |
+| Fee | use | `fee` (parsed to int from `₮405,000`) |
+| Status | filter | `status` (only `"Active"` kept) |
+| Payment Model | use | `payment_model` (e.g. `"Per Term"`) |
+| Teacher Access | ignore | — |
+| options | partial | `club_id` extracted from edit link only |
+
+### Sample row
+
+```html
+<tr role="row" class="odd">
+  <td>9</td>
+  <td>Chearleading GR3</td>
+  <td>Narantuya Toibgoo</td>
+  <td>Friday</td>
+  <td>₮405,000</td>
+  <td class="sorting_1"><span class="label label-success">Active</span></td>
+  <td><span class="label label-primary">Per Term</span></td>
+  <td><span class="label label-default">Standard</span></td>
+  <td>
+    <a onclick="showAjaxModal('https://esmlh.edu.mn/modal/popup/edit_after_club/15')" ...>...</a>
+    <a href="https://esmlh.edu.mn/admin/after_clubs/delete/15" ...>...</a>
+    <a onclick="loadStudentAssignment(15)" ...>...</a>
+    ...
+  </td>
+</tr>
+```
+
+### Parsing rules
+
+- **Status filter** — text of the inner `<span>` in the Status cell. Rows where the value is not exactly `"Active"` are skipped before any other parsing.
+- **Club Name / Teacher / Schedule** — stripped text of the cell.
+- **Fee** — text like `"₮405,000"`. Strip non-digits and parse to `int` (here, `405000`). Halt on rows where no digits are present.
+- **Payment Model** — text of the inner `<span>` in the cell.
+- **`club_id`** — extracted via regex `/edit_after_club/(\d+)` against the HTML of the options cell. This is the esmlh-side id needed later to hit the "Manage Students" endpoint. Stored as a string (same convention as `students.student_id`).
+- **Teacher Access** and the rest of the action buttons in the options cell — dropped.
+
+### Intermediate file shape (`scripts/scraped/after_clubs.json`)
+
+```json
+[
+  {
+    "club_id": "15",
+    "name": "Chearleading GR3",
+    "teacher": "Narantuya Toibgoo",
+    "schedule": "Friday",
+    "fee": 405000,
+    "status": "Active",
+    "payment_model": "Per Term"
+  }
+]
+```
+
+Loader does not exist yet. When added, it will read this JSON and upsert one `fee_structures` row per club per term, using the club name (+ term) as the natural key. The `club_id` field is retained so a future scraper can hit `https://esmlh.edu.mn/admin/manage_after_club_attendance?after_club_id=<id>` or the equivalent "Manage Students" endpoint to pull rosters.
 
 ---
 
