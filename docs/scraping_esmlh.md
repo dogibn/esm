@@ -55,6 +55,7 @@ cd scripts
 python -m scrape.students
 python -m scrape.teachers
 python -m scrape.after_clubs
+python -m scrape.student_clubs
 python -m parse.parse_tuition_excel
 python -m tools.cleaning --input parsed/tuition_25-26.json
 python -m tools.data_utils nulls scraped/students.json code
@@ -283,19 +284,85 @@ A `<table id="example23">` (same DataTables widget the student directory uses). 
 ]
 ```
 
-Loader does not exist yet. When added, it will read this JSON and upsert one `fee_structures` row per club per term, using the club name (+ term) as the natural key. The `club_id` field is retained so a future scraper can hit `https://esmlh.edu.mn/admin/manage_after_club_attendance?after_club_id=<id>` or the equivalent "Manage Students" endpoint to pull rosters.
+Loader: `scripts/load/after_clubs.ts` (`pnpm load:after-clubs`). Upserts one `fee_structures` row per club into the current term, with `fee_name = name`, `effective_from = current term start_date`, `superseded_at = null`, and `data = { fee, club_id, payment_model, teacher, schedule }`. The `club_id` field is retained for the student-clubs scraper below (and for any future per-club roster scrape via `https://esmlh.edu.mn/admin/manage_after_club_attendance?after_club_id=<id>`).
+
+---
+
+## Source: Student club enrolments
+
+URL: `https://esmlh.edu.mn/admin/student_clubs_summary?student_id=<id>` — one HTTP request **per student**.
+
+Produces the per-student club-membership pairs that feed `club_enrollments`. The scraper iterates over every student in `scripts/scraped/students.json`, requests their summary page, and keeps only rows whose `Club Status == "Active"`.
+
+Students with no enrolments render the page body as `"This student is not enrolled in any after school clubs."` (no table). Those are silently counted and skipped.
+
+### HTML structure
+
+A single `<table>` per page (no DataTables id needed). Columns:
+
+| HTML column | Use? | Maps to |
+|---|---|---|
+| # (row counter) | ignore | — |
+| Club Name | use | `name` (the club's `fee_structures.fee_name`) |
+| Club Status | filter | only `"Active"` kept |
+| Enrolment Status | ignore | — |
+| Payment Model | ignore | — |
+| Total Fee | ignore | — |
+| Total Paid | ignore | — |
+| Remaining | ignore | — |
+
+The page uses an "empty" sentinel when there are no enrolments — no table at all. The parser checks for the substring `"This student is not enrolled in any after school clubs."` and short-circuits.
+
+### Sample row
+
+```html
+<tr>
+  <td>1</td>
+  <td><strong>HW GR 1</strong></td>
+  <td><span class="label label-default">Inactive</span></td>
+  <td><span class="label label-default">Paid</span></td>
+  <td><span class="label label-info">Per Session</span></td>
+  <td class="text-right">₮240,000</td>
+  <td class="text-right text-success">₮525,000</td>
+  <td class="text-right text-success">+₮285,000 ...</td>
+</tr>
+```
+
+### Parsing rules
+
+- **Status filter** — text of the inner `<span>` in the Club Status cell. Rows where the value is not exactly `"Active"` are skipped.
+- **Club Name** — stripped text of the cell (the `<strong>` wrapper is collapsed away by `get_text(strip=True)`).
+- **Empty-name Active rows** — source-side artefact: some students have a ghost `Active` row with no club name and `—` fee (seen on student 58, row 4). These are not parse failures and not real enrolments; they are counted and skipped with a tally printed at the end. Halting on them would crash a full pass for ~3% of students.
+
+### Politeness
+
+`scripts/scrape/student_clubs.py` sleeps `0.3 s` between requests and prints a progress line every 50 students. A full pass over ~1,400 students takes roughly 8–10 minutes.
+
+### Intermediate file shape (`scripts/scraped/student_clubs.json`)
+
+Flat list of `(student, club)` pairs — one record per active enrolment, not one record per student:
+
+```json
+[
+  { "student_id": "55", "name": "Volleyball 11 am to 1pm Term 4" },
+  { "student_id": "58", "name": "Volleyball 1-3pm Term 4" }
+]
+```
+
+Loader: `scripts/load/club_enrollments.ts` (`pnpm load:club-enrollments`). Looks up `students.id` by the natural-key `student_id` text and `fee_structures.id` by `(fee_name, current term, superseded_at IS NULL)`. Inserts one `club_enrollments` row per pair. Idempotent via the existing `(student_id, fee_structure_id)` unique index — re-running is a no-op.
+
+A second loader, `scripts/load/charges_clubs.ts` (`pnpm load:charges-clubs`), joins `club_enrollments` × `fee_structures` for the current term and inserts a term-scoped `charges` row per enrolment, pulling `amount` from `data.fee`. It de-dups against existing rows by `(student_id, fee_name, academic_term_id)` since `charges` has no unique constraint.
 
 ---
 
 ## Fields not sourced from any scrape yet
 
-These fields the year-start / term-start load needs are not covered by either scrape source above. They must be supplied manually at load time, or another esmlh page found. Open questions about source live in `notes.md`.
+These fields the year-start / term-start load needs are not covered by any scrape source above. They must be supplied manually at load time, or another esmlh page found. Open questions about source live in `notes.md`.
 
 - `enrollments.student_category` (`new` / `old`)
 - `enrollments.tuition_contract_id`
 - Discount data
 - Bus opt-in (term-start)
-- Club enrollments (term-start)
 
 The load scripts combine the available scrapes with whatever is supplied for these gaps, and **fail loudly** when a required-but-missing field would force a placeholder.
 

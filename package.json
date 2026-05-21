@@ -21,7 +21,9 @@
     "load:charges-tuition-overrides": "tsx --env-file=.env.local scripts/load/charges_tuition_overrides.ts",
     "load:after-clubs": "tsx --env-file=.env.local scripts/load/after_clubs.ts",
     "load:club-enrollments": "tsx --env-file=.env.local scripts/load/club_enrollments.ts",
-    "load:charges-clubs": "tsx --env-file=.env.local scripts/load/charges_clubs.ts"
+    "load:charges-clubs": "tsx --env-file=.env.local scripts/load/charges_clubs.ts",
+    "load:charges-registration": "tsx --env-file=.env.local scripts/load/charges_registration.ts",
+    "qa:tuition-totals": "tsx --env-file=.env.local scripts/qa/verify_tuition_totals.ts"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
