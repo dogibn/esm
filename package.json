@@ -23,7 +23,9 @@
     "load:club-enrollments": "tsx --env-file=.env.local scripts/load/club_enrollments.ts",
     "load:charges-clubs": "tsx --env-file=.env.local scripts/load/charges_clubs.ts",
     "load:charges-registration": "tsx --env-file=.env.local scripts/load/charges_registration.ts",
-    "qa:tuition-totals": "tsx --env-file=.env.local scripts/qa/verify_tuition_totals.ts"
+    "qa:tuition-totals": "tsx --env-file=.env.local scripts/qa/verify_tuition_totals.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
@@ -61,6 +63,7 @@
     "eslint-config-next": "16.2.5",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.7"
   }
 }

@@ -1,0 +1,4 @@
+{
+  "comment": "Per-fee-structure alias lists. Edit when a new club is added. Key is fee_structure_id (string).",
+  "aliases": {}
+}
