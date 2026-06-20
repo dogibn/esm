@@ -84,7 +84,7 @@ if (yearRow.length === 0) {
   await client.end();
   process.exit(1);
 }
-const academicYearId = yearRow[0].id;
+const academicYearId = yearRow[0]!.id;
 
 const dbGradeRows = await db
   .select({
@@ -113,7 +113,7 @@ for (const s of cleanedStudents) {
 const PREFIX_RE = /^(\d+\+?)/;
 function extractLevelCode(gradeName: string): string | null {
   const m = gradeName.match(PREFIX_RE);
-  return m ? m[1] : null;
+  return m?.[1] ?? null;
 }
 
 // 1. Compute backfill set: in students.cleaned but not in DB.

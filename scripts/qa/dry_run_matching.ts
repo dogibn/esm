@@ -2,50 +2,31 @@
  * Dry-run the matching pipeline against a bank Excel file.
  *
  * Reads the bank file (default: features/imports/data/bank_transaction.xlsx),
- * pulls students/enrollments/fees/charges from the DB, builds a
- * MatchingContext, runs match() on each transaction, and writes a markdown
- * report to scripts/reports/matching_dry_run.md.
+ * pulls the matching context via the shared loader, runs match() on each
+ * transaction, and writes a markdown report to scripts/reports/matching_dry_run.md.
  *
  * No DB writes. No payments persisted.
  *
  * Usage:
  *   pnpm tsx --env-file=.env.local scripts/qa/dry_run_matching.ts [bank.xlsx]
  *
- * Required env var: DIRECT_URL
+ * Required env vars: DATABASE_URL (and the rest validated by @/lib/env).
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { and, eq, inArray, isNull, sql } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
 import * as XLSX from "xlsx";
 
-import {
-  academicTerms,
-  academicYears,
-  charges,
-  clubEnrollments,
-  discounts,
-  enrollments,
-  feeStructures,
-  grades,
-  gradeLevels,
-  payments,
-  students,
-} from "@/db/schema";
-
 import { buildMatchingContext, match } from "@/features/imports/matching";
+import { loadMatchingContextInput } from "@/features/imports/matching/load-context";
 import type {
   BankTransactionInput,
-  BuildIndexInput,
   ChargeWithBalance,
   MatchResult,
 } from "@/features/imports/matching";
 
 const DEFAULT_BANK_PATH = "features/imports/data/bank_transaction.xlsx";
 const REPORT_PATH = "scripts/reports/matching_dry_run.md";
-const CLUB_ALIASES_PATH = "features/imports/matching/club-aliases.json";
 
 // --------------------------- CLI / env ---------------------------
 const bankPathArg = process.argv[2] ?? DEFAULT_BANK_PATH;
@@ -55,29 +36,6 @@ if (!existsSync(bankAbsPath)) {
   console.error(`Place the file at the default path or pass it as the first argument.`);
   process.exit(1);
 }
-
-const dbUrl = process.env.DIRECT_URL;
-if (!dbUrl) {
-  console.error("ERROR: DIRECT_URL is not set.");
-  process.exit(1);
-}
-
-const client = postgres(dbUrl, { prepare: false });
-const db = drizzle(client, {
-  schema: {
-    academicTerms,
-    academicYears,
-    charges,
-    clubEnrollments,
-    discounts,
-    enrollments,
-    feeStructures,
-    grades,
-    gradeLevels,
-    payments,
-    students,
-  },
-});
 
 // --------------------------- bank file ---------------------------
 function readBankFile(path: string): BankTransactionInput[] {
@@ -158,182 +116,6 @@ function numVal(v: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-// --------------------------- DB context ---------------------------
-async function loadCurrent() {
-  const [year] = await db
-    .select()
-    .from(academicYears)
-    .where(eq(academicYears.isCurrent, true))
-    .limit(1);
-  const [term] = await db
-    .select()
-    .from(academicTerms)
-    .where(eq(academicTerms.isCurrent, true))
-    .limit(1);
-  if (!year) throw new Error("No current academic_year set");
-  if (!term) throw new Error("No current academic_term set");
-  return { year, term };
-}
-
-async function loadStudents() {
-  return db
-    .select({
-      id: students.id,
-      firstName: students.firstName,
-      lastName: students.lastName,
-    })
-    .from(students);
-}
-
-async function loadEnrollments(yearId: number) {
-  return db
-    .select({
-      studentId: enrollments.studentId,
-      gradeName: grades.name,
-      gradeLevelCode: gradeLevels.code,
-    })
-    .from(enrollments)
-    .innerJoin(grades, eq(grades.id, enrollments.gradeId))
-    .innerJoin(gradeLevels, eq(gradeLevels.id, grades.gradeLevelId))
-    .where(eq(enrollments.academicYearId, yearId));
-}
-
-type FeeRow = {
-  id: number;
-  feeName: string;
-  data: unknown;
-  academicTermId: number | null;
-};
-
-async function loadCurrentFees(termId: number) {
-  const rows = await db
-    .select({
-      id: feeStructures.id,
-      feeName: feeStructures.feeName,
-      data: feeStructures.data,
-      academicTermId: feeStructures.academicTermId,
-    })
-    .from(feeStructures)
-    .where(isNull(feeStructures.supersededAt));
-
-  const termRows: FeeRow[] = [];
-  const yearRows: FeeRow[] = [];
-  for (const r of rows) {
-    if (r.academicTermId === termId) termRows.push(r);
-    else if (r.academicTermId === null) yearRows.push(r);
-  }
-  return { termRows, yearRows };
-}
-
-function feeRowToTermInputs(
-  r: FeeRow,
-): Array<{ feeStructureId: number; feeName: string; amount: bigint; isClub: boolean }> {
-  // Club fee: { amount, teacher, schedule }
-  // Flat: { amount }
-  // Per-grade: { by_grade: { "1": 2_000_000, ... } }
-  const d = r.data as Record<string, unknown> | null;
-  if (!d) return [];
-  if (typeof d["amount"] === "number") {
-    // Treat as either club (if feeName ≠ tuition/bus_fee/registration) or flat school-wide fee.
-    const isClub = !["tuition", "bus_fee", "bus", "registration"].includes(r.feeName);
-    return [
-      {
-        feeStructureId: r.id,
-        feeName: r.feeName,
-        amount: BigInt(Math.round(d["amount"] as number)),
-        isClub,
-      },
-    ];
-  }
-  return [];
-}
-
-function feeRowToYearInputs(r: FeeRow): Array<{ feeName: string; amount: bigint }> {
-  const d = r.data as Record<string, unknown> | null;
-  if (!d) return [];
-  if (typeof d["amount"] === "number") {
-    return [{ feeName: r.feeName, amount: BigInt(Math.round(d["amount"] as number)) }];
-  }
-  if (d["by_grade"] && typeof d["by_grade"] === "object") {
-    const out: Array<{ feeName: string; amount: bigint }> = [];
-    for (const v of Object.values(d["by_grade"] as Record<string, unknown>)) {
-      if (typeof v === "number") {
-        out.push({ feeName: r.feeName, amount: BigInt(Math.round(v)) });
-      }
-    }
-    return out;
-  }
-  return [];
-}
-
-async function loadOpenCharges(yearId: number, termId: number) {
-  // All non-zero-balance charges in the current year + current term.
-  const allCharges = await db
-    .select({
-      id: charges.id,
-      studentId: charges.studentId,
-      feeName: charges.feeName,
-      amount: charges.amount,
-      academicYearId: charges.academicYearId,
-      academicTermId: charges.academicTermId,
-    })
-    .from(charges)
-    .where(
-      sql`${charges.academicYearId} = ${yearId} OR ${charges.academicTermId} = ${termId}`,
-    );
-
-  if (allCharges.length === 0) return [];
-
-  const chargeIds = allCharges.map((c) => c.id);
-
-  // Sum of payments per charge.
-  const paymentSums = await db
-    .select({
-      chargeId: payments.chargeId,
-      paid: sql<number>`COALESCE(SUM(${payments.amount}), 0)`.as("paid"),
-    })
-    .from(payments)
-    .where(inArray(payments.chargeId, chargeIds))
-    .groupBy(payments.chargeId);
-  const paidByCharge = new Map<number, number>();
-  for (const p of paymentSums) paidByCharge.set(p.chargeId, Number(p.paid));
-
-  // Tuition discounts per (student, year).
-  const tuitionDiscounts = await db
-    .select({
-      studentId: enrollments.studentId,
-      academicYearId: enrollments.academicYearId,
-      total: sql<number>`COALESCE(SUM(${discounts.amount}), 0)`.as("total"),
-    })
-    .from(discounts)
-    .innerJoin(enrollments, eq(enrollments.id, discounts.enrollmentId))
-    .where(eq(enrollments.academicYearId, yearId))
-    .groupBy(enrollments.studentId, enrollments.academicYearId);
-  const discountByStudent = new Map<number, number>();
-  for (const d of tuitionDiscounts) discountByStudent.set(d.studentId, Number(d.total));
-
-  const out: Array<ChargeWithBalance & { studentId: number }> = [];
-  for (const c of allCharges) {
-    const paid = paidByCharge.get(c.id) ?? 0;
-    const discount = c.feeName === "tuition" ? discountByStudent.get(c.studentId) ?? 0 : 0;
-    const balance = Number(c.amount) - discount - paid;
-    if (balance <= 0) continue;
-    const scope =
-      c.academicYearId !== null
-        ? { kind: "year" as const, academicYearId: c.academicYearId }
-        : { kind: "term" as const, academicTermId: c.academicTermId! };
-    out.push({
-      id: c.id,
-      studentId: c.studentId,
-      feeName: c.feeName,
-      scope,
-      grossAmount: BigInt(Number(c.amount)),
-      outstandingBalance: BigInt(balance),
-    });
-  }
-  return out;
-}
-
 // --------------------------- report ---------------------------
 function fmtMNT(n: bigint): string {
   return n.toLocaleString("en-US") + " MNT";
@@ -400,51 +182,23 @@ async function main(): Promise<void> {
   const txs = readBankFile(bankAbsPath);
   console.log(`Parsed ${txs.length} transaction rows.`);
 
-  console.log(`Querying DB for current year/term...`);
-  const { year, term } = await loadCurrent();
-  console.log(`  year=${year.name} (id=${year.id}), term=${term.name} (id=${term.id})`);
-
-  const [studentsRows, enrollmentsRows, currentFees, openCharges] = await Promise.all([
-    loadStudents(),
-    loadEnrollments(year.id),
-    loadCurrentFees(term.id),
-    loadOpenCharges(year.id, term.id),
-  ]);
-
+  console.log(`Loading matching context...`);
+  const { period, input } = await loadMatchingContextInput();
   console.log(
-    `  students=${studentsRows.length} enrollments=${enrollmentsRows.length} open_charges=${openCharges.length}`,
+    `  year=${period.yearName} (id=${period.yearId}), term=${period.termName} (id=${period.termId})`,
+  );
+  console.log(
+    `  students=${input.students.length} enrollments=${input.enrollments.length} open_charges=${input.openCharges.length}`,
   );
 
-  const currentTermFees = currentFees.termRows.flatMap(feeRowToTermInputs);
-  const currentYearFees = currentFees.yearRows.flatMap(feeRowToYearInputs);
-
-  let clubAliases: Record<string, string[]> = {};
-  try {
-    const aliasJson = JSON.parse(
-      readFileSync(resolve(process.cwd(), CLUB_ALIASES_PATH), "utf-8"),
-    ) as { aliases?: Record<string, string[]> };
-    clubAliases = aliasJson.aliases ?? {};
-  } catch (e) {
-    console.warn(`(could not load ${CLUB_ALIASES_PATH}: ${(e as Error).message})`);
-  }
-
-  const buildInput: BuildIndexInput = {
-    students: studentsRows,
-    enrollments: enrollmentsRows,
-    currentTermFees,
-    currentYearFees,
-    clubAliases,
-    confirmedAccountLinks: [],
-    openCharges,
-  };
-  const context = buildMatchingContext(buildInput);
+  const context = buildMatchingContext(input);
 
   const studentNamesById = new Map<number, string>();
-  for (const s of studentsRows) {
+  for (const s of input.students) {
     studentNamesById.set(s.id, `${s.firstName} ${s.lastName}`.trim());
   }
   const chargesById = new Map<number, ChargeWithBalance & { studentId: number }>();
-  for (const c of openCharges) chargesById.set(c.id, c);
+  for (const c of input.openCharges) chargesById.set(c.id, c);
 
   console.log(`Matching ${txs.length} rows...`);
   const summary = { matched: 0, matched_multi: 0, low_confidence: 0, unmatched: 0 };
@@ -476,8 +230,8 @@ async function main(): Promise<void> {
     "",
     `- Generated: ${new Date().toISOString()}`,
     `- Source: \`${bankPathArg}\``,
-    `- Academic year: ${year.name} (id=${year.id}), term: ${term.name} (id=${term.id})`,
-    `- Students=${studentsRows.length}, enrollments=${enrollmentsRows.length}, open charges=${openCharges.length}`,
+    `- Academic year: ${period.yearName} (id=${period.yearId}), term: ${period.termName} (id=${period.termId})`,
+    `- Students=${input.students.length}, enrollments=${input.enrollments.length}, open charges=${input.openCharges.length}`,
     `- Rows: ${txs.length}`,
     "",
     "## Summary",
@@ -499,8 +253,6 @@ async function main(): Promise<void> {
   writeFileSync(reportAbs, reportText, "utf-8");
   console.log(`Report written to ${reportAbs}`);
   console.log(JSON.stringify(summary, null, 2));
-
-  await client.end();
 }
 
 main().catch((e) => {

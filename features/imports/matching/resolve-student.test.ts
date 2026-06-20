@@ -117,6 +117,20 @@ describe('resolveStudent', () => {
     const agv = cands.find((c) => c.studentId === 3);
     expect(agv?.tier).toBe(5);
   });
+
+  it('resolves a name whose memo spelling differs from the directory only by o↔u', () => {
+    // Student 7's surname is "Bolor"; a memo writer spells it "Bulur". The o/u
+    // fold makes them converge, so this stays an exact name match (not a miss).
+    const variant = extractSignals('Bulur 5MA', BigInt('100000'), fullContext);
+    const baseline = extractSignals('Bolor 5MA', BigInt('100000'), fullContext);
+    const vCand = resolveStudent(variant, null, fullContext).find((c) => c.studentId === 7);
+    const bCand = resolveStudent(baseline, null, fullContext).find((c) => c.studentId === 7);
+    expect(vCand).toBeDefined();
+    expect(vCand?.signals.has('memo_name_partial')).toBe(true);
+    expect(vCand?.signals.has('memo_grade_class')).toBe(true);
+    // Same student, same tier regardless of which vowel the writer chose.
+    expect(vCand?.tier).toBe(bCand?.tier);
+  });
 });
 
 describe('detectMultiStudent', () => {

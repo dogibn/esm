@@ -94,6 +94,8 @@ An obligation: "Student S owes amount A for fee F."
 
 Stored as the **resolved gross amount** at creation time. Discounts and payments are subtracted at read time, not baked in. This preserves the audit trail (gross + discount + paid are all recoverable) and tolerates late-discovered discounts without rewriting historical Charges.
 
+> **Exception — "Per Session" club charges (homework club).** These accrue with attendance: the obligation is `per-session rate × sessions attended`, which esmlh recomputes continuously. Their gross `amount` is therefore **mutable** — re-synced from esmlh's Total Fee by `refresh:per-session-charges` (see `scraping_esmlh.md` § Per Session refresh), not fixed at creation. esmlh's Total Fee is the source of truth, including when it is blank: a student enrolled but with no sessions accrued has the charge set to **0** (not left at the seed rate). Payments are unaffected; `balance = amount − paid` recomputes. Every other charge (tuition, registration, bus, Per Term clubs) keeps the immutable-gross rule above. This is the *amount* that mutates, not the audit trail of payments.
+
 Scope is exclusive: exactly one of `academic_year_id` / `academic_term_id` is set, never both.
 
 | `fee_name`     | Scope |

@@ -1,7 +1,14 @@
 """
 Scrapes https://esmlh.edu.mn/admin/student_clubs_summary?student_id=<id> for
 every student in scripts/scraped/students.json. For each student, keeps only
-club rows whose "Club Status" == "Active" and emits {student_id, name} pairs.
+club rows whose "Club Status" == "Active" and emits
+{student_id, name, payment_model, total_fee} records.
+
+`total_fee` is esmlh's accrued obligation for the club, parsed from the
+"Total Fee" column. For "Per Session" clubs (e.g. homework club) this is
+attendance × per-session rate — the number that should become the club charge
+amount, since the after-clubs catalog fee is only the per-session rate. None
+when the cell has no digits.
 
 Students with no enrolment ("This student is not enrolled in any after school
 clubs.") are silently counted and skipped.
@@ -17,6 +24,7 @@ Requires env vars:
 """
 
 import os
+import re
 import sys
 import time
 
@@ -38,6 +46,22 @@ NOT_ENROLLED_MARKER = "This student is not enrolled in any after school clubs."
 REQUEST_DELAY_S = 0.3
 PROGRESS_EVERY = 50
 
+AMOUNT_RE = re.compile(r"\d+")
+
+
+def _span_text(td) -> str:
+    """Text of an inner <span> (status/payment-model labels), else the cell."""
+    span = td.find("span")
+    return span.get_text(strip=True) if span else td.get_text(strip=True)
+
+
+def _parse_amount(raw: str) -> int | None:
+    """Parse '₮240,000' → 240000. Returns None when no digits are present
+    (e.g. an em-dash placeholder), so the loader can tell 'unknown' apart from
+    a real 0."""
+    digits = "".join(AMOUNT_RE.findall(raw))
+    return int(digits) if digits else None
+
 
 def authenticate() -> requests.Session:
     email = os.environ.get("ESMLH_LOGIN_EMAIL")
@@ -52,10 +76,17 @@ def authenticate() -> requests.Session:
     return session
 
 
-def parse_active_clubs(html: str, student_id: str) -> tuple[list[str], bool, int]:
-    """Return (active_club_names, was_enrolled, orphan_count). was_enrolled is
-    False if the page has the 'not enrolled' marker. orphan_count is the number
-    of Active rows with empty club names (source-side artefacts — skipped)."""
+def parse_active_clubs(html: str, student_id: str) -> tuple[list[dict], bool, int]:
+    """Return (active_club_records, was_enrolled, orphan_count).
+
+    Each record is {name, payment_model, total_fee}. was_enrolled is False if
+    the page has the 'not enrolled' marker. orphan_count is the number of
+    Active rows with empty club names (source-side artefacts — skipped).
+
+    Columns: # | Club Name | Club Status | Enrolment Status | Payment Model |
+    Total Fee | Total Paid | Remaining. Payment Model (col 4) and Total Fee
+    (col 5) are read defensively — a layout shift in the trailing columns must
+    not break enrolment capture, which only needs the name."""
     if NOT_ENROLLED_MARKER in html:
         return [], False, 0
 
@@ -67,7 +98,7 @@ def parse_active_clubs(html: str, student_id: str) -> tuple[list[str], bool, int
     tbody = table.find("tbody")
     rows = tbody.find_all("tr") if tbody else table.find_all("tr")[1:]
 
-    names: list[str] = []
+    records: list[dict] = []
     orphans = 0
     for i, row in enumerate(rows, start=1):
         tds = row.find_all("td")
@@ -87,9 +118,15 @@ def parse_active_clubs(html: str, student_id: str) -> tuple[list[str], bool, int
             # student 58). Skip silently-with-count rather than halt the run.
             orphans += 1
             continue
-        names.append(name)
 
-    return names, True, orphans
+        payment_model = (_span_text(tds[4]) or None) if len(tds) > 4 else None
+        total_fee = _parse_amount(tds[5].get_text(strip=True)) if len(tds) > 5 else None
+
+        records.append(
+            {"name": name, "payment_model": payment_model, "total_fee": total_fee}
+        )
+
+    return records, True, orphans
 
 
 def scrape(session: requests.Session, student_ids: list[str]) -> list[dict]:
@@ -103,12 +140,12 @@ def scrape(session: requests.Session, student_ids: list[str]) -> list[dict]:
         resp = session.get(SUMMARY_URL, params={"student_id": sid})
         resp.raise_for_status()
 
-        names, was_enrolled, orphans = parse_active_clubs(resp.text, sid)
+        club_records, was_enrolled, orphans = parse_active_clubs(resp.text, sid)
         orphan_total += orphans
         if was_enrolled:
             enrolled_count += 1
-            for name in names:
-                records.append({"student_id": sid, "name": name})
+            for rec in club_records:
+                records.append({"student_id": sid, **rec})
         else:
             not_enrolled_count += 1
 

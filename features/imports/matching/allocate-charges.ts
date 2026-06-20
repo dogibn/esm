@@ -1,3 +1,4 @@
+import { categoryOfFeeName } from './vocabulary';
 import type {
   AllocationFlag,
   ChargeWithBalance,
@@ -17,6 +18,9 @@ export function feeTagMatches(feeName: string, hints: FeeTag[]): boolean {
       if (h === 'registration' && feeName === 'registration') return true;
     } else if (h.kind === 'club') {
       if (h.feeName === feeName) return true;
+    } else if (h.kind === 'club_category') {
+      // A category hint matches any open club charge of that category.
+      if (categoryOfFeeName(feeName) === h.category) return true;
     }
   }
   return false;
@@ -97,10 +101,14 @@ export function allocateCharges(
     };
   }
 
-  // Case B: hinted fees sum to amount.
+  // Case B: explicit fee hint resolves the target. An in-memo fee keyword
+  // ("basketball", "bus", "registration") is authoritative, so this runs BEFORE
+  // the generic amount-subset search below — otherwise a coincidental subset of
+  // unrelated charges could win over the fee the parent actually named.
   if (hintedFees.length > 0) {
     const matchingCharges = charges.filter((c) => feeTagMatches(c.feeName, hintedFees));
     const sum = sumBalances(matchingCharges);
+    // B1: hinted charges sum exactly to the amount → pay them in full.
     if (sum === amount && matchingCharges.length > 0) {
       return {
         studentId: candidate.studentId,
@@ -108,6 +116,20 @@ export function allocateCharges(
           chargeId: c.id,
           amount: c.outstandingBalance,
         })),
+        signals: proposalSignals,
+        flags,
+      };
+    }
+    // B2: exactly one hinted charge and a short payment → partial payment of it.
+    if (
+      matchingCharges.length === 1 &&
+      amount > BigInt('0') &&
+      amount < matchingCharges[0]!.outstandingBalance
+    ) {
+      flags.add('partial_payment');
+      return {
+        studentId: candidate.studentId,
+        allocations: [{ chargeId: matchingCharges[0]!.id, amount }],
         signals: proposalSignals,
         flags,
       };
@@ -178,24 +200,6 @@ export function allocateCharges(
       return {
         studentId: candidate.studentId,
         allocations: [],
-        signals: proposalSignals,
-        flags,
-      };
-    }
-  }
-
-  // Case F: partial payment with a single hinted-fee charge.
-  if (hintedFees.length > 0) {
-    const matchingCharges = charges.filter((c) => feeTagMatches(c.feeName, hintedFees));
-    if (
-      matchingCharges.length === 1 &&
-      amount < matchingCharges[0]!.outstandingBalance &&
-      amount > BigInt('0')
-    ) {
-      flags.add('partial_payment');
-      return {
-        studentId: candidate.studentId,
-        allocations: [{ chargeId: matchingCharges[0]!.id, amount }],
         signals: proposalSignals,
         flags,
       };

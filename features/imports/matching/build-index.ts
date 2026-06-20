@@ -1,5 +1,6 @@
 import { normalize } from './normalize';
 import {
+  CLUB_CATEGORIES,
   GENERIC_PAYMENT_TOKENS,
   KINDERGARTEN_TOKENS,
   SPECIFIC_FEE_TOKENS,
@@ -79,6 +80,21 @@ export function buildMatchingContext(input: BuildIndexInput): MatchingContext {
     for (const a of aliases) {
       const an = normalize(a);
       if (an.length > 0) entries.push({ normalizedToken: an, tag });
+    }
+  }
+  // Club-category aliases (Cyrillic + Latin) come LAST so a specific club fee
+  // structure (above) wins the dedup for any shared token; the category hint is
+  // the fallback that works even when no club fee structure is loaded for the
+  // term — which is the common case (only the per-student club charges load).
+  for (const cat of CLUB_CATEGORIES) {
+    for (const alias of cat.aliases) {
+      const n = normalize(alias);
+      if (n.length > 0) {
+        entries.push({
+          normalizedToken: n,
+          tag: { kind: 'club_category', category: cat.category },
+        });
+      }
     }
   }
 

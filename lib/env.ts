@@ -1,5 +1,15 @@
 import { z } from "zod";
 
+// SERVER-ONLY. Never import from client components, middleware, or anything
+// they pull in — the dynamic `safeParse(process.env)` below sees an empty
+// object outside the Node server, so every var reports as missing. Client
+// code uses lib/env-client.ts (statically-referenced NEXT_PUBLIC_* only).
+if (typeof window !== "undefined") {
+  throw new Error(
+    "lib/env.ts was imported into client code. Use lib/env-client.ts instead.",
+  );
+}
+
 const envSchema = z.object({
   DATABASE_URL: z.string().url(),
   DIRECT_URL: z.string().url(),

@@ -55,6 +55,13 @@ describe('feeTagMatches', () => {
     expect(feeTagMatches('Ballet', [tag])).toBe(true);
     expect(feeTagMatches('Basketball', [tag])).toBe(false);
   });
+  it('matches a club_category hint against any open club charge of that category', () => {
+    const tag: FeeTag = { kind: 'club_category', category: 'basketball' };
+    expect(feeTagMatches('Basketball 3-5 /Term 4/', [tag])).toBe(true);
+    expect(feeTagMatches('basketball GR 6-9 Term 4', [tag])).toBe(true);
+    expect(feeTagMatches('Volleyball 1-3pm Term 4', [tag])).toBe(false);
+    expect(feeTagMatches('tuition', [tag])).toBe(false);
+  });
 });
 
 describe('findCombosSummingTo', () => {
@@ -151,12 +158,52 @@ describe('allocateCharges', () => {
     expect(p.allocations.length).toBe(0);
   });
 
-  it('case F: partial payment with hint', () => {
+  it('case B2: partial payment with hint', () => {
     const ctx = ctxWithCharges(1, [charge(11, 'bus_fee', BigInt('300000'))]);
     const s = signals({ feeHints: { explicit: ['bus'], fromAmount: null } });
     const p = allocateCharges(candidate(1), BigInt('100000'), s, ctx);
     expect(p.flags.has('partial_payment')).toBe(true);
     expect(p.allocations).toEqual([{ chargeId: 11, amount: BigInt('100000') }]);
+  });
+
+  it('club_category hint: partial payment lands on the matching club charge', () => {
+    // The "Б.БААТАР 8Д САГСАН БӨМБӨГ" 210,000 scenario: a basketball charge of
+    // 300,000 paid short. Before the category hint this fell to manual_review.
+    const ctx = ctxWithCharges(1, [
+      charge(10, 'tuition', BigInt('4000000')),
+      charge(12, 'Basketball 3-5 /Term 4/', BigInt('300000')),
+    ]);
+    const s = signals({
+      feeHints: { explicit: [{ kind: 'club_category', category: 'basketball' }], fromAmount: null },
+    });
+    const p = allocateCharges(candidate(1), BigInt('210000'), s, ctx);
+    expect(p.flags.has('partial_payment')).toBe(true);
+    expect(p.allocations).toEqual([{ chargeId: 12, amount: BigInt('210000') }]);
+  });
+
+  it('club_category hint: exact payment pays the club charge in full', () => {
+    const ctx = ctxWithCharges(1, [
+      charge(10, 'tuition', BigInt('4000000')),
+      charge(12, 'Volleyball 1-3pm Term 4', BigInt('255000')),
+    ]);
+    const s = signals({
+      feeHints: { explicit: [{ kind: 'club_category', category: 'volleyball' }], fromAmount: null },
+    });
+    const p = allocateCharges(candidate(1), BigInt('255000'), s, ctx);
+    expect(p.allocations).toEqual([{ chargeId: 12, amount: BigInt('255000') }]);
+    expect(p.flags.has('manual_review')).toBe(false);
+  });
+
+  it('explicit hint is authoritative over a coincidental amount-subset', () => {
+    // Amount 300k equals BOTH the bus+nothing and the ballet charge; the bus
+    // hint must route it to the bus charge, not the equal-valued ballet one.
+    const ctx = ctxWithCharges(1, [
+      charge(11, 'bus_fee', BigInt('300000')),
+      charge(12, 'Ballet Mon, Wed Term 4', BigInt('300000')),
+    ]);
+    const s = signals({ feeHints: { explicit: ['bus'], fromAmount: null } });
+    const p = allocateCharges(candidate(1), BigInt('300000'), s, ctx);
+    expect(p.allocations).toEqual([{ chargeId: 11, amount: BigInt('300000') }]);
   });
 
   it('case G: nothing fits → manual_review', () => {

@@ -1,16 +1,25 @@
 // Cyrillic → Latin transliteration. Phonetic where memo-style writing
 // (Latin transliteration of Mongolian) and pure-Cyrillic memos need to land
 // on the same normalized form. The table is intentionally lossy on rare
-// distinctions (ү vs у both → u) because real-world memo writers don't
-// distinguish them either.
+// distinctions (ү vs у both → u, й → i, щ → sh) because real-world memo writers
+// don't distinguish them either.
+//
+// The o/u split is handled separately, after transliteration, by phoneticFold
+// (applied at the end of normalize): Mongolian о/ө/у/ү get romanized
+// inconsistently across both memos and the (Latin) student directory — the same
+// name shows up as "Bolor" and "Bulur", "Dolgoon" and "Dulguun". No single
+// per-letter mapping reconciles two *Latin* spellings of one name, so the
+// back/rounded vowels are folded to a single bucket as the last step. That makes
+// the table's exact ө mapping irrelevant to matching (both ө→o and ө→u land on
+// the same folded form), so it stays at the conventional 'o' here.
 const CYRILLIC_TO_LATIN: Record<string, string> = {
   а: 'a',
   б: 'b',
   в: 'v',
   г: 'g',
   д: 'd',
-  е: 'e',
-  ё: 'e',
+  е: 'ye',
+  ё: 'yo',
   ж: 'j',
   з: 'z',
   и: 'i',
@@ -29,7 +38,7 @@ const CYRILLIC_TO_LATIN: Record<string, string> = {
   ө: 'o',
   ф: 'f',
   х: 'h',
-  ц: 'c',
+  ц: 'ts',
   ч: 'ch',
   ш: 'sh',
   щ: 'sh',
@@ -97,8 +106,36 @@ export function normalize(input: string): string {
     out.push(' ');
   }
 
-  // Collapse multiple spaces, trim.
-  return out.join('').replace(/\s+/g, ' ').trim();
+  // Collapse multiple spaces, trim, then fold the o/u vowel ambiguity so memos
+  // and the directory land on one spelling regardless of how their writer
+  // romanized о/ө/у/ү.
+  return phoneticFold(out.join('').replace(/\s+/g, ' ').trim());
+}
+
+// Phonetic fold for the romanization ambiguities that survive transliteration
+// (see the header note). Applied as the final step of normalize so every index
+// and every memo is built in the same folded space — a memo and a directory
+// entry that disagree only on these spellings resolve as an ordinary exact
+// match rather than being lost.
+//
+// Two folds, both deliberately lossy:
+//
+//  - kh → h. Mongolian х is romanized "kh" in the (Latin) student directory
+//    ("Munkhbadrakh", "Khongor", "Khulan") but Cyrillic memos transliterate it
+//    to a bare "h" (our table maps х→h). Without this fold every Cyrillic-written
+//    name containing х misses its Latin directory entry ("hungur" vs "khungur").
+//    Folding both sides to "h" makes them meet. х is extremely common in
+//    Mongolian names, so this is the single largest source of recovered matches.
+//
+//  - o → u, for the o/u back-rounded-vowel ambiguity ("Dolgoon"/"Dulguun"):
+//    Mongolian о/ө/у/ү get romanized inconsistently on both sides.
+//
+// Both collapse genuinely-distinct spellings too (e.g. "bor"/"bur"), but two
+// *different* students almost never differ only by these romanization choices,
+// and where a collision does occur both land as candidates and are separated
+// downstream by the grade/amount signals.
+export function phoneticFold(input: string): string {
+  return input.replace(/kh/g, 'h').replace(/o/g, 'u');
 }
 
 function isWordChar(ch: string): boolean {

@@ -1,1 +1,143 @@
-export const strings = {};
+export const strings = {
+  title: "Bank transaction import",
+  description:
+    "Upload a bank Excel/CSV export. Parsed rows are stored as unmatched bank transactions. Matching is a separate step.",
+  dropzone: {
+    label: "Drop a bank file here or click to choose",
+    hint: "Accepts .xlsx, .xls, .csv (max 25 MB)",
+    chooseFile: "Choose file",
+    fileChosen: (name: string) => `Selected: ${name}`,
+    upload: "Upload",
+    uploading: "Uploading…",
+    cancel: "Choose a different file",
+  },
+  result: {
+    heading: "Upload summary",
+    parsedCount: (n: number) => `${n} parsed`,
+    insertedCount: (n: number) => `${n} inserted`,
+    skippedDuplicates: (n: number) => `${n} duplicate(s) skipped`,
+    skippedOutgoing: (n: number) => `${n} outgoing row(s) skipped`,
+    parseErrors: (n: number) => `${n} parse error(s)`,
+    insertedHeading: "Inserted rows",
+    parseErrorsHeading: "Parse errors",
+    noInserted: "No new rows were inserted.",
+    noParseErrors: "No parse errors.",
+    parseErrorRow: (rowIndex: number, reason: string) =>
+      rowIndex < 0 ? reason : `Row ${rowIndex + 1}: ${reason}`,
+  },
+  columns: {
+    transactionId: "Transaction ID",
+    senderName: "Sender name",
+    senderAccount: "Sender account",
+    memo: "Memo",
+    amount: "Amount (MNT)",
+    transactionAt: "Date",
+  },
+  errors: {
+    noFile: "Please choose a file first.",
+    uploadFailed: "Upload failed.",
+  },
+
+  review: {
+    title: "Review unmatched transactions",
+    refresh: "Refresh",
+    loading: "Loading proposals…",
+    error: "Failed to load proposals.",
+    empty: "No unmatched transactions to review.",
+    meta: (yearName: string, termName: string, total: number) =>
+      `${yearName} · ${termName} · ${total} unmatched`,
+    confirmedTally: (n: number) =>
+      n === 1 ? "1 transaction confirmed" : `${n} transactions confirmed`,
+    deletedTally: (n: number) =>
+      n === 1 ? "1 row deleted" : `${n} rows deleted`,
+    skippedTally: (n: number) =>
+      n === 1
+        ? "1 skipped (stays unmatched)"
+        : `${n} skipped (stay unmatched)`,
+    kind: {
+      matched: "Auto-matched",
+      matched_multi: "Multi-student",
+      low_confidence: "Low confidence",
+      unmatched: "No match",
+    } as Record<"matched" | "matched_multi" | "low_confidence" | "unmatched", string>,
+    showingCount: (shown: number, total: number) =>
+      `Showing ${shown} of ${total}`,
+    showMore: (n: number) => `Show ${n} more`,
+  },
+
+  form: {
+    classFilter: "Class",
+    classFilterAll: "All classes",
+    student: "Student",
+    studentPlaceholder: "Search student by name…",
+    studentNotSelected: "Select a student",
+    studentNoMatch: "No students match",
+    charge: "Charge",
+    chargePlaceholder: "Select a charge",
+    chargeNotSelected: "Select a charge",
+    chargeNoOpen: "No open charges for this student",
+    amount: "Amount (MNT)",
+    addLine: "Add another allocation line",
+    removeLine: "Remove this line",
+    lineHeading: (i: number) => `Line ${i + 1}`,
+    confirm: "Confirm",
+    confirmPending: "Confirming…",
+    delete: "Delete",
+    deletePending: "Deleting…",
+    deleteDialogTitle: "Delete this bank row?",
+    deleteDialogBody:
+      "Use this for rows that are not student payments (bank fees, refunds, unrelated transfers). The row is not kept — if deleted by mistake, re-upload the bank file to restore it.",
+    deleteDialogConfirm: "Delete row",
+    deleteDialogCancel: "Cancel",
+    skip: "Skip",
+    suggestions: "Other candidates:",
+    applySuggestion: (name: string) => `Use ${name}`,
+    sumOfLines: (n: number) => `Allocated: ${n.toLocaleString("en-US")} MNT`,
+    txAmount: (n: number) => `Transaction: ${n.toLocaleString("en-US")} MNT`,
+    diff: (n: number) => {
+      const abs = Math.abs(n).toLocaleString("en-US");
+      if (n === 0) return "Balanced";
+      return n > 0 ? `Over by ${abs} MNT` : `Short by ${abs} MNT`;
+    },
+  },
+
+  signals: {
+    rollup: {
+      memo_grade: "Memo: grade",
+      memo_name: "Memo: name",
+      account: "Account number",
+      amount: "Amount",
+    } as Record<"memo_grade" | "memo_name" | "account" | "amount", string>,
+    granular: {
+      memo_grade_class: "memo grade (class)",
+      memo_grade_wildcard: "memo grade (wildcard)",
+      memo_grade_level: "memo grade (level)",
+      memo_name_full: "memo name (full)",
+      memo_name_partial: "memo name (partial)",
+      memo_name_fuzzy: "memo name (fuzzy)",
+      sender_account: "sender account",
+      fee_hint_explicit: "memo fee hint",
+      fee_hint_from_amount: "amount → fee hint",
+      fee_inferred_from_amount: "amount → fee inferred",
+    } as Record<string, string>,
+  },
+
+  flags: {
+    no_open_charges: "No open charges for this student.",
+    overpayment: "Allocation exceeds the transaction amount.",
+    partial_payment: "Allocation is a partial payment.",
+    ambiguous_target: "Multiple candidate charges — pick one explicitly.",
+    multiple_valid_combos: "Multiple charge combinations matched the amount — confirm intent.",
+    multiple_tuition_charges: "More than one tuition charge — pick the correct one.",
+    fee_inferred_from_amount: "Fee was inferred from the amount; verify before confirming.",
+    manual_review: "Manual review required.",
+  } as Record<string, string>,
+
+  unmatched: {
+    reason: {
+      no_candidates: "No candidate students found.",
+      filtered: "Candidate filtered out.",
+      no_open_charges: "Candidate has no open charges.",
+    },
+  },
+};

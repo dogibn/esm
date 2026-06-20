@@ -306,10 +306,12 @@ A single `<table>` per page (no DataTables id needed). Columns:
 | Club Name | use | `name` (the club's `fee_structures.fee_name`) |
 | Club Status | filter | only `"Active"` kept |
 | Enrolment Status | ignore | — |
-| Payment Model | ignore | — |
-| Total Fee | ignore | — |
+| Payment Model | use | `payment_model` (e.g. `"Per Session"`, `"Per Term"`) |
+| Total Fee | use | `total_fee` (esmlh's accrued obligation; int from `₮240,000`) |
 | Total Paid | ignore | — |
 | Remaining | ignore | — |
+
+> **Why `total_fee` is captured.** For `"Per Session"` clubs (homework club), the after-clubs catalog fee is only the *per-session rate* (e.g. ₮15,000), so a flat charge built from it is wrong — the real obligation is rate × attendance, which esmlh already computes and shows in the **Total Fee** column. Capturing it lets the club-charge loader use the accrued total for Per Session clubs instead of the catalog rate. For `"Per Term"` clubs the catalog fee is already correct; `total_fee` is captured anyway for reconciliation and to keep the scraper a pure extractor (the Per Session vs Per Term decision lives in the loader, not the scrape).
 
 The page uses an "empty" sentinel when there are no enrolments — no table at all. The parser checks for the substring `"This student is not enrolled in any after school clubs."` and short-circuits.
 
@@ -333,6 +335,8 @@ The page uses an "empty" sentinel when there are no enrolments — no table at a
 - **Status filter** — text of the inner `<span>` in the Club Status cell. Rows where the value is not exactly `"Active"` are skipped.
 - **Club Name** — stripped text of the cell (the `<strong>` wrapper is collapsed away by `get_text(strip=True)`).
 - **Empty-name Active rows** — source-side artefact: some students have a ghost `Active` row with no club name and `—` fee (seen on student 58, row 4). These are not parse failures and not real enrolments; they are counted and skipped with a tally printed at the end. Halting on them would crash a full pass for ~3% of students.
+- **Payment Model** — text of the inner `<span>` in the cell (col 4); `None` if absent.
+- **Total Fee** — strip `₮` and commas from the cell text (col 5) and parse to `int`. Unlike the after-clubs Fee, an absent/`—` value does **not** halt — it parses to `None` (a Per Session club with no attendance yet legitimately has no accrued fee), letting the loader tell "unknown" apart from a real `0`. Both columns are read defensively (only when present) so a layout shift in the trailing fee columns can't break enrolment capture.
 
 ### Politeness
 
@@ -340,18 +344,32 @@ The page uses an "empty" sentinel when there are no enrolments — no table at a
 
 ### Intermediate file shape (`scripts/scraped/student_clubs.json`)
 
-Flat list of `(student, club)` pairs — one record per active enrolment, not one record per student:
+Flat list of `(student, club)` records — one record per active enrolment, not one record per student:
 
 ```json
 [
-  { "student_id": "55", "name": "Volleyball 11 am to 1pm Term 4" },
-  { "student_id": "58", "name": "Volleyball 1-3pm Term 4" }
+  { "student_id": "55", "name": "Volleyball 11 am to 1pm Term 4", "payment_model": "Per Term", "total_fee": 405000 },
+  { "student_id": "58", "name": "HW GR 1", "payment_model": "Per Session", "total_fee": 240000 }
 ]
 ```
 
-Loader: `scripts/load/club_enrollments.ts` (`pnpm load:club-enrollments`). Looks up `students.id` by the natural-key `student_id` text and `fee_structures.id` by `(fee_name, current term, superseded_at IS NULL)`. Inserts one `club_enrollments` row per pair. Idempotent via the existing `(student_id, fee_structure_id)` unique index — re-running is a no-op.
+Loader: `scripts/load/club_enrollments.ts` (`pnpm load:club-enrollments`). Looks up `students.id` by the natural-key `student_id` text and `fee_structures.id` by `(fee_name, current term, superseded_at IS NULL)`. Inserts one `club_enrollments` row per pair. Idempotent via the existing `(student_id, fee_structure_id)` unique index — re-running is a no-op. (`payment_model` / `total_fee` are not consumed by this loader.)
 
 A second loader, `scripts/load/charges_clubs.ts` (`pnpm load:charges-clubs`), joins `club_enrollments` × `fee_structures` for the current term and inserts a term-scoped `charges` row per enrolment, pulling `amount` from `data.fee`. It de-dups against existing rows by `(student_id, fee_name, academic_term_id)` since `charges` has no unique constraint.
+
+### Per Session refresh (homework club)
+
+`charges_clubs.ts` above generates charges only for **Per Term** clubs (it skips any `fee_structures` row whose `data.payment_model = "Per Session"`). Per Session clubs are owned by a separate, higher-cadence pipeline because their obligation accrues with attendance and changes between term-start and term-end:
+
+```
+scrape.per_session_fees  →  scraped/per_session_fees.json  →  refresh:per-session-charges
+   (scoped re-poll)                                              (update charge amounts)
+```
+
+- **`scripts/scrape/per_session_fees.py`** — a *scoped* scraper. It reads `after_clubs.json` (which club names are Per Session) and `student_clubs.json` (who is enrolled in them), then re-polls **only those ~50 students** for their current Total Fee. A full pass is well under a minute, vs. ~8–10 min for the full `student_clubs` scrape — so it can run weekly/daily. Output: `[{ student_id, name, total_fee }]`.
+- **`scripts/load/refresh_per_session_charges.ts`** (`pnpm refresh:per-session-charges`, `--dry-run` to preview) — resolves each `student_id`, then **updates** the current-term club charge's gross `amount` to `total_fee` (inserting it if missing). Idempotent. A null `total_fee` — esmlh shows a blank cell, i.e. no sessions accrued yet — is treated as **0**, since esmlh's Total Fee is the source of truth for the obligation; the charge is set to 0 rather than left at a stale seed amount. The run prints `zeroed_no_fee=N` for visibility. (Trade-off: a transient blank read on a charge that already received payments would briefly show an overpayment until the next good read; acceptable because esmlh owns the Per Session figure.)
+
+This makes Per Session club charges' gross amount **mutable** — a deliberate exception to the "resolved gross at creation, never propagate" rule (see `domain_model.md` § Charge). Existing `payments` are untouched; `balance = amount − paid` recomputes.
 
 ---
 

@@ -71,10 +71,20 @@ const enrolled = await db
 console.log(`Found ${enrolled.length} club enrolment(s) for the current term.`);
 
 let validationErrors = 0;
+let skippedPerSession = 0;
 const rows: (typeof charges.$inferInsert)[] = [];
 
 for (const e of enrolled) {
-  const data = e.data as { fee?: unknown };
+  const data = e.data as { fee?: unknown; payment_model?: unknown };
+  // "Per Session" clubs (homework club) accrue with attendance, so their
+  // charge amount is the esmlh Total Fee and changes between term-start and
+  // term-end. They are owned end-to-end by refresh_per_session_charges.ts
+  // (pnpm refresh:per-session-charges), not this once-per-term loader, which
+  // would otherwise stamp the per-session *rate* as the whole obligation.
+  if (data?.payment_model === "Per Session") {
+    skippedPerSession++;
+    continue;
+  }
   const fee = data?.fee;
   if (typeof fee !== "number" || !Number.isFinite(fee)) {
     console.error(
@@ -107,14 +117,21 @@ const existingKeys = new Set(existing.map((r) => `${r.studentId}:${r.feeName}`))
 const newRows = rows.filter((r) => !existingKeys.has(`${r.studentId}:${r.feeName}`));
 const skipped = rows.length - newRows.length;
 
+const perSessionNote =
+  skippedPerSession > 0
+    ? ` ${skippedPerSession} Per Session enrolment(s) skipped (owned by refresh:per-session-charges).`
+    : "";
+
 if (newRows.length === 0) {
-  console.log(`Nothing to insert. ${skipped} already existed.`);
+  console.log(`Nothing to insert. ${skipped} already existed.${perSessionNote}`);
   await client.end();
   process.exit(0);
 }
 
 const result = await db.insert(charges).values(newRows).returning({ id: charges.id });
 
-console.log(`Done. ${result.length} inserted, ${skipped} skipped (already existed).`);
+console.log(
+  `Done. ${result.length} inserted, ${skipped} skipped (already existed).${perSessionNote}`
+);
 
 await client.end();

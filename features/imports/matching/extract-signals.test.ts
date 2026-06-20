@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildMatchingContext } from './build-index';
-import { extractSignals } from './extract-signals';
+import { degenitiveVariant, extractSignals, peelGluedGrade } from './extract-signals';
 import type { BuildIndexInput } from './types';
 
 function ctx(overrides: Partial<BuildIndexInput> = {}) {
@@ -110,7 +110,8 @@ describe('extractSignals', () => {
 
   it('strips parenthetical sender block', () => {
     const s = extractSignals('4SA Anand tulbur (BAYARSAIKHAN)', BigInt('100000'), sampleContext);
-    expect(s.senderBlock).toBe('bayarsaikhan');
+    expect(s.senderBlock).toBe('bayarsaihan'); // kh→h folded
+
     expect(s.gradeTokens.class).toContain('4sa');
   });
 
@@ -120,5 +121,114 @@ describe('extractSignals', () => {
     });
     const s = extractSignals('random memo', BigInt('375000'), c);
     expect(s.feeHints.fromAmount).toBe('bus');
+  });
+
+  it('recognizes a Cyrillic club term as a club_category hint without a club fee structure', () => {
+    // No club fee structures in this context — the static category dictionary
+    // still turns "сагсан бөмбөг" into a basketball hint.
+    const c = ctx({});
+    const s = extractSignals('Б.БААТАР 8Д САГСАН БӨМБӨГ', BigInt('210000'), c);
+    expect(
+      s.feeHints.explicit.some(
+        (t) => typeof t === 'object' && t.kind === 'club_category' && t.category === 'basketball',
+      ),
+    ).toBe(true);
+    // The club words are consumed, not leaked as name tokens.
+    expect(s.nameTokens).not.toContain('sagsan');
+  });
+
+  it("splits a grade glued onto a name ('8дUjinlkham' → class 8d + name)", () => {
+    const s = extractSignals('8дUjinlkham гар бөмбөг', BigInt('0'), sampleContext);
+    expect(s.gradeTokens.class).toContain('8d');
+    expect(s.nameTokens).toContain('ujinlham'); // kh→h folded
+  });
+
+  it('recovers a genitive-case parent name to the nominative directory form', () => {
+    const c = ctx({
+      students: [{ id: 10, firstName: 'Nandinbeleg', lastName: 'Ariunbold' }],
+      enrollments: [{ studentId: 10, gradeName: '1JA', gradeLevelCode: '1' }],
+    });
+    // "Ариунболдын" (genitive) → "ariunbuldin"; directory "Ariunbold" →
+    // "ariunbuld". The additive de-genitive variant bridges them while the
+    // original token is still emitted.
+    const s = extractSignals('Ариунболдын Нандинбэлэг', BigInt('0'), c);
+    expect(s.nameTokens).toContain('ariunbuld');
+    expect(s.nameTokens).toContain('nandinbeleg');
+  });
+});
+
+describe('degenitiveVariant', () => {
+  const idx = new Map<string, number[]>([
+    ['ariunbuld', [1]],
+    ['azjargal', [2]],
+    ['bayanmunh', [3]],
+  ]);
+
+  it('strips -in / -iin / -yn genitive endings when the stem is a known name', () => {
+    expect(degenitiveVariant('ariunbuldin', idx)).toBe('ariunbuld');
+    expect(degenitiveVariant('azjargalin', idx)).toBe('azjargal');
+    expect(degenitiveVariant('bayanmunhiin', idx)).toBe('bayanmunh');
+  });
+
+  it('returns null when the token already is a known name (no needless strip)', () => {
+    expect(degenitiveVariant('ariunbuld', idx)).toBeNull();
+  });
+
+  it('returns null when the stem is not a real directory name (no noise)', () => {
+    // "nomin" ends in "in" but "nom" is not a name → left untouched.
+    expect(degenitiveVariant('nomin', idx)).toBeNull();
+    expect(degenitiveVariant('khulan', idx)).toBeNull();
+  });
+});
+
+describe('peelGluedGrade', () => {
+  const vocab = ['8va', '8v', '8d', '4sa'].sort((a, b) => b.length - a.length);
+
+  it('peels a leading class prefix glued to a name', () => {
+    expect(peelGluedGrade('8vujinlkham', vocab)).toEqual({
+      classTok: '8v',
+      levelTok: null,
+      rest: 'ujinlkham',
+    });
+  });
+
+  it('prefers the longest matching class', () => {
+    expect(peelGluedGrade('8vamisheel', vocab)).toEqual({
+      classTok: '8va',
+      levelTok: null,
+      rest: 'misheel',
+    });
+  });
+
+  it('reads a trailing 1–2 digit run as a grade level', () => {
+    expect(peelGluedGrade('enuujin7', vocab)).toEqual({
+      classTok: null,
+      levelTok: '7',
+      rest: 'enuujin',
+    });
+  });
+
+  it('strips a long trailing digit run (id/phone) as noise', () => {
+    expect(peelGluedGrade('anir99102455', vocab)).toEqual({
+      classTok: null,
+      levelTok: null,
+      rest: 'anir',
+    });
+  });
+
+  it('peels a leading bare grade level', () => {
+    expect(peelGluedGrade('7enuujin', vocab)).toEqual({
+      classTok: null,
+      levelTok: '7',
+      rest: 'enuujin',
+    });
+  });
+
+  it('leaves a plain name untouched', () => {
+    expect(peelGluedGrade('baatar', vocab)).toEqual({
+      classTok: null,
+      levelTok: null,
+      rest: 'baatar',
+    });
   });
 });

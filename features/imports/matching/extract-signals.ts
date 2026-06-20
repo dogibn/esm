@@ -4,6 +4,7 @@ import type { ExtractedSignals, FeeTag, MatchingContext } from './types';
 
 function feeTagKey(tag: FeeTag): string {
   if (typeof tag === 'string') return tag;
+  if (tag.kind === 'club_category') return `club_category:${tag.category}`;
   return `club:${tag.feeStructureId}`;
 }
 
@@ -153,16 +154,37 @@ export function extractSignals(
   if (buf) remaining.push(buf);
 
   // Strip generic payment tokens and short/numeric tokens.
+  // Grade names sorted longest-first so a glued prefix peels the most specific
+  // class ("8va" before "8v").
+  const sortedClassVocab = [...context.classVocabulary].sort(
+    (a, b) => b.length - a.length,
+  );
   const nameTokens: string[] = [];
   for (const tok of remaining) {
     if (tok.length < 2) continue;
     if (/^\d+$/.test(tok)) continue;
     if (context.feeVocabulary.genericTokens.has(tok)) continue;
     // Strip leading/trailing punctuation chars except `.` (kept for initials).
-    const trimmed = tok.replace(/^[-+]+|[-+]+$/g, '');
+    let trimmed = tok.replace(/^[-+]+|[-+]+$/g, '');
     if (trimmed.length < 2) continue;
     if (/^\d+$/.test(trimmed)) continue;
+    // Peel a grade glued onto the name with no separator ("8вUjinlkham" →
+    // class 8v + name ujinlkham; "Enuujin7" → name enuujin + level 7) so both
+    // the grade and the name register instead of the whole blob being a dead
+    // name token.
+    const peeled = peelGluedGrade(trimmed, sortedClassVocab);
+    if (peeled.classTok) classTokens.push(peeled.classTok);
+    if (peeled.levelTok) levelTokens.push(peeled.levelTok);
+    trimmed = peeled.rest;
+    if (trimmed.length < 2) continue;
+    if (/^\d+$/.test(trimmed)) continue;
+    if (context.feeVocabulary.genericTokens.has(trimmed)) continue;
     nameTokens.push(trimmed);
+    // Additively recover a name written in the genitive ("Ариунболдын" →
+    // "Ariunbold"). Only emitted when it resolves to a real directory name, so
+    // it never adds noise.
+    const deg = degenitiveVariant(trimmed, context.nameIndex);
+    if (deg) nameTokens.push(deg);
   }
 
   return {
@@ -179,4 +201,70 @@ export function extractSignals(
 
 function dedupe<T>(arr: T[]): T[] {
   return [...new Set(arr)];
+}
+
+// Mongolian genitive/patronymic suffixes as they appear AFTER normalize()
+// (transliteration + kh→h + o→u fold). A parent's or student's name is
+// frequently written in the genitive in memos — "Ариунболдын Нандинбэлэг"
+// ("Ariunbold's Nandinbeleg") — while the student directory stores the
+// nominative ("Ariunbold"). Longest first so the most specific ending wins.
+const GENITIVE_SUFFIXES = ['giin', 'iin', 'yin', 'iyn', 'yn', 'ny', 'in'];
+
+// Return the de-genitive stem of `token` IFF the token itself is not a known
+// name token but stripping a genitive suffix yields one that is. Consulting the
+// index makes this precise: we never invent a variant that doesn't resolve to a
+// real student, so it only ever *adds* a correct candidate — no spurious noise,
+// and no double-counting against the distinct-name-token heuristic (the original
+// form, being absent from the index, contributes no hit of its own).
+export function degenitiveVariant(
+  token: string,
+  nameIndex: Map<string, number[]>,
+): string | null {
+  if (nameIndex.has(token)) return null;
+  for (const suf of GENITIVE_SUFFIXES) {
+    if (!token.endsWith(suf)) continue;
+    const stem = token.slice(0, token.length - suf.length);
+    if (stem.length < 4) continue;
+    if (nameIndex.has(stem)) return stem;
+  }
+  return null;
+}
+
+// Split a grade glued directly onto a name (no separating space). Memos like
+// "8вUjinlkham" or "Enuujin7" collapse, after normalize, to a single token that
+// matches neither the grade alternation (its boundary lookarounds reject the
+// adjacent letter/digit) nor any directory name. Peeling restores both signals.
+//
+// `sortedClassVocab` must be longest-first so the most specific class wins.
+export function peelGluedGrade(
+  token: string,
+  sortedClassVocab: string[],
+): { classTok: string | null; levelTok: string | null; rest: string } {
+  // 1. Leading class-name prefix followed by a name: "8vujinlkham" → 8v + ...
+  //    Classes always begin with a digit, so this never mis-fires on a plain
+  //    (letter-initial) name.
+  for (const c of sortedClassVocab) {
+    if (c.length < 2 || token.length <= c.length) continue;
+    if (!token.startsWith(c)) continue;
+    if (/[a-z]/.test(token[c.length] ?? '')) {
+      return { classTok: c, levelTok: null, rest: token.slice(c.length) };
+    }
+  }
+  // 2. Leading bare grade level followed by a name: "7enuujin" → level 7 + ...
+  const lead = token.match(/^(\d{1,2})([a-z]{2,}.*)$/);
+  if (lead) {
+    return { classTok: null, levelTok: lead[1]!, rest: lead[2]! };
+  }
+  // 3. Trailing digits on a name. 1–2 digits read as a grade level
+  //    ("enuujin7" → 7); longer runs are stripped as noise (ids/phones).
+  const trail = token.match(/^([a-z][a-z.\-]*?)(\d+)$/);
+  if (trail) {
+    const digits = trail[2]!;
+    return {
+      classTok: null,
+      levelTok: digits.length <= 2 ? digits : null,
+      rest: trail[1]!,
+    };
+  }
+  return { classTok: null, levelTok: null, rest: token };
 }

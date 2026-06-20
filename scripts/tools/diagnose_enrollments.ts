@@ -41,11 +41,15 @@ const tuitionRows: TuitionRow[] = JSON.parse(
 );
 const tuitionByCode = new Map(tuitionRows.map((t) => [t.code, t]));
 
-const [{ id: yearId }] = await db
+const [yearRow] = await db
   .select({ id: academicYears.id })
   .from(academicYears)
   .where(eq(academicYears.name, ACADEMIC_YEAR_NAME))
   .limit(1);
+if (!yearRow) {
+  throw new Error(`academic year '${ACADEMIC_YEAR_NAME}' not found`);
+}
+const yearId = yearRow.id;
 
 const dbGrades = await db
   .select({ id: grades.id, name: grades.name })

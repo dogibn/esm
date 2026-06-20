@@ -87,7 +87,7 @@ if (yearRow.length === 0) {
   await client.end();
   process.exit(1);
 }
-const academicYearId = yearRow[0].id;
+const academicYearId = yearRow[0]!.id;
 
 const studentRows = await db
   .select({ id: students.id, studentIdText: students.studentId })

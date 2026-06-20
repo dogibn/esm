@@ -1,8 +1,17 @@
+import type { ChargeScope, ChargeWithBalance } from '@/features/students/balance';
+
+export type { ChargeScope, ChargeWithBalance };
+
 export type FeeTag =
   | 'tuition'
   | 'bus'
   | 'registration'
-  | { kind: 'club'; feeStructureId: number; feeName: string };
+  | { kind: 'club'; feeStructureId: number; feeName: string }
+  // A club identified only by category (e.g. "basketball") from a memo keyword,
+  // not by a specific fee structure. Matches any open club charge whose fee name
+  // classifies to the same category — needed because club fee structures are not
+  // always loaded for the current term even when the club charges exist.
+  | { kind: 'club_category'; category: string };
 
 export type SignalKind =
   | 'memo_grade_class'
@@ -57,18 +66,6 @@ export type MatchResult =
   | { kind: 'matched_multi'; proposal: MultiStudentMatchProposal }
   | { kind: 'low_confidence'; proposals: MatchProposal[] }
   | { kind: 'unmatched'; reason: 'no_candidates' | 'filtered' | 'no_open_charges' };
-
-export type ChargeScope =
-  | { kind: 'year'; academicYearId: number }
-  | { kind: 'term'; academicTermId: number };
-
-export type ChargeWithBalance = {
-  id: number;
-  feeName: string;
-  scope: ChargeScope;
-  grossAmount: bigint;
-  outstandingBalance: bigint;
-};
 
 export type FeeVocabularyEntry = {
   normalizedToken: string;

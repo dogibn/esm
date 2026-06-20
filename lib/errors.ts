@@ -1,3 +1,5 @@
+import { ZodError } from 'zod';
+
 export class HttpError extends Error {
   status: number;
 
@@ -16,6 +18,12 @@ export function withErrorHandler(handler: RouteHandler): RouteHandler {
     } catch (err) {
       if (err instanceof HttpError) {
         return Response.json({ error: err.message }, { status: err.status });
+      }
+      if (err instanceof ZodError) {
+        const detail = err.issues
+          .map((i) => (i.path.length ? `${i.path.join('.')}: ${i.message}` : i.message))
+          .join('; ');
+        return Response.json({ error: `Invalid request: ${detail}` }, { status: 400 });
       }
       console.error(err);
       return Response.json({ error: 'Internal server error' }, { status: 500 });

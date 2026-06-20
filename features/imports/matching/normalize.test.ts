@@ -13,8 +13,8 @@ const cases: Case[] = [
   { input: '5?c', expected: '5~c', description: '? → ~ wildcard inside token' },
   {
     input: 'EB -Munkhbadrakh Khongor-Uchral, preschool 5',
-    expected: 'eb -munkhbadrakh khongor-uchral preschool 5',
-    description: 'Hyphens preserved, comma → space, collapsed spaces',
+    expected: 'eb -munhbadrah hungur-uchral preschuul 5',
+    description: 'Hyphens preserved, comma → space, collapsed spaces, o→u and kh→h folded',
   },
   { input: '', expected: '', description: 'Empty string' },
   { input: '   ', expected: '', description: 'Only whitespace → empty' },
@@ -34,6 +34,23 @@ describe('normalize', () => {
 
   it('preserves + in grade-level codes like 5+', () => {
     expect(normalize('5+A')).toBe('5+a');
+  });
+
+  it('folds the o/u romanization split so variant spellings converge', () => {
+    // Cyrillic ө→o then folded, Latin o→u: both land on the same form, so a
+    // memo and a directory entry that disagree only on these vowels still meet.
+    expect(normalize('ДӨЛГӨӨН')).toBe(normalize('Dulguun'));
+    expect(normalize('БӨМБӨГ')).toBe('bumbug');
+    expect(normalize('Bolor')).toBe(normalize('Bulur'));
+  });
+
+  it('folds kh→h so Cyrillic х matches the directory Latin kh spelling', () => {
+    // Cyrillic х transliterates to a bare "h"; the directory romanizes it "kh".
+    // The fold lands both on "h" so the names meet.
+    expect(normalize('ХОНГОР')).toBe(normalize('Khongor'));
+    expect(normalize('Мөнхбадрах')).toBe(normalize('Munkhbadrakh'));
+    expect(normalize('ХУЛАН')).toBe(normalize('Khulan'));
+    expect(normalize('Энхжаргал')).toBe(normalize('Enkhjargal'));
   });
 
   it('handles a typical memo end-to-end', () => {

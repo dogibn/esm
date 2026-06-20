@@ -1,9 +1,13 @@
-import { withErrorHandler } from '@/lib/errors';
-import { requireUser } from '@/lib/auth';
+import { withErrorHandler } from "@/lib/errors";
+import { requireUser } from "@/lib/auth";
+import { listStudents, studentListParamsSchema } from "@/features/students";
 
 export const GET = withErrorHandler(async (req) => {
-  const { applyAuthCookies } = await requireUser(req);
-  const headers = new Headers();
-  applyAuthCookies(headers);
-  return Response.json([], { headers });
+  const { user } = await requireUser(req);
+  const url = new URL(req.url);
+  const params = studentListParamsSchema.parse(
+    Object.fromEntries(url.searchParams),
+  );
+  const data = await listStudents(user, params);
+  return Response.json(data);
 });

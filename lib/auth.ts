@@ -1,3 +1,13 @@
+/**
+ * Layout/server-component variant of requireUser ...
+ *
+ * NOT currently wired in. The (app) layout does a bare getUser() session
+ * check only. The users-row check below is intentionally deferred — API
+ * routes' requireUser() already enforces it (403 on missing row), so a
+ * deactivated user's session degrades to empty data rather than rendering
+ * a usable shell. Swap the layout's inline getUser() for this call when
+ * shell-level bounce-on-deactivation becomes worth the extra query.
+ */
 import { eq } from 'drizzle-orm';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';

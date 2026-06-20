@@ -1,4 +1,6 @@
-import { createServerClient as supabaseCreateServerClient, createBrowserClient as supabaseCreateBrowserClient } from '@supabase/ssr';
+import 'server-only';
+import { createServerClient as supabaseCreateServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 import { env } from '@/lib/env';
 
 interface CookieOpts {
@@ -72,6 +74,22 @@ export function createServerClient(req: Request) {
   return { client, applyToHeaders };
 }
 
-export function createBrowserClient() {
-  return supabaseCreateBrowserClient(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+export async function createServerComponentClient() {
+  const cookieStore = await cookies();
+  return supabaseCreateServerClient(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll();
+      },
+      setAll(cookiesToSet) {
+        try {
+          for (const cookie of cookiesToSet) {
+            cookieStore.set(cookie.name, cookie.value, cookie.options);
+          }
+        } catch {
+          // Setting cookies from a Server Component render is a no-op.
+        }
+      },
+    },
+  });
 }
