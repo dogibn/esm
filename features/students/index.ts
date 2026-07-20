@@ -10,8 +10,21 @@ export type {
   ChargeWithBalanceForStudent,
   StudentChargeDetail,
 } from "./balance";
+export { getStudentDetail } from "./detail";
+export type {
+  DiscountLine,
+  FeeLine,
+  PaymentHistoryRow,
+  StudentDetail,
+  StudentDetailHeader,
+  TermCell,
+  TermColumn,
+  TermFeeRow,
+  TuitionBreakdown,
+} from "./detail";
 export {
   STATUS_FILTER_VALUES,
+  studentIdParamSchema,
   studentListParamsSchema,
 } from "./schemas";
 export type { StatusFilterValue, StudentListParams } from "./schemas";
@@ -36,3 +49,4 @@ export {
 } from "./components/StudentFilters";
 export type { FilterState } from "./components/StudentFilters";
 export { StudentsView } from "./components/StudentsView";
+export { StudentDetailView } from "./components/detail/StudentDetailView";

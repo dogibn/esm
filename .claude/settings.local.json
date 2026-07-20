@@ -14,7 +14,8 @@
       "Bash(pnpm db:generate *)",
       "Bash(pnpm *)",
       "Bash(find /Users/dolgormaabatsaikhan -type d -name \"imports\" 2>/dev/null | head -5)",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "mcp__claude_ai_Figma__get_design_context"
     ]
   }
 }

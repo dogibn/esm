@@ -13,3 +13,5 @@ export const studentListParamsSchema = z.object({
 });
 
 export type StudentListParams = z.infer<typeof studentListParamsSchema>;
+
+export const studentIdParamSchema = z.coerce.number().int().positive();

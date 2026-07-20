@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   createColumnHelper,
   flexRender,
@@ -7,7 +8,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -18,14 +18,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { formatAmount } from "../format";
 import { strings } from "../strings";
 import type {
   ClubsFeeCell,
   FeeCell,
-  FeeStatus,
   StudentListResponse,
   StudentRow,
 } from "../types";
+import { StatusBadge } from "./StatusBadge";
 
 type Props = {
   data: StudentListResponse;
@@ -34,35 +35,6 @@ type Props = {
   emptyMessage: string;
   onPageChange: (page: number) => void;
 };
-
-const numberFormatter = new Intl.NumberFormat("en-US");
-
-function formatAmount(n: number): string {
-  return numberFormatter.format(n);
-}
-
-function statusVariant(
-  status: FeeStatus,
-): "secondary" | "outline" | "destructive" | null {
-  switch (status) {
-    case "paid":
-      return "secondary";
-    case "partial":
-      return "outline";
-    case "unpaid":
-      return "destructive";
-    case "none":
-      return null;
-  }
-}
-
-function StatusBadge({ status }: { status: FeeStatus }) {
-  const variant = statusVariant(status);
-  if (variant === null) {
-    return <span className="text-muted-foreground">{strings.status.none}</span>;
-  }
-  return <Badge variant={variant}>{strings.status[status]}</Badge>;
-}
 
 function FeeCellView({ cell }: { cell: FeeCell }) {
   if (!cell.hasCharge) {
@@ -104,10 +76,13 @@ const columns = [
     cell: (info) => {
       const row = info.row.original;
       return (
-        <div className="flex flex-col">
+        <Link
+          href={`/students/${row.studentId}`}
+          className="flex flex-col rounded-sm underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+        >
           <span className="font-medium">{row.lastName}</span>
           <span className="text-xs text-muted-foreground">{row.studentCode}</span>
-        </div>
+        </Link>
       );
     },
   }),

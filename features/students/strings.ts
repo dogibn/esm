@@ -43,4 +43,77 @@ export const strings = {
     rowCount: (shown: number, total: number) =>
       `Showing ${shown} of ${total}`,
   },
+  detail: {
+    back: "Back to students",
+    studentId: (code: string) => `Student ID: ${code}`,
+    categoryNew: "New student",
+    categoryReturning: "Returning student",
+    tabs: {
+      fees: "Fees overview",
+      history: "Payment history",
+    },
+    personal: {
+      title: "Personal information",
+      class: "Class",
+      teacher: "Teacher",
+      parentEmail: "Parent email",
+      parentPhone: "Parent phone",
+      contract: "Tuition contract",
+      empty: "—",
+    },
+    tuition: {
+      title: "Tuition breakdown",
+      base: "Base tuition",
+      net: "Net tuition",
+      noCharge: "No tuition charge for this year.",
+    },
+    annual: {
+      title: "One-time & annual fees",
+      empty: "No annual charges for this year.",
+    },
+    term: {
+      title: "Term-based fees",
+      feeType: "Fee",
+      current: "Current",
+      total: "Total",
+      empty: "No term-based charges for this year.",
+      notEnrolled: "—",
+    },
+    columns: {
+      fee: "Fee",
+      category: "Category",
+      amount: "Amount",
+      status: "Status",
+      paid: "Paid",
+      balance: "Balance",
+      date: "Date",
+      reference: "Reference",
+      sender: "Sender",
+      memo: "Memo",
+    },
+    totals: {
+      label: "Total",
+      charged: "Charged",
+      paid: "Paid",
+      balance: "Balance",
+    },
+    history: {
+      empty: "No payments recorded yet.",
+      subtitle: (name: string) => `Recorded payments for ${name}.`,
+    },
+    // Human labels for the raw fee_name values. Falls back to a prettified
+    // version of the stored name (club fees carry their own display names).
+    feeLabel: (feeName: string): string => {
+      const known: Record<string, string> = {
+        tuition: "Tuition",
+        registration: "Registration",
+        bus_fee: "Bus fee",
+        bus: "Bus fee",
+      };
+      return (
+        known[feeName] ??
+        feeName.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+      );
+    },
+  },
 };
