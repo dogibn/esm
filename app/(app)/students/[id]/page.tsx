@@ -29,9 +29,5 @@ export default async function StudentDetailPage({
     throw err;
   }
 
-  return (
-    <section className="flex flex-col gap-4 p-4">
-      <StudentDetailView detail={detail} />
-    </section>
-  );
+  return <StudentDetailView detail={detail} />;
 }

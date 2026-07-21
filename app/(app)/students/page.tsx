@@ -1,3 +1,6 @@
+import type { Metadata } from "next";
+
+import { PageContainer, PageHeader } from "@/components/ui/page-header";
 import {
   StudentsView,
   listFilterOptions,
@@ -6,6 +9,8 @@ import {
   studentListParamsSchema,
 } from "@/features/students";
 import { requireUserForLayout } from "@/lib/auth";
+
+export const metadata: Metadata = { title: strings.title };
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -26,9 +31,9 @@ export default async function StudentsPage({
   ]);
 
   return (
-    <section className="flex flex-col gap-4 p-4">
-      <h1 className="text-xl font-semibold">{strings.title}</h1>
+    <PageContainer>
+      <PageHeader title={strings.title} description={strings.subtitle} />
       <StudentsView options={filterOptions} initialData={initialData} />
-    </section>
+    </PageContainer>
   );
 }

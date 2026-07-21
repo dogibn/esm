@@ -47,11 +47,21 @@ export type StudentRow = {
   overallStatus: FeeStatus;
 };
 
+// Aggregates over every student matching the current filters (all pages),
+// shown in the summary cards above the tracking table.
+export type StudentListSummary = {
+  students: number;
+  totalCharged: number;
+  totalCollected: number;
+  totalDue: number;
+};
+
 export type StudentListResponse = {
   rows: StudentRow[];
   page: number;
   pageSize: number;
   total: number;
+  summary: StudentListSummary;
 };
 
 export type GradeLevelOption = {

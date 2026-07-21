@@ -253,11 +253,22 @@ export async function listStudents(
   const offset = (params.page - 1) * params.pageSize;
   const rows = folded.slice(offset, offset + params.pageSize);
 
+  const summary = folded.reduce(
+    (acc, row) => {
+      acc.totalCharged += row.totalCharged - row.totalDiscount;
+      acc.totalCollected += row.totalPaid;
+      acc.totalDue += row.totalBalance;
+      return acc;
+    },
+    { students: total, totalCharged: 0, totalCollected: 0, totalDue: 0 },
+  );
+
   return {
     rows,
     page: params.page,
     pageSize: params.pageSize,
     total,
+    summary,
   };
 }
 

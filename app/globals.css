@@ -3,6 +3,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
   --color-primary: hsl(var(--primary));
@@ -12,6 +14,16 @@
   --color-border: hsl(var(--border));
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+  --color-info: hsl(var(--info));
+  --color-info-foreground: hsl(var(--info-foreground));
+  --color-violet: hsl(var(--violet));
+  --color-violet-foreground: hsl(var(--violet-foreground));
+  --color-teal: hsl(var(--teal));
+  --color-teal-foreground: hsl(var(--teal-foreground));
   --color-secondary: hsl(var(--secondary));
   --color-secondary-foreground: hsl(var(--secondary-foreground));
   --color-input: hsl(var(--input));
@@ -28,24 +40,40 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+/*
+ * Palette per the Figma "Finance Portal" design:
+ * blue brand, near-white gray canvas, white surfaces, and semantic
+ * status colors (success/warning/destructive) plus category accents
+ * (info/violet/teal) for fee pills.
+ */
 :root {
-  --primary: 222 47% 11%;
+  --primary: 221 83% 53%; /* blue-600 */
   --primary-foreground: 210 40% 98%;
-  --background: 0 0% 100%;
-  --foreground: 222 47% 11%;
-  --muted: 210 40% 96%;
-  --muted-foreground: 215 16% 47%;
-  --border: 214 32% 91%;
-  --destructive: 0 84% 60%;
+  --background: 220 20% 97%; /* page canvas #F6F7F9 */
+  --foreground: 222 47% 11%; /* gray-900 */
+  --muted: 220 14% 96%; /* gray-100 */
+  --muted-foreground: 220 9% 46%; /* gray-500 */
+  --border: 220 13% 91%; /* gray-200 */
+  --destructive: 0 72% 51%; /* red-600 */
   --destructive-foreground: 210 40% 98%;
-  --radius: 0.5rem;
+  --success: 142 72% 29%; /* green-700 */
+  --success-foreground: 210 40% 98%;
+  --warning: 20 90% 40%; /* orange-700 */
+  --warning-foreground: 210 40% 98%;
+  --info: 221 83% 53%; /* blue-600 */
+  --info-foreground: 210 40% 98%;
+  --violet: 271 81% 48%; /* purple-600 */
+  --violet-foreground: 210 40% 98%;
+  --teal: 175 84% 32%; /* teal-600 */
+  --teal-foreground: 210 40% 98%;
+  --radius: 0.625rem;
 
-  --secondary: 210 40% 96%;
+  --secondary: 220 14% 96%;
   --secondary-foreground: 222 47% 11%;
-  --input: 214 32% 91%;
-  --ring: 222 47% 11%;
+  --input: 220 13% 91%;
+  --ring: 217 91% 60%; /* blue-500 */
 
-  --accent: 210 40% 96%;
+  --accent: 220 14% 96%;
   --accent-foreground: 222 47% 11%;
   --card: 0 0% 100%;
   --card-foreground: 222 47% 11%;
@@ -54,19 +82,29 @@
 }
 
 .dark {
-  --background: 222 47% 11%;
+  --background: 222 47% 8%;
   --foreground: 210 40% 98%;
-  --primary: 210 40% 98%;
+  --primary: 217 91% 60%;
   --primary-foreground: 222 47% 11%;
   --muted: 217 33% 17%;
   --muted-foreground: 215 20% 65%;
   --border: 217 33% 17%;
-  --destructive: 0 63% 31%;
+  --destructive: 0 72% 60%;
   --destructive-foreground: 210 40% 98%;
+  --success: 142 69% 58%;
+  --success-foreground: 222 47% 11%;
+  --warning: 27 96% 61%;
+  --warning-foreground: 222 47% 11%;
+  --info: 217 91% 60%;
+  --info-foreground: 222 47% 11%;
+  --violet: 270 95% 75%;
+  --violet-foreground: 222 47% 11%;
+  --teal: 172 66% 50%;
+  --teal-foreground: 222 47% 11%;
   --secondary: 217 33% 17%;
   --secondary-foreground: 210 40% 98%;
   --input: 217 33% 17%;
-  --ring: 213 27% 84%;
+  --ring: 217 91% 60%;
 
   --accent: 217 33% 17%;
   --accent-foreground: 210 40% 98%;

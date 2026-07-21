@@ -1,3 +1,6 @@
+import type { Metadata } from "next";
+
+import { PageContainer, PageHeader } from "@/components/ui/page-header";
 import {
   TransactionsView,
   listTransactions,
@@ -7,18 +10,17 @@ import {
 } from "@/features/transactions";
 import { requireUserForLayout } from "@/lib/auth";
 
+export const metadata: Metadata = { title: strings.title };
+
 export default async function TransactionsPage() {
   const user = await requireUserForLayout();
   const params = transactionListParamsSchema.parse({});
   const initialData = await listTransactions(user, params);
 
   return (
-    <section className="flex flex-col gap-4 p-4">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-xl font-semibold">{strings.title}</h1>
-        <p className="text-sm text-muted-foreground">{strings.description}</p>
-      </div>
+    <PageContainer>
+      <PageHeader title={strings.title} description={strings.description} />
       <TransactionsView initialData={transactionListResponseToWire(initialData)} />
-    </section>
+    </PageContainer>
   );
 }

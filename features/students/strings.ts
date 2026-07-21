@@ -1,10 +1,19 @@
 export const strings = {
-  title: "Students",
+  title: "Student Payment Tracker",
+  subtitle: "Balances by fee for the current academic year and term.",
+  summary: {
+    totalDue: "Total amount due",
+    totalCollected: "Total collected",
+    students: (n: number) => (n === 1 ? "1 student" : `${n} students`),
+    collectionRate: (pct: string) => `${pct}% collection rate`,
+  },
+  recordCount: (n: number) => (n === 1 ? "1 record" : `${n} records`),
   search: {
     placeholder: "Search by name, ID, or contact…",
     clear: "Clear search",
   },
   filters: {
+    label: "Filters:",
     gradeLevelLabel: "Grade level",
     gradeLabel: "Class",
     statusLabel: "Status",

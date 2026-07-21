@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { FileUp } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -118,15 +119,19 @@ export function UploadDropzone({ onUploadComplete }: UploadDropzoneProps = {}) {
             onDragLeave={() => setDragOver(false)}
             onDrop={onDrop}
             className={
-              "flex flex-col items-center gap-2 rounded-lg border-2 border-dashed p-6 text-sm " +
+              "flex flex-col items-center gap-2 rounded-xl border-2 border-dashed p-8 text-sm transition-colors " +
               (dragOver
-                ? "border-ring bg-muted/40"
-                : "border-border bg-transparent")
+                ? "border-primary bg-primary/5"
+                : "border-border bg-muted/30 hover:border-primary/40")
             }
           >
-            <span className="text-muted-foreground">
-              {strings.dropzone.label}
+            <span
+              aria-hidden
+              className="mb-1 flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary"
+            >
+              <FileUp className="size-5" />
             </span>
+            <span className="font-medium">{strings.dropzone.label}</span>
             <span className="text-xs text-muted-foreground">
               {strings.dropzone.hint}
             </span>

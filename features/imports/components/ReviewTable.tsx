@@ -53,13 +53,13 @@ async function parseErrorBody(res: Response): Promise<Error> {
 
 function kindBadgeVariant(
   kind: ProposalListItemWire["result"]["kind"],
-): "secondary" | "outline" | "destructive" {
+): "success" | "warning" | "destructive" {
   switch (kind) {
     case "matched":
     case "matched_multi":
-      return "secondary";
+      return "success";
     case "low_confidence":
-      return "outline";
+      return "warning";
     case "unmatched":
       return "destructive";
   }

@@ -43,7 +43,11 @@ export function AnnualFeesTable({ fees }: { fees: FeeLine[] }) {
               {formatMnt(f.net)}
             </TableCell>
             <TableCell className="text-right tabular-nums">
-              {formatMnt(f.paid)}
+              {f.paid > 0 ? (
+                <span className="font-medium text-success">{formatMnt(f.paid)}</span>
+              ) : (
+                formatMnt(f.paid)
+              )}
             </TableCell>
             <TableCell className="text-right tabular-nums">
               {f.balance > 0 ? (

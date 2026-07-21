@@ -36,12 +36,12 @@ export function TermFeesTable({
           {terms.map((t) => (
             <TableHead
               key={t.id}
-              className={cn("text-center", t.isCurrent && "bg-muted")}
+              className={cn("text-center", t.isCurrent && "bg-primary/10 text-primary")}
             >
               <div className="flex flex-col items-center gap-0.5">
                 <span>{t.name}</span>
                 {t.isCurrent ? (
-                  <Badge variant="outline">{s.current}</Badge>
+                  <Badge variant="info">{s.current}</Badge>
                 ) : null}
               </div>
             </TableHead>
@@ -63,7 +63,7 @@ export function TermFeesTable({
               return (
                 <TableCell
                   key={term.id}
-                  className={cn("text-center", term.isCurrent && "bg-muted/50")}
+                  className={cn("text-center", term.isCurrent && "bg-primary/5")}
                 >
                   {cell.hasCharge ? (
                     <div className="flex flex-col items-center gap-1">

@@ -128,24 +128,30 @@ const buttonVariants = cva(
 
 ### Design tokens in `app/globals.css`
 
-All colors, radii, and core spacing live as CSS variables:
+All colors, radii, and core spacing live as CSS variables. The palette follows
+the Figma "Finance Portal" design: blue brand, near-white gray page canvas,
+white card surfaces.
 
 ```css
 :root {
-  --primary: 222 47% 11%;
-  --primary-foreground: 210 40% 98%;
-  --background: 0 0% 100%;
-  --foreground: 222 47% 11%;
-  --muted: 210 40% 96%;
-  --muted-foreground: 215 16% 47%;
-  --border: 214 32% 91%;
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 210 40% 98%;
-  --radius: 0.5rem;
+  --primary: 221 83% 53%;       /* blue-600 — brand */
+  --background: 220 20% 97%;    /* gray page canvas */
+  --card: 0 0% 100%;            /* white surfaces */
+  --border: 220 13% 91%;
+  --destructive: 0 72% 51%;     /* unpaid / overdue */
+  --success: 142 72% 29%;       /* paid */
+  --warning: 20 90% 40%;        /* partial */
+  --info: 221 83% 53%;          /* category accent (tuition) */
+  --violet: 271 81% 48%;        /* category accent (bus) */
+  --teal: 175 84% 32%;          /* category accent (clubs/other) */
+  --radius: 0.625rem;
 }
 ```
 
-Tailwind reads them in `tailwind.config.ts`. Changing one CSS variable rethemes the entire app.
+Tailwind v4 reads them via the `@theme inline` block in the same file.
+Changing one CSS variable rethemes the entire app. Status colors are
+semantic: paid → `success`, partial → `warning`, unpaid/overdue →
+`destructive`; the one mapping lives in `features/students/components/StatusBadge.tsx`.
 
 ### Hard rules
 

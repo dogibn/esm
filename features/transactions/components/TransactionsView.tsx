@@ -134,7 +134,7 @@ export function TransactionsView({ initialData }: Props) {
         ) : null}
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border bg-card px-4 py-3 shadow-xs">
         <Input
           type="search"
           value={filters.search}
@@ -176,7 +176,11 @@ export function TransactionsView({ initialData }: Props) {
         </label>
       </div>
 
-      <Table>
+      <div
+        aria-busy={loading}
+        className={loading ? "opacity-60 transition-opacity" : "transition-opacity"}
+      >
+      <Table variant="card">
         <TableHeader>
           <TableRow>
             <TableHead>{strings.columns.date}</TableHead>
@@ -203,6 +207,7 @@ export function TransactionsView({ initialData }: Props) {
           )}
         </TableBody>
       </Table>
+      </div>
 
       <div className="flex items-center justify-between gap-3 text-sm text-muted-foreground">
         <span>{strings.pagination.rowCount(data.rows.length, data.total)}</span>
@@ -254,7 +259,8 @@ function TransactionRowView({ row }: { row: TransactionRowWire }) {
         {fmtAmount(row.amount)}
       </TableCell>
       <TableCell>
-        <Badge variant={row.status === "matched" ? "secondary" : "destructive"}>
+        <Badge variant={row.status === "matched" ? "success" : "destructive"}>
+          <span aria-hidden className="size-1.5 rounded-full bg-current" />
           {strings.status[row.status]}
         </Badge>
       </TableCell>

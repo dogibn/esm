@@ -1,4 +1,7 @@
 export const strings = {
+  pageTitle: "Bank Imports",
+  pageDescription:
+    "Upload bank statements, then review and confirm proposed payment matches.",
   title: "Bank transaction import",
   description:
     "Upload a bank Excel/CSV export. Parsed rows are stored as unmatched bank transactions. Matching is a separate step.",

@@ -7,12 +7,12 @@ import type { FeeStatus } from "../types";
 // table and the student detail page so the vocabulary stays identical.
 function statusVariant(
   status: FeeStatus,
-): "secondary" | "outline" | "destructive" | null {
+): "success" | "warning" | "destructive" | null {
   switch (status) {
     case "paid":
-      return "secondary";
+      return "success";
     case "partial":
-      return "outline";
+      return "warning";
     case "unpaid":
       return "destructive";
     case "none":
@@ -25,5 +25,10 @@ export function StatusBadge({ status }: { status: FeeStatus }) {
   if (variant === null) {
     return <span className="text-muted-foreground">{strings.status.none}</span>;
   }
-  return <Badge variant={variant}>{strings.status[status]}</Badge>;
+  return (
+    <Badge variant={variant}>
+      <span aria-hidden className="size-1.5 rounded-full bg-current" />
+      {strings.status[status]}
+    </Badge>
+  );
 }

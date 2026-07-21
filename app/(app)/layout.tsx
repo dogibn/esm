@@ -13,20 +13,30 @@ export default async function AppLayout({
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
-      <header className="border-b border-border">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-6 px-4 py-3">
-          <Logo width={32} height={32} />
-          <nav className="flex items-center gap-1 text-sm">
+      <header className="sticky top-0 z-40 border-b border-border bg-card">
+        <div className="mx-auto flex h-14 w-full max-w-7xl items-stretch gap-4 px-4 sm:gap-6 sm:px-6">
+          <div className="flex items-center gap-3">
+            <Logo width={34} height={34} />
+            <div className="hidden flex-col leading-tight md:flex">
+              <span className="text-sm font-semibold whitespace-nowrap">
+                {strings.brand.schoolName}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {strings.brand.portalName}
+              </span>
+            </div>
+          </div>
+          <nav className="flex items-stretch">
             <NavLink href="/students">{strings.nav.tracking}</NavLink>
             <NavLink href="/imports">{strings.nav.imports}</NavLink>
             <NavLink href="/transactions">{strings.nav.transactions}</NavLink>
-            <span className="ml-3">
-              <SignOutButton>{strings.auth.signOut}</SignOutButton>
-            </span>
           </nav>
+          <div className="ml-auto flex items-center">
+            <SignOutButton>{strings.auth.signOut}</SignOutButton>
+          </div>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-6xl flex-1">{children}</main>
+      <main className="flex-1">{children}</main>
     </div>
   );
 }

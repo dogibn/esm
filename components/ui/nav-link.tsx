@@ -10,6 +10,8 @@ type NavLinkProps = {
   children: React.ReactNode;
 };
 
+// Top-nav tab: full-height link with a bottom accent border on the active
+// route, matching the portal's underline-tab navigation.
 export function NavLink({ href, children }: NavLinkProps) {
   const pathname = usePathname();
   const active = pathname === href || pathname.startsWith(`${href}/`);
@@ -19,10 +21,10 @@ export function NavLink({ href, children }: NavLinkProps) {
       href={href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "rounded-md px-2 py-1 transition-colors",
+        "flex h-full items-center border-b-2 px-3 text-sm font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/50 sm:px-4",
         active
-          ? "bg-muted font-medium text-foreground"
-          : "text-muted-foreground hover:text-foreground",
+          ? "border-primary text-primary"
+          : "border-transparent text-muted-foreground hover:border-border hover:text-foreground",
       )}
     >
       {children}

@@ -11,6 +11,7 @@ import {
   emptyFilterState,
   type FilterState,
 } from "./StudentFilters";
+import { StudentSummaryCards } from "./StudentSummaryCards";
 import { StudentTable } from "./StudentTable";
 
 type Props = {
@@ -91,15 +92,23 @@ export function StudentsView({ options, initialData }: Props) {
   const emptyMessage = hasActiveFilters ? strings.emptyFiltered : strings.empty;
 
   return (
-    <div className="flex flex-col gap-4">
-      <StudentFilters options={options} state={filters} onChange={setFilters} />
-      <StudentTable
-        data={data}
-        loading={loading}
-        error={error}
-        emptyMessage={emptyMessage}
-        onPageChange={onPageChange}
-      />
+    <div className="flex flex-col gap-5">
+      <StudentSummaryCards summary={data.summary} />
+      <div className="flex flex-col gap-4">
+        <StudentFilters
+          options={options}
+          state={filters}
+          onChange={setFilters}
+          recordCount={data.total}
+        />
+        <StudentTable
+          data={data}
+          loading={loading}
+          error={error}
+          emptyMessage={emptyMessage}
+          onPageChange={onPageChange}
+        />
+      </div>
     </div>
   );
 }
