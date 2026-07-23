@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { PageContainer, PageHeader } from "@/components/ui/page-header";
+import { NewContractButton } from "@/features/enrollments";
 import {
   StudentsView,
   listFilterOptions,
@@ -32,7 +33,11 @@ export default async function StudentsPage({
 
   return (
     <PageContainer>
-      <PageHeader title={strings.title} description={strings.subtitle} />
+      <PageHeader
+        title={strings.title}
+        description={strings.subtitle}
+        actions={<NewContractButton />}
+      />
       <StudentsView options={filterOptions} initialData={initialData} />
     </PageContainer>
   );
