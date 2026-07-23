@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const TX_STATUS_VALUES = ["unmatched", "matched"] as const;
+export const TX_STATUS_VALUES = ["unmatched", "matched", "discarded"] as const;
 export type TxStatusValue = (typeof TX_STATUS_VALUES)[number];
 
 export const transactionListParamsSchema = z.object({

@@ -1,7 +1,8 @@
 export {
   confirmAllocation,
-  deleteUnmatchedTransaction,
+  discardUnmatchedTransaction,
   listProposals,
+  undoOperation,
   uploadBankTransactions,
 } from "./api";
 export { loadMatchingContextInput } from "./matching/load-context";
@@ -45,6 +46,7 @@ export type {
   ReviewStudent,
   TransactionPreview,
   TransactionPreviewWire,
+  UndoResult,
   UploadResult,
   UploadResultWire,
 } from "./types";

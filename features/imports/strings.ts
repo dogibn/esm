@@ -52,7 +52,7 @@ export const strings = {
     confirmedTally: (n: number) =>
       n === 1 ? "1 transaction confirmed" : `${n} transactions confirmed`,
     deletedTally: (n: number) =>
-      n === 1 ? "1 row deleted" : `${n} rows deleted`,
+      n === 1 ? "1 row discarded" : `${n} rows discarded`,
     skippedTally: (n: number) =>
       n === 1
         ? "1 skipped (stays unmatched)"
@@ -87,10 +87,10 @@ export const strings = {
     confirmPending: "Confirming…",
     delete: "Delete",
     deletePending: "Deleting…",
-    deleteDialogTitle: "Delete this bank row?",
+    deleteDialogTitle: "Discard this bank row?",
     deleteDialogBody:
-      "Use this for rows that are not student payments (bank fees, refunds, unrelated transfers). The row is not kept — if deleted by mistake, re-upload the bank file to restore it.",
-    deleteDialogConfirm: "Delete row",
+      "Use this for rows that are not student payments (bank fees, refunds, unrelated transfers). The row is kept as 'discarded' and can be restored from Transaction history within the undo window.",
+    deleteDialogConfirm: "Discard row",
     deleteDialogCancel: "Cancel",
     skip: "Skip",
     suggestions: "Other candidates:",

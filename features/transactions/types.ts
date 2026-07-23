@@ -20,6 +20,10 @@ export type TransactionRow = {
   transactionAt: Date;
   status: TxStatusValue;
   payments: TransactionPaymentInfo[];
+  // The operation to undo for this row (confirm for matched, discard for
+  // discarded), set only when the current user may undo it and it is still in
+  // window. null otherwise — the UI shows the Undo/Restore action iff non-null.
+  undoOperationId: number | null;
 };
 
 export type TransactionListResponse = {

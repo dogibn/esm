@@ -172,6 +172,14 @@ export type ConfirmResult = {
   totalAllocated: number;
 };
 
+// Returned by the undo endpoint. JSON-safe.
+export type UndoResult = {
+  operationId: number;
+  kind: string;
+  undoOperationId: number;
+  bankTransactionId: number | null;
+};
+
 export type ParsedBankRow = {
   transactionId: string;
   senderName: string | null;

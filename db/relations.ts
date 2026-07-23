@@ -13,6 +13,7 @@ import {
   charges,
   discounts,
   payments,
+  operations,
 } from "./schema";
 
 export const studentsRelations = relations(students, ({ many }) => ({
@@ -129,4 +130,16 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
 export const usersRelations = relations(users, ({ many }) => ({
   discounts: many(discounts),
   payments: many(payments),
+  operations: many(operations),
+}));
+
+export const operationsRelations = relations(operations, ({ one }) => ({
+  actor: one(users, {
+    fields: [operations.actorUserId],
+    references: [users.id],
+  }),
+  bankTransaction: one(bankTransactions, {
+    fields: [operations.bankTransactionId],
+    references: [bankTransactions.id],
+  }),
 }));

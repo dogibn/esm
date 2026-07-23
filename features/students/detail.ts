@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
 
 import { db } from "@/db/index";
 import {
@@ -214,7 +214,7 @@ export async function getStudentDetail(studentDbId: number): Promise<StudentDeta
         paid: sql<number>`COALESCE(SUM(${payments.amount}), 0)`.as("paid"),
       })
       .from(payments)
-      .where(inArray(payments.chargeId, chargeIds))
+      .where(and(inArray(payments.chargeId, chargeIds), isNull(payments.voidedAt)))
       .groupBy(payments.chargeId);
     for (const p of paymentSums) paidByCharge.set(p.chargeId, Number(p.paid));
   }
@@ -324,7 +324,7 @@ export async function getStudentDetail(studentDbId: number): Promise<StudentDeta
         bankTransactions,
         eq(bankTransactions.id, payments.bankTransactionId),
       )
-      .where(inArray(payments.chargeId, chargeIds))
+      .where(and(inArray(payments.chargeId, chargeIds), isNull(payments.voidedAt)))
       .orderBy(desc(bankTransactions.transactionAt));
     paymentHistory = rows.map((r) => ({
       paymentId: r.paymentId,

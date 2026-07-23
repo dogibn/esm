@@ -95,6 +95,7 @@ Grouped by the phase that introduces them. Full column specs land in
 | `id` | serial PK | |
 | `actor_user_id` | uuid FK users | who did it |
 | `kind` | text CHECK | `confirm_match`, `discard_transaction`, `restore_transaction`, `create_enrollment`, `add_discount`, `undo` |
+| `bank_transaction_id` | int NULL FK bank_transactions | the row this operation concerns (all Phase 1-2 kinds); nullable for later entity kinds |
 | `created_at` | timestamptz | |
 | `undoable_until` | timestamptz NULL | NULL = not undoable (e.g. `undo` itself) |
 | `undone_at` | timestamptz NULL | set when reversed |

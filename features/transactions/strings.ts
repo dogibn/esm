@@ -19,7 +19,8 @@ export const strings = {
   status: {
     matched: "Matched",
     unmatched: "Unmatched",
-  } as Record<"matched" | "unmatched", string>,
+    discarded: "Discarded",
+  } as Record<"matched" | "unmatched" | "discarded", string>,
   columns: {
     date: "Date",
     sender: "Sender",
@@ -27,6 +28,13 @@ export const strings = {
     amount: "Amount (MNT)",
     status: "Status",
     paidFor: "Paid for",
+    actions: "",
+  },
+  actions: {
+    undo: "Undo",
+    restore: "Restore",
+    pending: "…",
+    error: "Could not undo. It may be past its window or already undone.",
   },
   paymentLine: (feeName: string, student: string, amount: string) =>
     `${feeName} — ${student} (${amount} MNT)`,
