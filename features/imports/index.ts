@@ -51,9 +51,18 @@ export type {
   UploadResultWire,
 } from "./types";
 export { AllocationForm } from "./components/AllocationForm";
+export { CollapsedProposalRow } from "./components/CollapsedProposalRow";
 export { ImportsView } from "./components/ImportsView";
 export { ReviewTable, type ReviewTableHandle } from "./components/ReviewTable";
 export { UploadDropzone } from "./components/UploadDropzone";
+export {
+  attentionReason,
+  classifyProposal,
+  confidentProposal,
+  proposalToLines,
+  sumAllocations,
+} from "./triage";
+export type { AttentionReason, ProposalTier } from "./triage";
 export {
   allocationFormSchema,
   allocationLineSchema,

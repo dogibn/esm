@@ -68,6 +68,56 @@ export const strings = {
     showMore: (n: number) => `Show ${n} more`,
   },
 
+  triage: {
+    tabs: {
+      all: "All",
+      attention: "Needs attention",
+      confident: "Confident",
+    },
+    tabCount: (n: number) => `${n}`,
+    attentionHeading: "Needs attention",
+    attentionHint: "Review and confirm each of these individually.",
+    confidentHeading: "Confident matches",
+    confidentHint: "Pre-selected. Uncheck any that look wrong, then confirm.",
+    selectAll: "Select all",
+    clear: "Clear",
+    selectedCount: (n: number) =>
+      n === 1 ? "1 selected" : `${n} selected`,
+    confirmSelected: (n: number) => `Confirm ${n} selected`,
+    confirmingProgress: (done: number, total: number) =>
+      `Confirming ${done} of ${total}…`,
+    bulkDone: (ok: number, failed: number) =>
+      failed === 0
+        ? `${ok} confirmed.`
+        : `${ok} confirmed, ${failed} failed — those rows are kept.`,
+    noConfident: "No confident matches.",
+    noAttention: "Nothing needs attention.",
+    expand: "Show details",
+    collapse: "Hide details",
+    balanced: "Balanced",
+    noMemo: "(no memo)",
+    proposedFor: "→",
+    splitStudents: (n: number) => `Split · ${n} students`,
+    noProposal: "No proposed match",
+    detailsLabel: "Bank details",
+    reason: {
+      unmatched: "No match",
+      low_confidence: "Low confidence",
+      multi_student: "Split payment",
+      multiple_candidates: "Multiple candidates",
+      flagged: "Needs a check",
+      unbalanced: "Amount doesn't balance",
+    } as Record<
+      | "unmatched"
+      | "low_confidence"
+      | "multi_student"
+      | "multiple_candidates"
+      | "flagged"
+      | "unbalanced",
+      string
+    >,
+  },
+
   form: {
     classFilter: "Class",
     classFilterAll: "All classes",

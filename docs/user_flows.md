@@ -45,11 +45,11 @@ The accountant has just downloaded a bank Excel/CSV file and needs to record tho
    - One transaction may map to more than one fee (e.g. a parent paying tuition and bus fee in a single transfer).
    - Match confidence is shown as which fields contributed (memo grade, memo name, account number, amount), not as a numeric score.
 5. For transactions where parsing fails or is ambiguous, match fields are left empty for the accountant to fill in manually.
-6. The accountant reviews each row and either:
-   - **Confirms** (with edits if needed) → payments are recorded.
-   - **Deletes** the row (it is not a student payment — bank fee, refund, unrelated transfer). Deleted rows are not persisted.
-   - **Skips** the row → it stays in the unmatched queue and can be matched later from the Transaction history view.
-7. Confirmed rows become `BankTransaction` records with one or more `Payment` allocations against `Charge`s.
+6. The review screen triages rows into two tiers so the common case is fast:
+   - **Confident** — a single, balanced, flag-free auto-match (e.g. a start-of-year tuition-only transfer for the exact amount). Shown as compact, pre-selected one-line rows; the accountant glances, unchecks any that look wrong, and clicks **Confirm N selected** to record them in one action. Any row can be expanded to edit before confirming.
+   - **Needs attention** — everything else (no match, low confidence, split across students, multiple candidates, flagged, or unbalanced), sorted to the top. Each is a compact one-line row that expands to the full allocation editor.
+   For any row the accountant can **Confirm** (with edits), **Discard** it (not a student payment — soft-deleted, reversible; see `history_and_reversibility.md`), or **Skip** it (stays unmatched, resurfaces in Transaction history).
+7. Confirmed rows become `BankTransaction` records with one or more `Payment` allocations against `Charge`s. Each confirm is a reversible operation (undo within the window).
 
 ---
 
