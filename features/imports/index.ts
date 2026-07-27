@@ -59,10 +59,23 @@ export {
   attentionReason,
   classifyProposal,
   confidentProposal,
-  proposalToLines,
+  editSum,
+  editToLines,
+  isEditConfirmable,
+  proposalToEdit,
+  resultAlternatives,
+  resultFlags,
+  resultSignals,
+  rollupSignals,
   sumAllocations,
 } from "./triage";
-export type { AttentionReason, ProposalTier } from "./triage";
+export type {
+  AttentionReason,
+  ChargeLine,
+  ProposalTier,
+  RowEdit,
+  SignalCategory,
+} from "./triage";
 export {
   allocationFormSchema,
   allocationLineSchema,

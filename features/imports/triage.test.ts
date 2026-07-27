@@ -4,14 +4,20 @@ import {
   attentionReason,
   classifyProposal,
   confidentProposal,
-  proposalToLines,
-  sumAllocations,
+  editSum,
+  editToLines,
+  isEditConfirmable,
+  proposalToEdit,
+  rollupSignals,
+  type RowEdit,
 } from "./triage";
-import type { MatchProposalWire, MatchResultWire } from "./types";
+import type {
+  MatchProposalWire,
+  MatchResultWire,
+  ProposalListItemWire,
+} from "./types";
 
-function proposal(
-  over: Partial<MatchProposalWire> = {},
-): MatchProposalWire {
+function proposal(over: Partial<MatchProposalWire> = {}): MatchProposalWire {
   return {
     studentId: 1,
     allocations: [{ chargeId: 10, amount: 1_000 }],
@@ -26,27 +32,47 @@ const matched = (p: MatchProposalWire): MatchResultWire => ({
   proposals: [p],
 });
 
+function item(result: MatchResultWire, amount = 1_000): ProposalListItemWire {
+  return {
+    bankTransactionId: 7,
+    transactionPreview: {
+      transactionId: "TX",
+      senderName: null,
+      senderAccount: null,
+      memo: null,
+      amount,
+      transactionAt: "2026-01-01T00:00:00Z",
+    },
+    result,
+  };
+}
+
 describe("classifyProposal", () => {
-  it("is confident for a single balanced flag-free match", () => {
+  it("is confident for a single balanced flag-free single-charge match", () => {
     expect(classifyProposal(matched(proposal()), 1_000)).toBe("confident");
   });
 
-  it("is attention when the allocation does not balance the amount", () => {
-    expect(classifyProposal(matched(proposal()), 999)).toBe("attention");
+  it("is attention when the match has more than one allocation (a split)", () => {
+    const p = proposal({
+      allocations: [
+        { chargeId: 10, amount: 600 },
+        { chargeId: 11, amount: 400 },
+      ],
+    });
+    expect(classifyProposal(matched(p), 1_000)).toBe("attention");
   });
 
-  it("is attention when the proposal carries any flag", () => {
+  it("is attention when unbalanced, flagged, or with alternatives", () => {
+    expect(classifyProposal(matched(proposal()), 999)).toBe("attention");
     expect(
       classifyProposal(matched(proposal({ flags: ["partial_payment"] })), 1_000),
     ).toBe("attention");
-  });
-
-  it("is attention when there are alternative candidates", () => {
-    const result: MatchResultWire = {
-      kind: "matched",
-      proposals: [proposal(), proposal({ studentId: 2 })],
-    };
-    expect(classifyProposal(result, 1_000)).toBe("attention");
+    expect(
+      classifyProposal(
+        { kind: "matched", proposals: [proposal(), proposal({ studentId: 2 })] },
+        1_000,
+      ),
+    ).toBe("attention");
   });
 
   it("is attention for matched_multi, low_confidence, and unmatched", () => {
@@ -62,12 +88,6 @@ describe("classifyProposal", () => {
     expect(
       classifyProposal({ kind: "unmatched", reason: "no_candidates" }, 1_000),
     ).toBe("attention");
-  });
-
-  it("is attention when the match has no allocations", () => {
-    expect(classifyProposal(matched(proposal({ allocations: [] })), 0)).toBe(
-      "attention",
-    );
   });
 });
 
@@ -105,32 +125,70 @@ describe("attentionReason", () => {
   });
 });
 
-describe("proposalToLines", () => {
-  it("maps allocations to confirm lines", () => {
-    const values = proposalToLines(7, proposal({
-      studentId: 3,
-      allocations: [
-        { chargeId: 10, amount: 600 },
-        { chargeId: 11, amount: 400 },
-      ],
-    }));
-    expect(values).toEqual({
-      bankTransactionId: 7,
-      lines: [
-        { studentId: 3, chargeId: 10, amount: 600 },
-        { studentId: 3, chargeId: 11, amount: 400 },
-      ],
+describe("inline edit helpers", () => {
+  it("seeds an edit from the top proposal", () => {
+    const edit = proposalToEdit(
+      item(matched(proposal({ studentId: 3, allocations: [{ chargeId: 10, amount: 1_000 }] }))),
+    );
+    expect(edit).toEqual({ studentId: 3, lines: [{ chargeId: 10, amount: 1_000 }] });
+  });
+
+  it("seeds an empty edit for an unmatched row", () => {
+    expect(proposalToEdit(item({ kind: "unmatched", reason: "no_candidates" }))).toEqual({
+      studentId: 0,
+      lines: [],
     });
   });
 
-  it("emits a single zero line when there are no allocations", () => {
-    const values = proposalToLines(7, proposal({ studentId: 3, allocations: [] }));
-    expect(values.lines).toEqual([{ studentId: 3, chargeId: 0, amount: 0 }]);
+  it("editToLines stamps the student onto every charge line", () => {
+    const edit: RowEdit = {
+      studentId: 5,
+      lines: [
+        { chargeId: 10, amount: 600 },
+        { chargeId: 11, amount: 400 },
+      ],
+    };
+    expect(editToLines(7, edit)).toEqual({
+      bankTransactionId: 7,
+      lines: [
+        { studentId: 5, chargeId: 10, amount: 600 },
+        { studentId: 5, chargeId: 11, amount: 400 },
+      ],
+    });
+    expect(editSum(edit)).toBe(1_000);
   });
 
-  it("sumAllocations totals the allocation amounts", () => {
+  it("isEditConfirmable requires a student, charges, and a balanced total", () => {
+    const ok: RowEdit = { studentId: 5, lines: [{ chargeId: 10, amount: 1_000 }] };
+    expect(isEditConfirmable(ok, 1_000)).toBe(true);
+    expect(isEditConfirmable(ok, 999)).toBe(false); // unbalanced
+    expect(isEditConfirmable({ studentId: 0, lines: ok.lines }, 1_000)).toBe(false);
+    expect(isEditConfirmable({ studentId: 5, lines: [] }, 0)).toBe(false);
     expect(
-      sumAllocations(proposal({ allocations: [{ chargeId: 1, amount: 5 }, { chargeId: 2, amount: 7 }] })),
-    ).toBe(12);
+      isEditConfirmable(
+        { studentId: 5, lines: [{ chargeId: 0, amount: 1_000 }] },
+        1_000,
+      ),
+    ).toBe(false); // no charge chosen
+    expect(
+      isEditConfirmable(
+        {
+          studentId: 5,
+          lines: [
+            { chargeId: 10, amount: 500 },
+            { chargeId: 10, amount: 500 },
+          ],
+        },
+        1_000,
+      ),
+    ).toBe(false); // duplicate charge
+  });
+});
+
+describe("rollupSignals", () => {
+  it("collapses granular signals into categories", () => {
+    expect(
+      rollupSignals(["memo_name_full", "memo_name_fuzzy", "sender_account", "fee_hint_explicit"]),
+    ).toEqual(["memo_name", "account"]);
   });
 });

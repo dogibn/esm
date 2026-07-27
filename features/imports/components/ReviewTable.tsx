@@ -14,10 +14,17 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import type { AllocationFormValues } from "../schemas";
-import { classifyProposal, confidentProposal, proposalToLines } from "../triage";
+import {
+  classifyProposal,
+  editToLines,
+  isEditConfirmable,
+  proposalToEdit,
+  type RowEdit,
+} from "../triage";
 import type {
   ProposalListItemWire,
   ProposalListResponseWire,
+  ReviewOpenCharge,
 } from "../types";
 import { strings } from "../strings";
 
@@ -28,9 +35,6 @@ async function parseErrorBody(res: Response): Promise<Error> {
   return new Error(body?.error ?? `HTTP ${res.status}`);
 }
 
-// Confident rows are cheap (one line), but thousands of DOM nodes still add up.
-// Render the confident tier in chunks; selection and bulk confirm operate on the
-// whole tier regardless of what's rendered.
 const CONFIDENT_CHUNK = 50;
 const BULK_CONCURRENCY = 6;
 
@@ -50,7 +54,10 @@ function confidentIdSet(resp: ProposalListResponseWire): Set<number> {
   );
 }
 
-// Run async workers over items with bounded concurrency.
+function buildEdits(resp: ProposalListResponseWire): Map<number, RowEdit> {
+  return new Map(resp.proposals.map((p) => [p.bankTransactionId, proposalToEdit(p)]));
+}
+
 async function runPool<T>(
   items: T[],
   size: number,
@@ -87,6 +94,9 @@ export function ReviewTable({ initialData, handleRef }: Props) {
   const [selected, setSelected] = useState<Set<number>>(() =>
     confidentIdSet(initialData),
   );
+  const [edits, setEdits] = useState<Map<number, RowEdit>>(() =>
+    buildEdits(initialData),
+  );
   const [tab, setTab] = useState<Tab>("all");
   const [visibleConfident, setVisibleConfident] = useState(CONFIDENT_CHUNK);
   const [bulkRunning, setBulkRunning] = useState(false);
@@ -107,6 +117,7 @@ export function ReviewTable({ initialData, handleRef }: Props) {
       setData(json);
       setSkipped(new Set());
       setSelected(confidentIdSet(json));
+      setEdits(buildEdits(json));
       setTally(ZERO_TALLY);
       setVisibleConfident(CONFIDENT_CHUNK);
       setBulkResult(null);
@@ -119,8 +130,6 @@ export function ReviewTable({ initialData, handleRef }: Props) {
 
   useImperativeHandle(handleRef, () => ({ refresh: load }), [load]);
 
-  // Remove one row locally (keeps the other rows' in-progress edits alive) and
-  // drop it from the selection.
   const removeRow = useCallback((bankTransactionId: number) => {
     setData((prev) => ({
       ...prev,
@@ -138,9 +147,15 @@ export function ReviewTable({ initialData, handleRef }: Props) {
       next.delete(bankTransactionId);
       return next;
     });
+    setEdits((prev) => {
+      if (!prev.has(bankTransactionId)) return prev;
+      const next = new Map(prev);
+      next.delete(bankTransactionId);
+      return next;
+    });
   }, []);
 
-  const onConfirm = useCallback(
+  const postConfirm = useCallback(
     async (values: AllocationFormValues) => {
       const res = await fetch(`/api/imports/${values.bankTransactionId}/confirm`, {
         method: "POST",
@@ -155,7 +170,7 @@ export function ReviewTable({ initialData, handleRef }: Props) {
     [removeRow],
   );
 
-  const onDelete = useCallback(
+  const onDiscard = useCallback(
     async (bankTransactionId: number) => {
       const res = await fetch(`/api/imports/${bankTransactionId}`, {
         method: "DELETE",
@@ -179,36 +194,39 @@ export function ReviewTable({ initialData, handleRef }: Props) {
     setTally((t) => ({ ...t, skipped: t.skipped + 1 }));
   }, []);
 
+  const setEdit = useCallback((txId: number, next: RowEdit) => {
+    setEdits((prev) => new Map(prev).set(txId, next));
+  }, []);
+
   const studentById = useMemo(
     () => new Map(data.context.students.map((s) => [s.id, s])),
     [data.context.students],
   );
-  const chargeById = useMemo(
-    () => new Map(data.context.openCharges.map((c) => [c.id, c])),
-    [data.context.openCharges],
-  );
+  const openChargesByStudent = useMemo(() => {
+    const m = new Map<number, ReviewOpenCharge[]>();
+    for (const c of data.context.openCharges) {
+      const arr = m.get(c.studentId);
+      if (arr) arr.push(c);
+      else m.set(c.studentId, [c]);
+    }
+    return m;
+  }, [data.context.openCharges]);
 
   const remaining = useMemo(
     () => data.proposals.filter((p) => !skipped.has(p.bankTransactionId)),
     [data.proposals, skipped],
   );
-  const attention = useMemo(
-    () => remaining.filter((p) => !isConfident(p)),
-    [remaining],
-  );
-  const confident = useMemo(
-    () => remaining.filter((p) => isConfident(p)),
-    [remaining],
-  );
-  const selectedPresent = confident.filter((p) =>
-    selected.has(p.bankTransactionId),
-  );
+  const attention = useMemo(() => remaining.filter((p) => !isConfident(p)), [remaining]);
+  const confident = useMemo(() => remaining.filter((p) => isConfident(p)), [remaining]);
+  const selectedPresent = confident.filter((p) => selected.has(p.bankTransactionId));
 
   const runBulk = async () => {
     const jobs = selectedPresent
       .map((p) => {
-        const cp = confidentProposal(p.result, p.transactionPreview.amount);
-        return cp ? proposalToLines(p.bankTransactionId, cp) : null;
+        const edit = edits.get(p.bankTransactionId);
+        if (!edit) return null;
+        if (!isEditConfirmable(edit, p.transactionPreview.amount)) return null;
+        return editToLines(p.bankTransactionId, edit);
       })
       .filter((v): v is AllocationFormValues => v !== null);
     if (jobs.length === 0) return;
@@ -220,7 +238,7 @@ export function ReviewTable({ initialData, handleRef }: Props) {
     let failed = 0;
     await runPool(jobs, BULK_CONCURRENCY, async (values) => {
       try {
-        await onConfirm(values);
+        await postConfirm(values);
         ok += 1;
       } catch {
         failed += 1;
@@ -237,28 +255,38 @@ export function ReviewTable({ initialData, handleRef }: Props) {
     tally.skipped > 0 ? strings.review.skippedTally(tally.skipped) : null,
   ].filter(Boolean);
 
-  const renderRow = (p: ProposalListItemWire) => (
-    <CollapsedProposalRow
-      key={p.bankTransactionId}
-      item={p}
-      tier={isConfident(p) ? "confident" : "attention"}
-      context={data.context}
-      studentById={studentById}
-      chargeById={chargeById}
-      selected={selected.has(p.bankTransactionId)}
-      onToggleSelect={() =>
-        setSelected((prev) => {
-          const next = new Set(prev);
-          if (next.has(p.bankTransactionId)) next.delete(p.bankTransactionId);
-          else next.add(p.bankTransactionId);
-          return next;
-        })
-      }
-      onConfirm={onConfirm}
-      onDelete={() => onDelete(p.bankTransactionId)}
-      onSkip={() => onSkip(p.bankTransactionId)}
-    />
-  );
+  const renderRow = (p: ProposalListItemWire) => {
+    const edit = edits.get(p.bankTransactionId) ?? { studentId: 0, lines: [] };
+    return (
+      <CollapsedProposalRow
+        key={p.bankTransactionId}
+        item={p}
+        tier={isConfident(p) ? "confident" : "attention"}
+        allStudents={data.context.students}
+        studentById={studentById}
+        openChargesByStudent={openChargesByStudent}
+        classes={data.context.classes}
+        edit={edit}
+        onEditChange={(next) => setEdit(p.bankTransactionId, next)}
+        selected={selected.has(p.bankTransactionId)}
+        onToggleSelect={() =>
+          setSelected((prev) => {
+            const next = new Set(prev);
+            if (next.has(p.bankTransactionId)) next.delete(p.bankTransactionId);
+            else next.add(p.bankTransactionId);
+            return next;
+          })
+        }
+        onConfirm={async () => {
+          const current = edits.get(p.bankTransactionId);
+          if (!current) return;
+          await postConfirm(editToLines(p.bankTransactionId, current));
+        }}
+        onDiscard={() => onDiscard(p.bankTransactionId)}
+        onSkip={() => onSkip(p.bankTransactionId)}
+      />
+    );
+  };
 
   const showAttention = tab === "all" || tab === "attention";
   const showConfident = tab === "all" || tab === "confident";
@@ -314,7 +342,6 @@ export function ReviewTable({ initialData, handleRef }: Props) {
               </TabsList>
             </Tabs>
 
-            {/* Needs attention — top. */}
             {showAttention ? (
               <section className="flex flex-col gap-2">
                 <div className="flex flex-col gap-0.5">
@@ -335,7 +362,6 @@ export function ReviewTable({ initialData, handleRef }: Props) {
               </section>
             ) : null}
 
-            {/* Confident — collapsed, pre-selected, bulk confirm. */}
             {showConfident ? (
               <section className="flex flex-col gap-2">
                 <div className="flex flex-wrap items-center justify-between gap-2">
@@ -422,9 +448,7 @@ export function ReviewTable({ initialData, handleRef }: Props) {
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() =>
-                        setVisibleConfident((c) => c + CONFIDENT_CHUNK)
-                      }
+                      onClick={() => setVisibleConfident((c) => c + CONFIDENT_CHUNK)}
                     >
                       {strings.review.showMore(
                         Math.min(CONFIDENT_CHUNK, hiddenConfident),

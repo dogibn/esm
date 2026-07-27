@@ -116,6 +116,41 @@ export const strings = {
       | "unbalanced",
       string
     >,
+    controls: {
+      classAll: "All classes",
+      classLabel: "Class",
+      studentValue: "Student",
+      studentPlaceholder: "Search student…",
+      studentNone: "Pick student",
+      studentNoMatch: "No students in this class",
+      chargePlaceholder: "Charge",
+      noOpenCharges: "No open charges for this student",
+    },
+    split: {
+      enable: "Split",
+      disable: "Single charge",
+      addCharge: "Add charge",
+      remove: "Remove",
+      allocated: (allocated: number, total: number) =>
+        `Allocated ${allocated.toLocaleString("en-US")} of ${total.toLocaleString("en-US")} MNT`,
+    },
+    info: {
+      transaction: "Transaction details",
+      sender: "Sender",
+      account: "Account",
+      reference: "Reference",
+      date: "Date",
+      matchedOn: "Matched on",
+      noSignals: "No matching signals — fill this in manually.",
+      alternatives: "Other candidate students",
+      apply: (name: string) => `Use ${name}`,
+      warnings: "Warnings",
+      reason: "Why there's no confident match",
+    },
+    confirm: "Confirm",
+    confirmPending: "…",
+    skip: "Skip",
+    discard: "Not a payment",
   },
 
   form: {
