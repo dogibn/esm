@@ -17,6 +17,8 @@ import { HttpError } from "@/lib/errors";
 
 import { loadStudentChargeDetails, type StudentChargeDetail } from "./balance";
 import type {
+  ChargeCreateInput,
+  ChargeUpdateInput,
   StudentListParams,
   StudentUpdateInput,
   TuitionUpdateInput,
@@ -398,6 +400,147 @@ export async function updateTuition(
     }
   });
 
+  return { ok: true };
+}
+
+// Tuition is edited through updateTuition (base + discounts); block it here so
+// there's a single source of truth for the tuition charge.
+const TUITION_FEE = "tuition";
+
+async function paidForCharge(chargeId: number): Promise<number> {
+  const [row] = await db
+    .select({ paid: sql<number>`COALESCE(SUM(${payments.amount}), 0)` })
+    .from(payments)
+    .where(eq(payments.chargeId, chargeId));
+  return Number(row?.paid ?? 0);
+}
+
+// Add an ad-hoc fee (registration, bus, a club, etc.) as a charge — annual
+// (year-scoped) or attached to a specific term.
+export async function createCharge(
+  _user: User,
+  studentId: number,
+  input: ChargeCreateInput,
+): Promise<{ chargeId: number }> {
+  const feeName = input.feeName.trim();
+  if (feeName.toLowerCase() === TUITION_FEE) {
+    throw new HttpError(400, "Tuition is managed from the tuition breakdown.");
+  }
+
+  const [year] = await db
+    .select({ id: academicYears.id })
+    .from(academicYears)
+    .where(eq(academicYears.isCurrent, true))
+    .limit(1);
+  if (!year) throw new HttpError(500, "No current academic year is set");
+
+  const [student] = await db
+    .select({ id: students.id })
+    .from(students)
+    .where(eq(students.id, studentId))
+    .limit(1);
+  if (!student) throw new HttpError(404, "Student not found");
+
+  const scopeColumns: { academicYearId: number | null; academicTermId: number | null } =
+    input.scope === "annual"
+      ? { academicYearId: year.id, academicTermId: null }
+      : { academicYearId: null, academicTermId: input.academicTermId! };
+
+  if (input.scope === "term") {
+    const [term] = await db
+      .select({ id: academicTerms.id })
+      .from(academicTerms)
+      .where(
+        and(
+          eq(academicTerms.id, input.academicTermId!),
+          eq(academicTerms.academicYearId, year.id),
+        ),
+      )
+      .limit(1);
+    if (!term) throw new HttpError(400, "That term is not part of the current year.");
+  }
+
+  // Reject a duplicate of the same fee in the same scope so the ledger stays
+  // one-row-per-(fee, period).
+  const dupeScope =
+    input.scope === "annual"
+      ? eq(charges.academicYearId, year.id)
+      : eq(charges.academicTermId, input.academicTermId!);
+  const [dupe] = await db
+    .select({ id: charges.id })
+    .from(charges)
+    .where(and(eq(charges.studentId, studentId), eq(charges.feeName, feeName), dupeScope))
+    .limit(1);
+  if (dupe) {
+    throw new HttpError(409, "This student already has that fee for the chosen period.");
+  }
+
+  const [created] = await db
+    .insert(charges)
+    .values({
+      studentId,
+      academicYearId: scopeColumns.academicYearId,
+      academicTermId: scopeColumns.academicTermId,
+      feeName,
+      amount: input.amount,
+      notes: input.notes ?? null,
+    })
+    .returning({ id: charges.id });
+
+  return { chargeId: created!.id };
+}
+
+async function loadOwnedCharge(studentId: number, chargeId: number) {
+  const [charge] = await db
+    .select({ id: charges.id, feeName: charges.feeName, studentId: charges.studentId })
+    .from(charges)
+    .where(eq(charges.id, chargeId))
+    .limit(1);
+  if (!charge || charge.studentId !== studentId) {
+    throw new HttpError(404, "Charge not found");
+  }
+  if (charge.feeName.toLowerCase() === TUITION_FEE) {
+    throw new HttpError(400, "Tuition is managed from the tuition breakdown.");
+  }
+  return charge;
+}
+
+// Edit a charge's amount / notes. Amount can't drop below what's already been
+// paid against it (balance would go negative).
+export async function updateCharge(
+  _user: User,
+  studentId: number,
+  chargeId: number,
+  input: ChargeUpdateInput,
+): Promise<{ ok: true }> {
+  await loadOwnedCharge(studentId, chargeId);
+  const paid = await paidForCharge(chargeId);
+  if (input.amount < paid) {
+    throw new HttpError(
+      400,
+      `Amount can't be below the ${paid.toLocaleString("en-US")}₮ already paid.`,
+    );
+  }
+  await db
+    .update(charges)
+    .set({ amount: input.amount, notes: input.notes ?? null })
+    .where(eq(charges.id, chargeId));
+  return { ok: true };
+}
+
+// Delete a charge, but only when nothing has been paid against it (a paid
+// charge is referenced by payments and part of the audit trail).
+export async function deleteCharge(
+  _user: User,
+  studentId: number,
+  chargeId: number,
+): Promise<{ ok: true }> {
+  await loadOwnedCharge(studentId, chargeId);
+  const paid = await paidForCharge(chargeId);
+  if (paid > 0) {
+    throw new HttpError(409, "This fee has recorded payments and can't be deleted.");
+  }
+  await db.delete(charges).where(eq(charges.id, chargeId));
   return { ok: true };
 }
 

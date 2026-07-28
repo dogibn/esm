@@ -1,3 +1,5 @@
+"use client";
+
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -14,13 +16,16 @@ import { formatMnt } from "../../format";
 import { strings } from "../../strings";
 
 import { StatusBadge } from "../StatusBadge";
+import type { ChargeEditTarget } from "./ChargeFormDialog";
 
 export function TermFeesTable({
   terms,
   rows,
+  onEdit,
 }: {
   terms: TermColumn[];
   rows: TermFeeRow[];
+  onEdit: (target: ChargeEditTarget) => void;
 }) {
   const s = strings.detail.term;
   if (rows.length === 0) {
@@ -66,12 +71,28 @@ export function TermFeesTable({
                   className={cn("text-center", term.isCurrent && "bg-primary/5")}
                 >
                   {cell.hasCharge ? (
-                    <div className="flex flex-col items-center gap-1">
+                    <button
+                      type="button"
+                      className="mx-auto flex flex-col items-center gap-1 rounded-md px-2 py-1 transition-colors outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+                      aria-label={strings.detail.charge.editAria(
+                        `${strings.detail.feeLabel(r.feeName)} · ${term.name}`,
+                      )}
+                      onClick={() =>
+                        onEdit({
+                          chargeId: cell.chargeId,
+                          feeName: strings.detail.feeLabel(r.feeName),
+                          scopeLabel: term.name,
+                          amount: cell.charged,
+                          notes: cell.notes,
+                          paid: cell.paid,
+                        })
+                      }
+                    >
                       <StatusBadge status={cell.status} />
                       <span className="text-xs tabular-nums text-muted-foreground">
                         {formatMnt(cell.charged)}
                       </span>
-                    </div>
+                    </button>
                   ) : (
                     <span className="text-muted-foreground">{s.notEnrolled}</span>
                   )}

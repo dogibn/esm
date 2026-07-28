@@ -63,3 +63,36 @@ export const tuitionUpdateSchema = z
   );
 
 export type TuitionUpdateInput = z.infer<typeof tuitionUpdateSchema>;
+
+// ── Charges (non-tuition fees) ────────────────────────────────────────────────
+
+export const CHARGE_SCOPES = ["annual", "term"] as const;
+export type ChargeScopeValue = (typeof CHARGE_SCOPES)[number];
+
+const optionalNotes = z.preprocess(
+  (v) => (typeof v === "string" && v.trim() === "" ? null : v),
+  z.string().trim().max(500).nullish(),
+);
+
+export const chargeCreateSchema = z
+  .object({
+    feeName: z.string().trim().min(1, "Fee name is required").max(60),
+    scope: z.enum(CHARGE_SCOPES),
+    academicTermId: z.coerce.number().int().positive().optional(),
+    amount: z.coerce.number().int().nonnegative(),
+    notes: optionalNotes,
+  })
+  .refine(
+    (d) =>
+      d.scope === "annual" ? d.academicTermId === undefined : d.academicTermId !== undefined,
+    { message: "Choose a term for a term-based fee.", path: ["academicTermId"] },
+  );
+
+export type ChargeCreateInput = z.infer<typeof chargeCreateSchema>;
+
+export const chargeUpdateSchema = z.object({
+  amount: z.coerce.number().int().nonnegative(),
+  notes: optionalNotes,
+});
+
+export type ChargeUpdateInput = z.infer<typeof chargeUpdateSchema>;

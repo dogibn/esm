@@ -1,20 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, Plus } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageContainer } from "@/components/ui/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import type { StudentDetail } from "../../detail";
 import { formatMnt } from "../../format";
+import type { ChargeScopeValue } from "../../schemas";
 import { strings } from "../../strings";
 import type { FeeStatus } from "../../types";
 
 import { StatusBadge } from "../StatusBadge";
 
 import { AnnualFeesTable } from "./AnnualFeesTable";
+import { ChargeFormDialog, type ChargeEditTarget } from "./ChargeFormDialog";
 import { PaymentHistoryTable } from "./PaymentHistoryTable";
 import { PersonalInfoCard } from "./PersonalInfoCard";
 import { SectionHeading } from "./SectionHeading";
@@ -43,6 +47,24 @@ export function StudentDetailView({ detail }: { detail: StudentDetail }) {
   const t = strings.detail;
   const fullName = `${header.firstName} ${header.lastName}`.trim();
   const isNew = header.studentCategory === "new";
+
+  const [charge, setCharge] = useState<{
+    open: boolean;
+    target: ChargeEditTarget | null;
+    defaultScope: ChargeScopeValue;
+  }>({ open: false, target: null, defaultScope: "term" });
+
+  const openEdit = (target: ChargeEditTarget) =>
+    setCharge({ open: true, target, defaultScope: "term" });
+  const openAdd = (defaultScope: ChargeScopeValue) =>
+    setCharge({ open: true, target: null, defaultScope });
+
+  const addButton = (scope: ChargeScopeValue) => (
+    <Button variant="outline" size="sm" onClick={() => openAdd(scope)}>
+      <Plus />
+      {t.charge.addFee}
+    </Button>
+  );
 
   return (
     <div className="flex flex-col">
@@ -94,14 +116,14 @@ export function StudentDetailView({ detail }: { detail: StudentDetail }) {
 
               <TabsContent value="fees" className="flex flex-col">
                 <div className="px-4 pt-3 pb-1">
-                  <SectionHeading title={t.annual.title} />
+                  <SectionHeading title={t.annual.title} action={addButton("annual")} />
                 </div>
-                <AnnualFeesTable fees={annualFees} />
+                <AnnualFeesTable fees={annualFees} onEdit={openEdit} />
 
                 <div className="border-t px-4 pt-3 pb-1">
-                  <SectionHeading title={t.term.title} />
+                  <SectionHeading title={t.term.title} action={addButton("term")} />
                 </div>
-                <TermFeesTable terms={terms} rows={termFees} />
+                <TermFeesTable terms={terms} rows={termFees} onEdit={openEdit} />
 
                 <div className="flex flex-wrap items-center justify-end gap-4 border-t bg-muted/40 px-4 py-3 text-sm">
                   <TotalPill label={t.totals.charged} value={formatMnt(totals.charged)} />
@@ -119,6 +141,16 @@ export function StudentDetailView({ detail }: { detail: StudentDetail }) {
           </Card>
         </div>
       </PageContainer>
+
+      <ChargeFormDialog
+        open={charge.open}
+        onOpenChange={(open) => setCharge((s) => ({ ...s, open }))}
+        studentId={header.id}
+        terms={terms}
+        target={charge.target}
+        defaultScope={charge.defaultScope}
+        onSaved={() => {}}
+      />
     </div>
   );
 }

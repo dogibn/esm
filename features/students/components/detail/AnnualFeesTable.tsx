@@ -1,3 +1,8 @@
+"use client";
+
+import { Pencil } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -12,8 +17,15 @@ import { formatMnt } from "../../format";
 import { strings } from "../../strings";
 
 import { StatusBadge } from "../StatusBadge";
+import type { ChargeEditTarget } from "./ChargeFormDialog";
 
-export function AnnualFeesTable({ fees }: { fees: FeeLine[] }) {
+export function AnnualFeesTable({
+  fees,
+  onEdit,
+}: {
+  fees: FeeLine[];
+  onEdit: (target: ChargeEditTarget) => void;
+}) {
   const c = strings.detail.columns;
   if (fees.length === 0) {
     return (
@@ -31,10 +43,13 @@ export function AnnualFeesTable({ fees }: { fees: FeeLine[] }) {
           <TableHead className="text-right">{c.paid}</TableHead>
           <TableHead className="text-right">{c.balance}</TableHead>
           <TableHead>{c.status}</TableHead>
+          <TableHead className="w-8" aria-label="Actions" />
         </TableRow>
       </TableHeader>
       <TableBody>
-        {fees.map((f) => (
+        {fees.map((f) => {
+          const isTuition = f.feeName === "tuition";
+          return (
           <TableRow key={f.chargeId}>
             <TableCell className="font-medium">
               {strings.detail.feeLabel(f.feeName)}
@@ -63,8 +78,32 @@ export function AnnualFeesTable({ fees }: { fees: FeeLine[] }) {
             <TableCell>
               <StatusBadge status={f.status} />
             </TableCell>
+            <TableCell className="text-right">
+              {isTuition ? null : (
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={strings.detail.charge.editAria(
+                    strings.detail.feeLabel(f.feeName),
+                  )}
+                  onClick={() =>
+                    onEdit({
+                      chargeId: f.chargeId,
+                      feeName: strings.detail.feeLabel(f.feeName),
+                      scopeLabel: strings.detail.charge.scopeAnnual,
+                      amount: f.charged,
+                      notes: f.notes,
+                      paid: f.paid,
+                    })
+                  }
+                >
+                  <Pencil />
+                </Button>
+              )}
+            </TableCell>
           </TableRow>
-        ))}
+          );
+        })}
       </TableBody>
     </Table>
   );

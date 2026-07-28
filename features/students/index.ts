@@ -1,6 +1,9 @@
 export {
+  createCharge,
+  deleteCharge,
   listFilterOptions,
   listStudents,
+  updateCharge,
   updateStudent,
   updateTuition,
 } from "./api";
@@ -29,13 +32,19 @@ export type {
   TuitionBreakdown,
 } from "./detail";
 export {
+  CHARGE_SCOPES,
   STATUS_FILTER_VALUES,
+  chargeCreateSchema,
+  chargeUpdateSchema,
   studentIdParamSchema,
   studentListParamsSchema,
   studentUpdateSchema,
   tuitionUpdateSchema,
 } from "./schemas";
 export type {
+  ChargeCreateInput,
+  ChargeScopeValue,
+  ChargeUpdateInput,
   StatusFilterValue,
   StudentListParams,
   StudentUpdateInput,

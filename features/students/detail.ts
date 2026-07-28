@@ -68,10 +68,12 @@ export type TermCell =
   | { hasCharge: false }
   | {
       hasCharge: true;
+      chargeId: number;
       charged: number;
       paid: number;
       balance: number;
       status: FeeStatus;
+      notes: string | null;
     };
 
 export type TermFeeRow = {
@@ -291,10 +293,12 @@ export async function getStudentDetail(studentDbId: number): Promise<StudentDeta
         if (!ch) return { hasCharge: false };
         return {
           hasCharge: true,
+          chargeId: ch.id,
           charged: ch.amount,
           paid: ch.paid,
           balance: ch.balance,
           status: deriveFeeStatus(ch.balance, ch.paid),
+          notes: ch.notes,
         };
       });
       return {
