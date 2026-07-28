@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useToast } from "@/components/ui/toast";
 
 import { formatMnt } from "../../format";
 import { strings } from "../../strings";
@@ -94,6 +95,7 @@ function ChargeForm({
   onSaved,
 }: Omit<Props, "open">) {
   const router = useRouter();
+  const { toast } = useToast();
   const isEdit = target !== null;
 
   const [feeName, setFeeName] = useState(target?.feeName ?? "");
@@ -135,6 +137,10 @@ function ChargeForm({
       }
       onOpenChange(false);
       onSaved();
+      toast({
+        message: isEdit ? strings.toasts.feeUpdated : strings.toasts.feeAdded,
+        variant: "success",
+      });
       router.refresh();
     } catch (err) {
       setError((err as Error).message || c.error);
@@ -159,6 +165,7 @@ function ChargeForm({
       }
       onOpenChange(false);
       onSaved();
+      toast({ message: strings.toasts.feeDeleted, variant: "success" });
       router.refresh();
     } catch (err) {
       setError((err as Error).message || c.error);

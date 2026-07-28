@@ -7,6 +7,7 @@ import { Pencil, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/toast";
 
 import type { TuitionBreakdown } from "../../detail";
 import { formatMnt } from "../../format";
@@ -31,6 +32,7 @@ export function TuitionBreakdownCard({
   tuition: TuitionBreakdown | null;
 }) {
   const router = useRouter();
+  const { toast } = useToast();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -70,6 +72,7 @@ export function TuitionBreakdownCard({
         throw new Error(body?.error ?? `HTTP ${res.status}`);
       }
       setEditing(false);
+      toast({ message: strings.toasts.tuitionSaved, variant: "success" });
       router.refresh();
     } catch (err) {
       setError((err as Error).message || s.saveError);

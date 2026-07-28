@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
+import { ToastProvider } from "@/components/ui/toast";
 import { strings } from "@/app/strings";
 
 const inter = Inter({
@@ -33,7 +34,9 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${geistMono.variable} h-full font-sans antialiased`}
     >
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        <ToastProvider>{children}</ToastProvider>
+      </body>
     </html>
   );
 }

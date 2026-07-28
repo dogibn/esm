@@ -51,6 +51,13 @@ export const strings = {
     rowCount: (shown: number, total: number) =>
       `Showing ${shown} of ${total}`,
   },
+  toasts: {
+    profileSaved: "Student details saved.",
+    tuitionSaved: "Tuition updated.",
+    feeAdded: "Fee added.",
+    feeUpdated: "Fee updated.",
+    feeDeleted: "Fee deleted.",
+  },
   detail: {
     back: "Back to students",
     studentId: (code: string) => `Student ID: ${code}`,

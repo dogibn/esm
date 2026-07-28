@@ -7,6 +7,7 @@ import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/toast";
 
 import type { StudentDetailHeader } from "../../detail";
 import { strings } from "../../strings";
@@ -76,6 +77,7 @@ function formFrom(header: StudentDetailHeader): FormState {
 
 export function PersonalInfoCard({ header }: { header: StudentDetailHeader }) {
   const router = useRouter();
+  const { toast } = useToast();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -105,6 +107,7 @@ export function PersonalInfoCard({ header }: { header: StudentDetailHeader }) {
         throw new Error(body?.error ?? `HTTP ${res.status}`);
       }
       setEditing(false);
+      toast({ message: strings.toasts.profileSaved, variant: "success" });
       // Re-fetch the server component so the banner, this card, and the
       // tracking table all reflect the saved values.
       router.refresh();
