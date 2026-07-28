@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useToast } from "@/components/ui/toast";
 import {
   Table,
   TableBody,
@@ -47,6 +48,7 @@ type UploadDropzoneProps = {
 };
 
 export function UploadDropzone({ onUploadComplete }: UploadDropzoneProps = {}) {
+  const { toast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -95,6 +97,10 @@ export function UploadDropzone({ onUploadComplete }: UploadDropzoneProps = {}) {
       setResult(json);
       setFile(null);
       if (inputRef.current) inputRef.current.value = "";
+      toast({
+        message: strings.toasts.imported(json.insertedCount),
+        variant: "success",
+      });
       onUploadComplete?.();
     } catch (e) {
       setError((e as Error).message || strings.errors.uploadFailed);

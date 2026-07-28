@@ -41,6 +41,13 @@ export const strings = {
     uploadFailed: "Upload failed.",
   },
 
+  toasts: {
+    paymentRecorded: "Payment recorded.",
+    transactionDiscarded: "Transaction discarded.",
+    imported: (n: number) =>
+      n === 1 ? "1 transaction imported." : `${n} transactions imported.`,
+  },
+
   review: {
     title: "Review unmatched transactions",
     refresh: "Refresh",

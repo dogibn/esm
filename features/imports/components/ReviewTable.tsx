@@ -20,6 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useToast } from "@/components/ui/toast";
 
 import type { AllocationFormValues } from "../schemas";
 import type {
@@ -84,6 +85,7 @@ const ZERO_TALLY: Tally = { confirmed: 0, deleted: 0, skipped: 0 };
 const PAGE_SIZE = 20;
 
 export function ReviewTable({ initialData, handleRef }: Props) {
+  const { toast } = useToast();
   const [data, setData] = useState<ProposalListResponseWire>(initialData);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -145,8 +147,9 @@ export function ReviewTable({ initialData, handleRef }: Props) {
       if (!res.ok) throw await parseErrorBody(res);
       removeRow(values.bankTransactionId);
       setTally((t) => ({ ...t, confirmed: t.confirmed + 1 }));
+      toast({ message: strings.toasts.paymentRecorded, variant: "success" });
     },
-    [removeRow],
+    [removeRow, toast],
   );
 
   const onDelete = useCallback(
@@ -158,8 +161,9 @@ export function ReviewTable({ initialData, handleRef }: Props) {
       if (!res.ok) throw await parseErrorBody(res);
       removeRow(bankTransactionId);
       setTally((t) => ({ ...t, deleted: t.deleted + 1 }));
+      toast({ message: strings.toasts.transactionDiscarded, variant: "success" });
     },
-    [removeRow],
+    [removeRow, toast],
   );
 
   const onSkip = useCallback((bankTransactionId: number) => {
