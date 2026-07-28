@@ -24,9 +24,8 @@ export const strings = {
     activeCount: (n: number) => (n === 1 ? "1 filter active" : `${n} filters active`),
   },
   columns: {
-    surname: "Surname",
-    firstName: "First name",
-    studentCode: "ID",
+    id: "ID",
+    student: "Student",
     class: "Class",
     tuition: "Tuition",
     bus: "Bus",

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   createColumnHelper,
   flexRender,
@@ -70,26 +71,35 @@ function ClubsCellView({ cell }: { cell: ClubsFeeCell }) {
 const columnHelper = createColumnHelper<StudentRow>();
 
 const columns = [
+  columnHelper.accessor("studentCode", {
+    id: "id",
+    header: strings.columns.id,
+    cell: (info) => (
+      <span className="font-mono text-xs text-muted-foreground">
+        {info.getValue()}
+      </span>
+    ),
+  }),
   columnHelper.accessor("lastName", {
-    id: "surname",
-    header: strings.columns.surname,
+    id: "student",
+    header: strings.columns.student,
     cell: (info) => {
       const row = info.row.original;
+      // Surname-first per Mongolian convention: surname lighter, given name
+      // emphasized. The whole row is the click target (see TableRow below);
+      // this stays a real link so keyboard and screen-reader users have one too.
       return (
         <Link
           href={`/students/${row.studentId}`}
-          className="flex flex-col rounded-sm underline-offset-4 hover:text-primary hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+          className="rounded-sm underline-offset-4 outline-none group-hover:underline focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <span className="font-medium">{row.lastName}</span>
-          <span className="text-xs text-muted-foreground">{row.studentCode}</span>
+          <span className="text-muted-foreground">{row.lastName}</span>{" "}
+          <span className="font-semibold text-foreground group-hover:text-primary">
+            {row.firstName}
+          </span>
         </Link>
       );
     },
-  }),
-  columnHelper.accessor("firstName", {
-    id: "firstName",
-    header: strings.columns.firstName,
-    cell: (info) => <span>{info.getValue()}</span>,
   }),
   columnHelper.accessor("gradeName", {
     id: "class",
@@ -135,6 +145,7 @@ export function StudentTable({
   emptyMessage,
   onPageChange,
 }: Props) {
+  const router = useRouter();
   const totalPages = Math.max(1, Math.ceil(data.total / data.pageSize));
 
   const table = useReactTable({
@@ -181,7 +192,15 @@ export function StudentTable({
               </TableRow>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
+                <TableRow
+                  key={row.id}
+                  className="group cursor-pointer"
+                  onClick={() => {
+                    // Let the accountant copy a cell's text without navigating.
+                    if (window.getSelection()?.toString()) return;
+                    router.push(`/students/${row.original.studentId}`);
+                  }}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
