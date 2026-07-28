@@ -79,7 +79,7 @@ export function StudentDetailView({ detail }: { detail: StudentDetail }) {
         <div className="grid gap-5 lg:grid-cols-[320px_minmax(0,1fr)]">
           <div className="flex flex-col gap-5">
             <PersonalInfoCard header={header} />
-            <TuitionBreakdownCard tuition={tuition} />
+            <TuitionBreakdownCard studentId={header.id} tuition={tuition} />
           </div>
 
           <Card size="sm" className="gap-0 self-start">

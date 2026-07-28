@@ -1,4 +1,9 @@
-export { listFilterOptions, listStudents, updateStudent } from "./api";
+export {
+  listFilterOptions,
+  listStudents,
+  updateStudent,
+  updateTuition,
+} from "./api";
 export type { UpdatedStudent } from "./api";
 export {
   computeChargeBalance,
@@ -28,11 +33,13 @@ export {
   studentIdParamSchema,
   studentListParamsSchema,
   studentUpdateSchema,
+  tuitionUpdateSchema,
 } from "./schemas";
 export type {
   StatusFilterValue,
   StudentListParams,
   StudentUpdateInput,
+  TuitionUpdateInput,
 } from "./schemas";
 export { strings } from "./strings";
 export type {

@@ -38,3 +38,28 @@ export const studentUpdateSchema = z.object({
 });
 
 export type StudentUpdateInput = z.infer<typeof studentUpdateSchema>;
+
+// Tuition breakdown edit: the base (gross) tuition amount plus the set of
+// discount lines on the enrollment. Net = base − Σ discounts is derived, never
+// stored. Money is integer MNT. The "net ≥ already paid" floor is enforced
+// server-side (it needs the payment total), the "discounts ≤ base" invariant
+// here.
+export const tuitionUpdateSchema = z
+  .object({
+    baseAmount: z.coerce.number().int().nonnegative(),
+    discounts: z
+      .array(
+        z.object({
+          name: z.string().trim().min(1, "Discount name is required").max(100),
+          amount: z.coerce.number().int().nonnegative(),
+        }),
+      )
+      .max(20)
+      .default([]),
+  })
+  .refine(
+    (d) => d.discounts.reduce((s, x) => s + x.amount, 0) <= d.baseAmount,
+    { message: "Discounts can't exceed the base tuition.", path: ["discounts"] },
+  );
+
+export type TuitionUpdateInput = z.infer<typeof tuitionUpdateSchema>;

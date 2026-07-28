@@ -4,16 +4,23 @@ import { db } from "@/db/index";
 import {
   academicTerms,
   academicYears,
+  charges,
+  discounts,
   enrollments,
   gradeLevels,
   grades,
+  payments,
   students,
   type User,
 } from "@/db/schema";
 import { HttpError } from "@/lib/errors";
 
 import { loadStudentChargeDetails, type StudentChargeDetail } from "./balance";
-import type { StudentListParams, StudentUpdateInput } from "./schemas";
+import type {
+  StudentListParams,
+  StudentUpdateInput,
+  TuitionUpdateInput,
+} from "./schemas";
 import type {
   ClubFeeItem,
   ClubsFeeCell,
@@ -313,6 +320,85 @@ export async function updateStudent(
     });
 
   return updated!;
+}
+
+// Edit the tuition breakdown: correct the base (gross) amount and replace the
+// enrollment's discount lines. Base tuition is normally immutable per
+// domain_model.md § Charge, but an accountant may correct it here; the floor
+// below keeps net tuition from dropping under what's already been paid.
+export async function updateTuition(
+  user: User,
+  studentId: number,
+  input: TuitionUpdateInput,
+): Promise<{ ok: true }> {
+  const [year] = await db
+    .select({ id: academicYears.id })
+    .from(academicYears)
+    .where(eq(academicYears.isCurrent, true))
+    .limit(1);
+  if (!year) throw new HttpError(500, "No current academic year is set");
+
+  const [enrollment] = await db
+    .select({ id: enrollments.id })
+    .from(enrollments)
+    .where(
+      and(
+        eq(enrollments.studentId, studentId),
+        eq(enrollments.academicYearId, year.id),
+      ),
+    )
+    .limit(1);
+  if (!enrollment) throw new HttpError(404, "Student not found for the current year");
+
+  const [tuitionCharge] = await db
+    .select({ id: charges.id })
+    .from(charges)
+    .where(
+      and(
+        eq(charges.studentId, studentId),
+        eq(charges.academicYearId, year.id),
+        eq(charges.feeName, "tuition"),
+      ),
+    )
+    .limit(1);
+  if (!tuitionCharge) {
+    throw new HttpError(400, "This student has no tuition charge to edit.");
+  }
+
+  const [paidRow] = await db
+    .select({ paid: sql<number>`COALESCE(SUM(${payments.amount}), 0)` })
+    .from(payments)
+    .where(eq(payments.chargeId, tuitionCharge.id));
+  const paid = Number(paidRow?.paid ?? 0);
+
+  const discountTotal = input.discounts.reduce((s, d) => s + d.amount, 0);
+  const net = input.baseAmount - discountTotal;
+  if (net < paid) {
+    throw new HttpError(
+      400,
+      `Net tuition (${net.toLocaleString("en-US")}₮) can't be below the ${paid.toLocaleString("en-US")}₮ already paid.`,
+    );
+  }
+
+  await db.transaction(async (tx) => {
+    await tx
+      .update(charges)
+      .set({ amount: input.baseAmount })
+      .where(eq(charges.id, tuitionCharge.id));
+    await tx.delete(discounts).where(eq(discounts.enrollmentId, enrollment.id));
+    if (input.discounts.length > 0) {
+      await tx.insert(discounts).values(
+        input.discounts.map((d) => ({
+          enrollmentId: enrollment.id,
+          name: d.name,
+          amount: d.amount,
+          createdBy: user.id,
+        })),
+      );
+    }
+  });
+
+  return { ok: true };
 }
 
 export async function listFilterOptions(): Promise<FilterOptions> {
