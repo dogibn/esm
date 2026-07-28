@@ -13,7 +13,7 @@ import {
 import { HttpError } from "@/lib/errors";
 
 import { loadStudentChargeDetails, type StudentChargeDetail } from "./balance";
-import type { StudentListParams } from "./schemas";
+import type { StudentListParams, StudentUpdateInput } from "./schemas";
 import type {
   ClubFeeItem,
   ClubsFeeCell,
@@ -270,6 +270,49 @@ export async function listStudents(
     total,
     summary,
   };
+}
+
+export type UpdatedStudent = {
+  id: number;
+  firstName: string;
+  lastName: string;
+  parentEmail: string | null;
+  parentPhone: string | null;
+};
+
+// `user` accepted for future audit/scoping; every accountant may edit profiles
+// (domain_model.md § User: accountants do everything except manage FeeStructure).
+export async function updateStudent(
+  _user: User,
+  studentId: number,
+  input: StudentUpdateInput,
+): Promise<UpdatedStudent> {
+  const [existing] = await db
+    .select({ id: students.id })
+    .from(students)
+    .where(eq(students.id, studentId))
+    .limit(1);
+  if (!existing) throw new HttpError(404, "Student not found");
+
+  const [updated] = await db
+    .update(students)
+    .set({
+      firstName: input.firstName,
+      lastName: input.lastName,
+      parentEmail: input.parentEmail,
+      parentPhone: input.parentPhone,
+      updatedAt: new Date(),
+    })
+    .where(eq(students.id, studentId))
+    .returning({
+      id: students.id,
+      firstName: students.firstName,
+      lastName: students.lastName,
+      parentEmail: students.parentEmail,
+      parentPhone: students.parentPhone,
+    });
+
+  return updated!;
 }
 
 export async function listFilterOptions(): Promise<FilterOptions> {

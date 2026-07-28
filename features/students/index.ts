@@ -1,4 +1,5 @@
-export { listFilterOptions, listStudents } from "./api";
+export { listFilterOptions, listStudents, updateStudent } from "./api";
+export type { UpdatedStudent } from "./api";
 export {
   computeChargeBalance,
   loadChargeBalances,
@@ -26,8 +27,13 @@ export {
   STATUS_FILTER_VALUES,
   studentIdParamSchema,
   studentListParamsSchema,
+  studentUpdateSchema,
 } from "./schemas";
-export type { StatusFilterValue, StudentListParams } from "./schemas";
+export type {
+  StatusFilterValue,
+  StudentListParams,
+  StudentUpdateInput,
+} from "./schemas";
 export { strings } from "./strings";
 export type {
   ClubFeeItem,
