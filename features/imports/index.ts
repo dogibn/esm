@@ -1,7 +1,8 @@
 export {
   confirmAllocation,
-  deleteUnmatchedTransaction,
+  discardUnmatchedTransaction,
   listProposals,
+  undoOperation,
   uploadBankTransactions,
 } from "./api";
 export { loadMatchingContextInput } from "./matching/load-context";
@@ -45,13 +46,36 @@ export type {
   ReviewStudent,
   TransactionPreview,
   TransactionPreviewWire,
+  UndoResult,
   UploadResult,
   UploadResultWire,
 } from "./types";
 export { AllocationForm } from "./components/AllocationForm";
+export { CollapsedProposalRow } from "./components/CollapsedProposalRow";
 export { ImportsView } from "./components/ImportsView";
 export { ReviewTable, type ReviewTableHandle } from "./components/ReviewTable";
 export { UploadDropzone } from "./components/UploadDropzone";
+export {
+  attentionReason,
+  classifyProposal,
+  confidentProposal,
+  editSum,
+  editToLines,
+  isEditConfirmable,
+  proposalToEdit,
+  resultAlternatives,
+  resultFlags,
+  resultSignals,
+  rollupSignals,
+  sumAllocations,
+} from "./triage";
+export type {
+  AttentionReason,
+  ChargeLine,
+  ProposalTier,
+  RowEdit,
+  SignalCategory,
+} from "./triage";
 export {
   allocationFormSchema,
   allocationLineSchema,

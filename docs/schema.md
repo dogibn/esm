@@ -156,11 +156,16 @@ For *what* the entities mean and *why* the schema looks like this, see `domain_m
 | `memo` | `text` | nullable |
 | `amount` | `bigint` | NOT NULL — MNT |
 | `transaction_at` | `timestamptz` | NOT NULL |
-| `status` | `text` | NOT NULL, CHECK in (`'matched'`, `'unmatched'`) |
+| `status` | `text` | NOT NULL, CHECK in (`'matched'`, `'unmatched'`, `'discarded'`) |
+| `discarded_at` | `timestamptz` | nullable — set when `status = 'discarded'` |
+| `discarded_by_user_id` | `uuid` | nullable, FK → `users.id` |
 | `created_at` | `timestamptz` | NOT NULL DEFAULT `now()` |
 
 - Partial INDEX `(status) WHERE status = 'unmatched'`
 - INDEX `(transaction_at DESC)`
+- `'discarded'` is a soft delete for non-student rows (bank fees, refunds). The
+  row persists so the discard is reversible and re-uploads still dedup on
+  `transaction_id`. See `history_and_reversibility.md`.
 
 ### `charges`
 
@@ -204,9 +209,37 @@ For *what* the entities mean and *why* the schema looks like this, see `domain_m
 | `amount` | `bigint` | NOT NULL — MNT |
 | `recorded_by` | `uuid` | NOT NULL, FK → `users.id` |
 | `recorded_at` | `timestamptz` | NOT NULL DEFAULT `now()` |
+| `operation_id` | `integer` | nullable, FK → `operations.id` — the confirm that created this payment |
+| `voided_at` | `timestamptz` | nullable — a voided payment is excluded from paid/balance totals but kept for audit |
+| `voided_by_user_id` | `uuid` | nullable, FK → `users.id` |
 
 - INDEX `(charge_id)`
 - INDEX `(bank_transaction_id)`
+- INDEX `(operation_id)`
+- A payment is **live** iff `voided_at IS NULL`. Undo of a confirm voids exactly
+  the payments carrying that confirm's `operation_id`.
+
+### `operations`
+
+Append-only log of user-initiated actions, and the unit of undo. One row per
+mutation; undoable kinds carry `undoable_until`. See
+`history_and_reversibility.md`.
+
+| Column | Type | Constraints |
+|---|---|---|
+| `id` | `serial` | PK |
+| `actor_user_id` | `uuid` | NOT NULL, FK → `users.id` |
+| `kind` | `text` | NOT NULL, CHECK in (`'confirm_match'`, `'discard_transaction'`, `'restore_transaction'`, `'create_enrollment'`, `'add_discount'`, `'undo'`) |
+| `bank_transaction_id` | `integer` | nullable, FK → `bank_transactions.id` — the row this operation concerns |
+| `created_at` | `timestamptz` | NOT NULL DEFAULT `now()` |
+| `undoable_until` | `timestamptz` | nullable — undo deadline, stored at write time; NULL = not undoable (e.g. an `undo`) |
+| `undone_at` | `timestamptz` | nullable — set once reversed |
+| `undone_by_user_id` | `uuid` | nullable, FK → `users.id` |
+| `undo_operation_id` | `integer` | nullable, FK → `operations.id` — the `undo` that reversed this |
+| `summary` | `text` | NOT NULL — human line for the History view |
+| `details` | `jsonb` | nullable — structured context |
+
+- INDEX `(actor_user_id)`, `(bank_transaction_id)`, `(kind)`, `(created_at)`
 
 ---
 
@@ -230,7 +263,8 @@ discount_total =
 paid_total =
   (SELECT COALESCE(SUM(p.amount), 0)
      FROM payments p
-    WHERE p.charge_id = C.id)
+    WHERE p.charge_id = C.id
+      AND p.voided_at IS NULL)   -- voided payments never count
 
 balance = C.amount − discount_total − paid_total
 ```
@@ -253,7 +287,8 @@ Drizzle's `drizzle-kit generate` handles ordering automatically. This list is fo
 10. `bank_transactions`
 11. `charges`
 12. `discounts`
-13. `payments`
+13. `operations`
+14. `payments` (adds `operation_id` → `operations`)
 
 ---
 

@@ -119,11 +119,11 @@ A *recorded outcome*, not a computed rule: v1 stores the amount that was applied
 > **v2 evolution.** When discount rules become clear, add columns like `kind` (flat / percentage / override) and `rate`, plus a `DiscountType` reference table to constrain `name`. Existing rows remain valid with those new columns NULL. If non-tuition discounts emerge, re-link to Charge with a constraint that the linked Charge's `fee_name` is in the discountable set.
 
 ### BankTransaction
-One row from an uploaded bank file that the accountant has confirmed (or left pending) is a student-related transaction. Non-student rows (bank fees, refunds, unrelated transfers) are filtered at upload and during review — never persisted. There is no `ignored` status; if recovery is needed, the bank file is re-uploadable.
+One row from an uploaded bank file. Non-student rows (bank fees, refunds, unrelated transfers) are filtered at upload; those the accountant identifies during review are **soft-discarded**, not removed (see below).
 
-`transaction_id` is the bank's ID and is **UNIQUE** — re-uploads of the same file are safe.
+`transaction_id` is the bank's ID and is **UNIQUE** — re-uploads of the same file are safe (a re-uploaded row that is already present, including a discarded one, is not re-inserted).
 
-`status` is `matched` or `unmatched`.
+`status` is `matched`, `unmatched`, or `discarded`. A discarded row is a reversible soft delete — kept with `discarded_at` / `discarded_by_user_id` so the discard can be undone within the window (`history_and_reversibility.md`). This supersedes the v1 rule that non-student rows are never persisted and that there is no `ignored`-style status.
 
 ### Payment
 A recorded allocation of money from a BankTransaction to a Charge. A single BankTransaction can produce multiple Payments (split across Charges). A single Charge can receive multiple Payments (installments).
@@ -199,7 +199,7 @@ Run continuously by accountants in-app.
 | Memo + sender account + amount drive matching | MatchProposal scope and the fields shown in the review UI |
 | MatchProposals are ephemeral | The unmatched queue is just `BankTransaction WHERE status = 'unmatched'`; no MatchProposal table |
 | `transaction_id` deduplicates re-uploads | No ImportBatch entity in v1; original files not stored |
-| Non-student rows are deleted at review, not persisted | No `ignored` status on BankTransaction; no audit trail of deletions |
+| Non-student rows are soft-discarded at review (reversible), not removed | `status = 'discarded'` + `discarded_at`/`discarded_by_user_id`; the discard is logged in `operations` and undoable (`history_and_reversibility.md`) |
 | One BankTransaction can fund multiple Charges; one Charge can receive multiple Payments | Payment is a separate table from BankTransaction |
 | Match confidence shown as which fields matched, not numeric | No confidence column; UI shows signal badges |
 

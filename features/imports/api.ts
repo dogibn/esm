@@ -1,14 +1,17 @@
-import { and, asc, eq, inArray } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 
 import { db } from "@/db/index";
 import {
   bankTransactions,
   charges,
   gradeLevels,
+  operations,
   payments,
   type User,
 } from "@/db/schema";
 import { HttpError } from "@/lib/errors";
+
+import { isUndoable, recordOperation, undoableUntil } from "@/features/history";
 
 import { buildMatchingContext, match } from "./matching";
 import { loadMatchingContextInput } from "./matching/load-context";
@@ -26,6 +29,7 @@ import type {
   ReviewClass,
   ReviewOpenCharge,
   ReviewStudent,
+  UndoResult,
   UploadResult,
 } from "./types";
 
@@ -310,12 +314,24 @@ export async function confirmAllocation(
       throw new HttpError(409, "This transaction has already been matched");
     }
 
+    // Record the confirm as an undoable operation, then stamp its id onto every
+    // payment it creates. Undo voids exactly this operation's payments.
+    const op = await recordOperation(dbTx, {
+      actorUserId: user.id,
+      kind: "confirm_match",
+      bankTransactionId: input.bankTransactionId,
+      undoableUntil: undoableUntil(new Date()),
+      summary: `Matched transaction #${input.bankTransactionId} · ${input.lines.length} payment(s) · ${allocated.toLocaleString("en-US")} MNT`,
+      details: { lines: input.lines },
+    });
+
     await dbTx.insert(payments).values(
       input.lines.map((l) => ({
         bankTransactionId: input.bankTransactionId,
         chargeId: l.chargeId,
         amount: l.amount,
         recordedBy: user.id,
+        operationId: op.id,
       })),
     );
 
@@ -328,26 +344,141 @@ export async function confirmAllocation(
 }
 
 /**
- * Delete a non-student bank row (bank fee, refund, unrelated transfer).
- * Matched transactions are protected — both here and by the payments FK
- * (ON DELETE RESTRICT). Recovery path if deleted by mistake: re-upload the
- * bank file (transaction_id dedup re-inserts it).
+ * Discard a non-student bank row (bank fee, refund, unrelated transfer). This
+ * is a SOFT delete: the row is kept with status 'discarded' so the action is
+ * reversible (undo the discard operation) and re-uploads still dedup on
+ * transaction_id. Only unmatched rows can be discarded.
  */
-export async function deleteUnmatchedTransaction(id: number): Promise<void> {
-  const deleted = await db
-    .delete(bankTransactions)
-    .where(
-      and(eq(bankTransactions.id, id), eq(bankTransactions.status, "unmatched")),
-    )
-    .returning({ id: bankTransactions.id });
-  if (deleted.length > 0) return;
+export async function discardUnmatchedTransaction(
+  user: User,
+  id: number,
+): Promise<void> {
+  await db.transaction(async (dbTx) => {
+    const claimed = await dbTx
+      .update(bankTransactions)
+      .set({
+        status: "discarded",
+        discardedAt: new Date(),
+        discardedByUserId: user.id,
+      })
+      .where(
+        and(
+          eq(bankTransactions.id, id),
+          eq(bankTransactions.status, "unmatched"),
+        ),
+      )
+      .returning({ id: bankTransactions.id });
 
-  const [existing] = await db
-    .select({ id: bankTransactions.id })
-    .from(bankTransactions)
-    .where(eq(bankTransactions.id, id))
+    if (claimed.length === 0) {
+      const [existing] = await dbTx
+        .select({ id: bankTransactions.id })
+        .from(bankTransactions)
+        .where(eq(bankTransactions.id, id))
+        .limit(1);
+      throw existing
+        ? new HttpError(409, "Only unmatched transactions can be discarded")
+        : new HttpError(404, "Bank transaction not found");
+    }
+
+    await recordOperation(dbTx, {
+      actorUserId: user.id,
+      kind: "discard_transaction",
+      bankTransactionId: id,
+      undoableUntil: undoableUntil(new Date()),
+      summary: `Discarded transaction #${id} (not a student payment)`,
+    });
+  });
+}
+
+/**
+ * Undo a previously-recorded operation, if the actor is allowed (its owner, or
+ * any admin) and it is still inside its window and not already undone. Inverts
+ * the operation by kind and writes a companion `undo` operation. See
+ * docs/history_and_reversibility.md.
+ */
+export async function undoOperation(
+  user: User,
+  operationId: number,
+): Promise<UndoResult> {
+  const [op] = await db
+    .select()
+    .from(operations)
+    .where(eq(operations.id, operationId))
     .limit(1);
-  throw existing
-    ? new HttpError(409, "Matched transactions cannot be deleted")
-    : new HttpError(404, "Bank transaction not found");
+  if (!op) throw new HttpError(404, "Operation not found");
+
+  if (op.actorUserId !== user.id && user.role !== "admin") {
+    throw new HttpError(403, "You can only undo your own actions");
+  }
+  if (op.undoableUntil === null) {
+    throw new HttpError(400, "This action cannot be undone");
+  }
+  if (op.undoneAt !== null) {
+    throw new HttpError(409, "This action has already been undone");
+  }
+  if (!isUndoable(op, new Date())) {
+    throw new HttpError(400, "The undo window for this action has passed");
+  }
+
+  return db.transaction(async (dbTx) => {
+    if (op.kind === "confirm_match") {
+      if (op.bankTransactionId === null) {
+        throw new HttpError(500, "Confirm operation is missing its transaction link");
+      }
+      // Void exactly this operation's live payments, then un-match the row.
+      await dbTx
+        .update(payments)
+        .set({ voidedAt: new Date(), voidedByUserId: user.id })
+        .where(and(eq(payments.operationId, op.id), isNull(payments.voidedAt)));
+      await dbTx
+        .update(bankTransactions)
+        .set({ status: "unmatched" })
+        .where(
+          and(
+            eq(bankTransactions.id, op.bankTransactionId),
+            eq(bankTransactions.status, "matched"),
+          ),
+        );
+    } else if (op.kind === "discard_transaction") {
+      if (op.bankTransactionId === null) {
+        throw new HttpError(500, "Discard operation is missing its transaction link");
+      }
+      await dbTx
+        .update(bankTransactions)
+        .set({ status: "unmatched", discardedAt: null, discardedByUserId: null })
+        .where(
+          and(
+            eq(bankTransactions.id, op.bankTransactionId),
+            eq(bankTransactions.status, "discarded"),
+          ),
+        );
+    } else {
+      throw new HttpError(400, "This kind of action cannot be undone");
+    }
+
+    const undoOp = await recordOperation(dbTx, {
+      actorUserId: user.id,
+      kind: "undo",
+      bankTransactionId: op.bankTransactionId,
+      undoableUntil: null, // an undo is not itself undoable (no redo in v2)
+      summary: `Reverted operation #${op.id} (${op.kind})`,
+      details: { undoneOperationId: op.id },
+    });
+
+    await dbTx
+      .update(operations)
+      .set({
+        undoneAt: new Date(),
+        undoneByUserId: user.id,
+        undoOperationId: undoOp.id,
+      })
+      .where(eq(operations.id, op.id));
+
+    return {
+      operationId: op.id,
+      kind: op.kind,
+      undoOperationId: undoOp.id,
+      bankTransactionId: op.bankTransactionId,
+    };
+  });
 }

@@ -59,7 +59,7 @@ export const strings = {
     confirmedTally: (n: number) =>
       n === 1 ? "1 transaction confirmed" : `${n} transactions confirmed`,
     deletedTally: (n: number) =>
-      n === 1 ? "1 row deleted" : `${n} rows deleted`,
+      n === 1 ? "1 row discarded" : `${n} rows discarded`,
     skippedTally: (n: number) =>
       n === 1
         ? "1 skipped (stays unmatched)"
@@ -73,6 +73,91 @@ export const strings = {
     showingCount: (shown: number, total: number) =>
       `Showing ${shown} of ${total}`,
     showMore: (n: number) => `Show ${n} more`,
+  },
+
+  triage: {
+    tabs: {
+      all: "All",
+      attention: "Needs attention",
+      confident: "Confident",
+    },
+    tabCount: (n: number) => `${n}`,
+    attentionHeading: "Needs attention",
+    attentionHint: "Review and confirm each of these individually.",
+    confidentHeading: "Confident matches",
+    confidentHint: "Pre-selected. Uncheck any that look wrong, then confirm.",
+    selectAll: "Select all",
+    clear: "Clear",
+    selectedCount: (n: number) =>
+      n === 1 ? "1 selected" : `${n} selected`,
+    confirmSelected: (n: number) => `Confirm ${n} selected`,
+    confirmingProgress: (done: number, total: number) =>
+      `Confirming ${done} of ${total}…`,
+    bulkDone: (ok: number, failed: number) =>
+      failed === 0
+        ? `${ok} confirmed.`
+        : `${ok} confirmed, ${failed} failed — those rows are kept.`,
+    noConfident: "No confident matches.",
+    noAttention: "Nothing needs attention.",
+    expand: "Show details",
+    collapse: "Hide details",
+    balanced: "Balanced",
+    noMemo: "(no memo)",
+    proposedFor: "→",
+    splitStudents: (n: number) => `Split · ${n} students`,
+    noProposal: "No proposed match",
+    detailsLabel: "Bank details",
+    reason: {
+      unmatched: "No match",
+      low_confidence: "Low confidence",
+      multi_student: "Split payment",
+      multiple_candidates: "Multiple candidates",
+      flagged: "Needs a check",
+      unbalanced: "Amount doesn't balance",
+    } as Record<
+      | "unmatched"
+      | "low_confidence"
+      | "multi_student"
+      | "multiple_candidates"
+      | "flagged"
+      | "unbalanced",
+      string
+    >,
+    controls: {
+      classAll: "All classes",
+      classLabel: "Class",
+      studentValue: "Student",
+      studentPlaceholder: "Search student…",
+      studentNone: "Pick student",
+      studentNoMatch: "No students in this class",
+      chargePlaceholder: "Charge",
+      noOpenCharges: "No open charges for this student",
+    },
+    split: {
+      enable: "Split",
+      disable: "Single charge",
+      addCharge: "Add charge",
+      remove: "Remove",
+      allocated: (allocated: number, total: number) =>
+        `Allocated ${allocated.toLocaleString("en-US")} of ${total.toLocaleString("en-US")} MNT`,
+    },
+    info: {
+      transaction: "Transaction details",
+      sender: "Sender",
+      account: "Account",
+      reference: "Reference",
+      date: "Date",
+      matchedOn: "Matched on",
+      noSignals: "No matching signals — fill this in manually.",
+      alternatives: "Other candidate students",
+      apply: (name: string) => `Use ${name}`,
+      warnings: "Warnings",
+      reason: "Why there's no confident match",
+    },
+    confirm: "Confirm",
+    confirmPending: "…",
+    skip: "Skip",
+    discard: "Not a payment",
   },
 
   form: {
@@ -94,10 +179,10 @@ export const strings = {
     confirmPending: "Confirming…",
     delete: "Delete",
     deletePending: "Deleting…",
-    deleteDialogTitle: "Delete this bank row?",
+    deleteDialogTitle: "Discard this bank row?",
     deleteDialogBody:
-      "Use this for rows that are not student payments (bank fees, refunds, unrelated transfers). The row is not kept — if deleted by mistake, re-upload the bank file to restore it.",
-    deleteDialogConfirm: "Delete row",
+      "Use this for rows that are not student payments (bank fees, refunds, unrelated transfers). The row is kept as 'discarded' and can be restored from Transaction history within the undo window.",
+    deleteDialogConfirm: "Discard row",
     deleteDialogCancel: "Cancel",
     skip: "Skip",
     suggestions: "Other candidates:",
