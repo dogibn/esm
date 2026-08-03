@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { allocateCharges, feeTagMatches, findCombosSummingTo } from './allocate-charges';
 import { buildMatchingContext } from './build-index';
+import { NEW_CHARGE_PLACEHOLDER_ID } from './types';
 import type {
   ChargeWithBalance,
   ExtractedSignals,
@@ -13,6 +14,7 @@ function signals(overrides: Partial<ExtractedSignals> = {}): ExtractedSignals {
   return {
     gradeTokens: { class: [], wildcard: [], level: [] },
     nameTokens: [],
+    nameGroups: [],
     feeHints: { explicit: [], fromAmount: null },
     senderBlock: '',
     ...overrides,
@@ -20,7 +22,12 @@ function signals(overrides: Partial<ExtractedSignals> = {}): ExtractedSignals {
 }
 
 function candidate(id: number): StudentCandidate {
-  return { studentId: id, signals: new Set(['memo_grade_class', 'memo_name_full']), tier: 1 };
+  return {
+    studentId: id,
+    signals: new Set(['memo_grade_class', 'memo_name_full']),
+    tier: 1,
+    score: 1.3,
+  };
 }
 
 function charge(
@@ -218,5 +225,121 @@ describe('allocateCharges', () => {
     const p = allocateCharges(candidate(99), BigInt('100000'), signals(), ctx);
     expect(p.flags.has('no_open_charges')).toBe(true);
     expect(p.allocations.length).toBe(0);
+  });
+});
+
+// The charge stage on fees the ledger doesn't have yet, and on club charges
+// whose amount moves under the student (see docs/import_matching_plan.md § 2).
+describe('allocateCharges — fees the student has no charge for', () => {
+  function ctxWithFees(
+    studentId: number,
+    charges: ChargeWithBalance[],
+    termFees: Array<{ feeStructureId: number; feeName: string; amount: bigint; isClub: boolean }>,
+  ): MatchingContext {
+    return buildMatchingContext({
+      academicTermId: 4,
+      students: [],
+      enrollments: [],
+      currentTermFees: termFees,
+      currentYearFees: [],
+      clubAliases: {},
+      confirmedAccountLinks: [],
+      openCharges: charges.map((c) => ({ ...c, studentId })),
+    });
+  }
+
+  const busFee = {
+    feeStructureId: 1,
+    feeName: 'bus',
+    amount: BigInt('375000'),
+    isClub: false,
+  };
+
+  it('proposes creating the bus charge when the amount is the school rate', () => {
+    const ctx = ctxWithFees(1, [charge(10, 'tuition', BigInt('20000000'))], [busFee]);
+    const s = signals({ feeHints: { explicit: ['bus'], fromAmount: null } });
+    const p = allocateCharges(candidate(1), BigInt('375000'), s, ctx);
+    expect(p.proposedCharge).toEqual({
+      feeName: 'bus',
+      amount: BigInt('375000'),
+      scope: 'term',
+      academicTermId: 4,
+      reason: 'fee_hint_explicit',
+    });
+    expect(p.allocations).toEqual([
+      { chargeId: NEW_CHARGE_PLACEHOLDER_ID, amount: BigInt('375000') },
+    ]);
+    expect(p.flags.has('manual_review')).toBe(false);
+  });
+
+  it('proposes the bus charge even for a student who owes nothing', () => {
+    const ctx = ctxWithFees(1, [], [busFee]);
+    const s = signals({ feeHints: { explicit: ['bus'], fromAmount: null } });
+    const p = allocateCharges(candidate(1), BigInt('375000'), s, ctx);
+    expect(p.proposedCharge?.feeName).toBe('bus');
+    expect(p.flags.has('no_open_charges')).toBe(false);
+  });
+
+  it('refuses to guess when the amount is a multiple of the rate', () => {
+    // 750,000 is two terms, or two siblings — a decision, not a deduction.
+    const ctx = ctxWithFees(1, [charge(10, 'tuition', BigInt('20000000'))], [busFee]);
+    const s = signals({ feeHints: { explicit: ['bus'], fromAmount: null } });
+    const p = allocateCharges(candidate(1), BigInt('750000'), s, ctx);
+    expect(p.proposedCharge).toBeUndefined();
+  });
+
+  it('prefers an existing charge over creating one', () => {
+    const ctx = ctxWithFees(
+      1,
+      [charge(10, 'bus_fee', BigInt('375000'))],
+      [busFee],
+    );
+    const s = signals({ feeHints: { explicit: ['bus'], fromAmount: null } });
+    const p = allocateCharges(candidate(1), BigInt('375000'), s, ctx);
+    expect(p.proposedCharge).toBeUndefined();
+    expect(p.allocations).toEqual([{ chargeId: 10, amount: BigInt('375000') }]);
+  });
+
+  it('never proposes creating a club charge', () => {
+    const ctx = ctxWithFees(
+      1,
+      [charge(10, 'tuition', BigInt('20000000'))],
+      [{ feeStructureId: 2, feeName: 'Ballet Mon, Wed Term 4', amount: BigInt('285000'), isClub: true }],
+    );
+    const s = signals({
+      feeHints: { explicit: [{ kind: 'club_category', category: 'ballet' }], fromAmount: null },
+    });
+    const p = allocateCharges(candidate(1), BigInt('285000'), s, ctx);
+    expect(p.proposedCharge).toBeUndefined();
+  });
+});
+
+describe('allocateCharges — a named fee whose balance has moved', () => {
+  it('pays a per-session club charge that is owed less than was paid', () => {
+    // Homework club accrues per session; the parent pays the standard rate.
+    const ctx = ctxWithCharges(1, [
+      charge(10, 'tuition', BigInt('20000000')),
+      charge(11, 'HW GR1 Term 4', BigInt('555000')),
+    ]);
+    const s = signals({
+      feeHints: { explicit: [{ kind: 'club_category', category: 'homework' }], fromAmount: null },
+    });
+    const p = allocateCharges(candidate(1), BigInt('690000'), s, ctx);
+    expect(p.allocations).toEqual([{ chargeId: 11, amount: BigInt('690000') }]);
+    expect(p.flags.has('overpayment')).toBe(true);
+    expect(p.flags.has('manual_review')).toBe(false);
+  });
+
+  it('pays a named fee short without giving up', () => {
+    const ctx = ctxWithCharges(1, [
+      charge(10, 'tuition', BigInt('20000000')),
+      charge(11, 'HW GR1 Term 4', BigInt('705000')),
+    ]);
+    const s = signals({
+      feeHints: { explicit: [{ kind: 'club_category', category: 'homework' }], fromAmount: null },
+    });
+    const p = allocateCharges(candidate(1), BigInt('225000'), s, ctx);
+    expect(p.allocations).toEqual([{ chargeId: 11, amount: BigInt('225000') }]);
+    expect(p.flags.has('partial_payment')).toBe(true);
   });
 });

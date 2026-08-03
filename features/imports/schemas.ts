@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { NEW_CHARGE_PLACEHOLDER_ID } from "./matching";
+
 const ACCEPTED_MIMES = new Set([
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
   "application/vnd.ms-excel", // .xls
@@ -48,14 +50,77 @@ export type ParsedBankRowInput = z.infer<typeof parsedBankRowSchema>;
 
 export const allocationLineSchema = z.object({
   studentId: z.number().int().positive(),
-  chargeId: z.number().int().positive(),
+  // Either a real charge id, or NEW_CHARGE_PLACEHOLDER_ID (-1) meaning "the
+  // charge `createCharges` will make for this student" — see below.
+  chargeId: z
+    .number()
+    .int()
+    .refine((v) => v > 0 || v === NEW_CHARGE_PLACEHOLDER_ID, {
+      message: "Charge id must be a real charge or the new-charge placeholder",
+    }),
   amount: z.number().int().positive(),
 });
 
-export const allocationFormSchema = z.object({
-  bankTransactionId: z.number().int().positive(),
-  lines: z.array(allocationLineSchema).min(1, "At least one allocation line is required"),
+/**
+ * A charge to create as part of confirming this transaction. The school has a
+ * rate for the fee but no Charge row for this student — bus, most often, whose
+ * opt-in list is not imported. Confirming does both: create the charge, then
+ * pay it, in one operation that undoes as a unit.
+ *
+ * At most one per student, so a line's placeholder `chargeId` is unambiguous.
+ */
+export const createChargeSchema = z.object({
+  studentId: z.number().int().positive(),
+  feeName: z.string().trim().min(1).max(60),
+  amount: z.number().int().positive(),
+  scope: z.enum(["term", "annual"]),
+  academicTermId: z.number().int().positive().nullable(),
 });
 
+export const allocationFormSchema = z
+  .object({
+    bankTransactionId: z.number().int().positive(),
+    lines: z.array(allocationLineSchema).min(1, "At least one allocation line is required"),
+    createCharges: z.array(createChargeSchema).optional(),
+  })
+  .refine(
+    (d) =>
+      new Set((d.createCharges ?? []).map((c) => c.studentId)).size ===
+      (d.createCharges ?? []).length,
+    { message: "Only one new fee per student per transaction", path: ["createCharges"] },
+  )
+  .refine(
+    (d) =>
+      d.lines
+        .filter((l) => l.chargeId === NEW_CHARGE_PLACEHOLDER_ID)
+        .every((l) => (d.createCharges ?? []).some((c) => c.studentId === l.studentId)),
+    {
+      message: "A line refers to a new charge that is not being created",
+      path: ["lines"],
+    },
+  )
+  .refine(
+    (d) =>
+      (d.createCharges ?? []).every((c) =>
+        d.lines.some(
+          (l) => l.studentId === c.studentId && l.chargeId === NEW_CHARGE_PLACEHOLDER_ID,
+        ),
+      ),
+    {
+      // Otherwise a confirm could add a fee to a student's ledger that this
+      // transaction never pays — a charge nobody asked for and nobody owes to.
+      message: "Every new fee must be paid by a line on this transaction",
+      path: ["createCharges"],
+    },
+  )
+  .refine(
+    (d) =>
+      (d.createCharges ?? []).every((c) =>
+        c.scope === "term" ? c.academicTermId !== null : c.academicTermId === null,
+      ),
+    { message: "A term fee needs a term; an annual fee must not have one", path: ["createCharges"] },
+  );
+
 export type AllocationLine = z.infer<typeof allocationLineSchema>;
+export type CreateChargeInput = z.infer<typeof createChargeSchema>;
 export type AllocationFormValues = z.infer<typeof allocationFormSchema>;

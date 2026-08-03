@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useImperativeHandle, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from "react";
+import { ChevronDownIcon, ChevronRightIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,8 +24,10 @@ import type { AllocationFormValues } from "../schemas";
 import {
   classifyProposal,
   editToLines,
+  groupByAttentionReason,
   isEditConfirmable,
   proposalToEdit,
+  type AttentionReason,
   type RowEdit,
 } from "../triage";
 import type {
@@ -39,7 +47,7 @@ async function parseErrorBody(res: Response): Promise<Error> {
 const CONFIDENT_CHUNK = 50;
 const BULK_CONCURRENCY = 6;
 
-type Tab = "all" | "attention" | "confident";
+type Tab = "all" | "attention" | "missing" | "notStudent" | "confident";
 type Tally = { confirmed: number; deleted: number; skipped: number };
 const ZERO_TALLY: Tally = { confirmed: 0, deleted: 0, skipped: 0 };
 
@@ -47,6 +55,26 @@ function isConfident(p: ProposalListItemWire): boolean {
   return (
     classifyProposal(p.result, p.transactionPreview.amount) === "confident"
   );
+}
+
+/**
+ * Rows whose match hinges on a fee the student does not have yet. Kept in their
+ * own group rather than folded into "confident": confirming one writes a charge
+ * to the ledger as well as a payment, so it stays an explicit, opt-in action —
+ * but a whole term of bus payments is still one pass rather than sixty.
+ */
+function needsNewCharge(p: ProposalListItemWire): boolean {
+  if (isConfident(p)) return false;
+  const top =
+    p.result.kind === "matched" || p.result.kind === "low_confidence"
+      ? p.result.proposals[0]
+      : null;
+  return Boolean(top?.proposedCharge);
+}
+
+/** Incoming money the classifier says isn't a fee payment at all. */
+function isNotStudent(p: ProposalListItemWire): boolean {
+  return p.result.kind === "unmatched" && p.result.reason === "not_student";
 }
 
 function confidentIdSet(resp: ProposalListResponseWire): Set<number> {
@@ -86,6 +114,55 @@ type Props = {
   handleRef?: React.Ref<ReviewTableHandle>;
 };
 
+/**
+ * A labelled, collapsible run of rows. The label is the one place the reason
+ * appears — it used to be a badge on every row, which said the same four words
+ * dozens of times and squeezed the memo that a reviewer actually reads.
+ */
+function RowGroup({
+  label,
+  count,
+  collapsed,
+  onToggle,
+  items,
+  renderRow,
+}: {
+  label: string;
+  count: number;
+  collapsed: boolean;
+  onToggle: () => void;
+  items: ProposalListItemWire[];
+  renderRow: (item: ProposalListItemWire) => React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={!collapsed}
+        className="flex w-full items-center gap-1.5 rounded-md bg-muted/50 px-2 py-1 text-left text-xs font-medium text-foreground hover:bg-muted"
+      >
+        {collapsed ? (
+          <ChevronRightIcon className="size-3.5 text-muted-foreground" />
+        ) : (
+          <ChevronDownIcon className="size-3.5 text-muted-foreground" />
+        )}
+        <span>{label}</span>
+        <span className="rounded bg-background px-1.5 py-px tabular-nums text-muted-foreground">
+          {count}
+        </span>
+      </button>
+      {collapsed ? null : (
+        <ul className="flex flex-col gap-1.5">
+          {items.map((item) => (
+            <li key={item.bankTransactionId}>{renderRow(item)}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 export function ReviewTable({ initialData, handleRef }: Props) {
   const { toast } = useToast();
   const [data, setData] = useState<ProposalListResponseWire>(initialData);
@@ -100,6 +177,10 @@ export function ReviewTable({ initialData, handleRef }: Props) {
     buildEdits(initialData),
   );
   const [tab, setTab] = useState<Tab>("all");
+  // Groups open by default: a collapsed group would hide work without saying so.
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<AttentionReason>>(
+    () => new Set(),
+  );
   const [visibleConfident, setVisibleConfident] = useState(CONFIDENT_CHUNK);
   const [bulkRunning, setBulkRunning] = useState(false);
   const [bulkProgress, setBulkProgress] = useState({ done: 0, total: 0 });
@@ -220,12 +301,61 @@ export function ReviewTable({ initialData, handleRef }: Props) {
     () => data.proposals.filter((p) => !skipped.has(p.bankTransactionId)),
     [data.proposals, skipped],
   );
-  const attention = useMemo(() => remaining.filter((p) => !isConfident(p)), [remaining]);
-  const confident = useMemo(() => remaining.filter((p) => isConfident(p)), [remaining]);
+  const missingCharge = useMemo(
+    () => remaining.filter(needsNewCharge),
+    [remaining],
+  );
+  const notStudent = useMemo(() => remaining.filter(isNotStudent), [remaining]);
+  const attention = useMemo(
+    () =>
+      remaining.filter(
+        (p) => !isConfident(p) && !needsNewCharge(p) && !isNotStudent(p),
+      ),
+    [remaining],
+  );
+  const confident = useMemo(() => remaining.filter(isConfident), [remaining]);
+  const attentionGroups = useMemo(
+    () => groupByAttentionReason(attention),
+    [attention],
+  );
+  const toggleGroup = useCallback((reason: AttentionReason) => {
+    setCollapsedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(reason)) next.delete(reason);
+      else next.add(reason);
+      return next;
+    });
+  }, []);
   const selectedPresent = confident.filter((p) => selected.has(p.bankTransactionId));
+  const selectedMissing = missingCharge.filter((p) =>
+    selected.has(p.bankTransactionId),
+  );
+  const selectedNotStudent = notStudent.filter((p) =>
+    selected.has(p.bankTransactionId),
+  );
 
-  const runBulk = async () => {
-    const jobs = selectedPresent
+  const runBulkDiscard = async (rows: ProposalListItemWire[]) => {
+    if (rows.length === 0) return;
+    setBulkRunning(true);
+    setBulkResult(null);
+    setBulkProgress({ done: 0, total: rows.length });
+    let ok = 0;
+    let failed = 0;
+    await runPool(rows, BULK_CONCURRENCY, async (row) => {
+      try {
+        await onDiscard(row.bankTransactionId);
+        ok += 1;
+      } catch {
+        failed += 1;
+      }
+      setBulkProgress((p) => ({ ...p, done: p.done + 1 }));
+    });
+    setBulkRunning(false);
+    setBulkResult({ ok, failed });
+  };
+
+  const runBulk = async (rows: ProposalListItemWire[]) => {
+    const jobs = rows
       .map((p) => {
         const edit = edits.get(p.bankTransactionId);
         if (!edit) return null;
@@ -265,7 +395,7 @@ export function ReviewTable({ initialData, handleRef }: Props) {
       <CollapsedProposalRow
         key={p.bankTransactionId}
         item={p}
-        tier={isConfident(p) ? "confident" : "attention"}
+        selectable={isConfident(p) || needsNewCharge(p) || isNotStudent(p)}
         allStudents={data.context.students}
         studentById={studentById}
         openChargesByStudent={openChargesByStudent}
@@ -293,6 +423,8 @@ export function ReviewTable({ initialData, handleRef }: Props) {
   };
 
   const showAttention = tab === "all" || tab === "attention";
+  const showMissing = tab === "all" || tab === "missing";
+  const showNotStudent = tab === "all" || tab === "notStudent";
   const showConfident = tab === "all" || tab === "confident";
   const visibleConfidentRows = confident.slice(0, visibleConfident);
   const hiddenConfident = confident.length - visibleConfidentRows.length;
@@ -339,6 +471,14 @@ export function ReviewTable({ initialData, handleRef }: Props) {
                   {strings.triage.tabs.attention}
                   <Badge variant="warning">{attention.length}</Badge>
                 </TabsTrigger>
+                <TabsTrigger value="missing">
+                  {strings.triage.tabs.missingCharge}
+                  <Badge variant="warning">{missingCharge.length}</Badge>
+                </TabsTrigger>
+                <TabsTrigger value="notStudent">
+                  {strings.triage.tabs.notStudent}
+                  <Badge variant="secondary">{notStudent.length}</Badge>
+                </TabsTrigger>
                 <TabsTrigger value="confident">
                   {strings.triage.tabs.confident}
                   <Badge variant="success">{confident.length}</Badge>
@@ -346,122 +486,269 @@ export function ReviewTable({ initialData, handleRef }: Props) {
               </TabsList>
             </Tabs>
 
-            {showAttention ? (
-              <section className="flex flex-col gap-2">
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-sm font-medium">
-                    {strings.triage.attentionHeading}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {attention.length === 0
-                      ? strings.triage.noAttention
-                      : strings.triage.attentionHint}
-                  </span>
-                </div>
-                <ul className="flex flex-col gap-1.5">
-                  {attention.map((p) => (
-                    <li key={p.bankTransactionId}>{renderRow(p)}</li>
-                  ))}
-                </ul>
-              </section>
-            ) : null}
-
-            {showConfident ? (
-              <section className="flex flex-col gap-2">
-                <div className="flex flex-wrap items-center justify-between gap-2">
+            {/* One horizontal scroller around every section: the rows are wider
+                than a laptop screen, and scrolling them together is what keeps
+                the columns lined up across groups. */}
+            <div className="flex flex-col gap-3 overflow-x-auto pb-1">
+              {showAttention ? (
+                <section className="flex flex-col gap-2">
                   <div className="flex flex-col gap-0.5">
                     <span className="text-sm font-medium">
-                      {strings.triage.confidentHeading}
+                      {strings.triage.attentionHeading}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      {confident.length === 0
-                        ? strings.triage.noConfident
-                        : strings.triage.confidentHint}
+                      {attention.length === 0
+                        ? strings.triage.noAttention
+                        : strings.triage.attentionHint}
                     </span>
                   </div>
-                  {confident.length > 0 ? (
-                    <div className="flex items-center gap-2">
+                  {attentionGroups.map((group) => (
+                    <RowGroup
+                      key={group.reason}
+                      label={strings.triage.reason[group.reason]}
+                      count={group.items.length}
+                      collapsed={collapsedGroups.has(group.reason)}
+                      onToggle={() => toggleGroup(group.reason)}
+                      items={group.items}
+                      renderRow={renderRow}
+                    />
+                  ))}
+                </section>
+              ) : null}
+
+              {showMissing ? (
+                <section className="flex flex-col gap-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-sm font-medium">
+                        {strings.triage.missingChargeHeading}
+                      </span>
                       <span className="text-xs text-muted-foreground">
-                        {strings.triage.selectedCount(selectedPresent.length)}
+                        {missingCharge.length === 0
+                          ? strings.triage.noMissingCharge
+                          : strings.triage.missingChargeHint}
+                      </span>
+                    </div>
+                    {missingCharge.length > 0 ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">
+                          {strings.triage.selectedCount(selectedMissing.length)}
+                        </span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          disabled={bulkRunning}
+                          onClick={() =>
+                            setSelected((prev) => {
+                              const next = new Set(prev);
+                              for (const p of missingCharge)
+                                next.add(p.bankTransactionId);
+                              return next;
+                            })
+                          }
+                        >
+                          {strings.triage.selectAll}
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          disabled={bulkRunning || selectedMissing.length === 0}
+                          onClick={() => void runBulk(selectedMissing)}
+                        >
+                          {bulkRunning
+                            ? strings.triage.confirmingProgress(
+                                bulkProgress.done,
+                                bulkProgress.total,
+                              )
+                            : strings.triage.addFeeAndConfirmSelected(
+                                selectedMissing.length,
+                              )}
+                        </Button>
+                      </div>
+                    ) : null}
+                  </div>
+                  <ul className="flex flex-col gap-1.5">
+                    {missingCharge.map((p) => (
+                      <li key={p.bankTransactionId}>{renderRow(p)}</li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null}
+
+              {showNotStudent ? (
+                <section className="flex flex-col gap-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-sm font-medium">
+                        {strings.triage.notStudentHeading}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {notStudent.length === 0
+                          ? strings.triage.noNotStudent
+                          : strings.triage.notStudentHint}
+                      </span>
+                    </div>
+                    {notStudent.length > 0 ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">
+                          {strings.triage.selectedCount(
+                            selectedNotStudent.length,
+                          )}
+                        </span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          disabled={bulkRunning}
+                          onClick={() =>
+                            setSelected((prev) => {
+                              const next = new Set(prev);
+                              for (const p of notStudent)
+                                next.add(p.bankTransactionId);
+                              return next;
+                            })
+                          }
+                        >
+                          {strings.triage.selectAll}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          disabled={
+                            bulkRunning || selectedNotStudent.length === 0
+                          }
+                          onClick={() =>
+                            void runBulkDiscard(selectedNotStudent)
+                          }
+                        >
+                          {bulkRunning
+                            ? strings.triage.confirmingProgress(
+                                bulkProgress.done,
+                                bulkProgress.total,
+                              )
+                            : strings.triage.discardSelected(
+                                selectedNotStudent.length,
+                              )}
+                        </Button>
+                      </div>
+                    ) : null}
+                  </div>
+                  <ul className="flex flex-col gap-1.5">
+                    {notStudent.map((p) => (
+                      <li key={p.bankTransactionId}>{renderRow(p)}</li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null}
+
+              {showConfident ? (
+                <section className="flex flex-col gap-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-sm font-medium">
+                        {strings.triage.confidentHeading}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {confident.length === 0
+                          ? strings.triage.noConfident
+                          : strings.triage.confidentHint}
+                      </span>
+                    </div>
+                    {confident.length > 0 ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">
+                          {strings.triage.selectedCount(selectedPresent.length)}
+                        </span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          disabled={bulkRunning}
+                          onClick={() =>
+                            setSelected(
+                              new Set(
+                                confident.map((p) => p.bankTransactionId),
+                              ),
+                            )
+                          }
+                        >
+                          {strings.triage.selectAll}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          disabled={bulkRunning}
+                          onClick={() => setSelected(new Set())}
+                        >
+                          {strings.triage.clear}
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          disabled={bulkRunning || selectedPresent.length === 0}
+                          onClick={() => void runBulk(selectedPresent)}
+                        >
+                          {bulkRunning
+                            ? strings.triage.confirmingProgress(
+                                bulkProgress.done,
+                                bulkProgress.total,
+                              )
+                            : strings.triage.confirmSelected(
+                                selectedPresent.length,
+                              )}
+                        </Button>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  {bulkResult ? (
+                    <div
+                      className={
+                        bulkResult.failed > 0
+                          ? "text-sm text-destructive"
+                          : "text-sm text-success"
+                      }
+                    >
+                      {strings.triage.bulkDone(
+                        bulkResult.ok,
+                        bulkResult.failed,
+                      )}
+                    </div>
+                  ) : null}
+
+                  <ul className="flex flex-col gap-1.5">
+                    {visibleConfidentRows.map((p) => (
+                      <li key={p.bankTransactionId}>{renderRow(p)}</li>
+                    ))}
+                  </ul>
+                  {hiddenConfident > 0 ? (
+                    <div className="flex items-center justify-center gap-3 text-sm text-muted-foreground">
+                      <span>
+                        {strings.review.showingCount(
+                          visibleConfidentRows.length,
+                          confident.length,
+                        )}
                       </span>
                       <Button
                         type="button"
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
-                        disabled={bulkRunning}
                         onClick={() =>
-                          setSelected(
-                            new Set(confident.map((p) => p.bankTransactionId)),
-                          )
+                          setVisibleConfident((c) => c + CONFIDENT_CHUNK)
                         }
                       >
-                        {strings.triage.selectAll}
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        disabled={bulkRunning}
-                        onClick={() => setSelected(new Set())}
-                      >
-                        {strings.triage.clear}
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        disabled={bulkRunning || selectedPresent.length === 0}
-                        onClick={() => void runBulk()}
-                      >
-                        {bulkRunning
-                          ? strings.triage.confirmingProgress(
-                              bulkProgress.done,
-                              bulkProgress.total,
-                            )
-                          : strings.triage.confirmSelected(selectedPresent.length)}
+                        {strings.review.showMore(
+                          Math.min(CONFIDENT_CHUNK, hiddenConfident),
+                        )}
                       </Button>
                     </div>
                   ) : null}
-                </div>
-
-                {bulkResult ? (
-                  <div
-                    className={
-                      bulkResult.failed > 0
-                        ? "text-sm text-destructive"
-                        : "text-sm text-success"
-                    }
-                  >
-                    {strings.triage.bulkDone(bulkResult.ok, bulkResult.failed)}
-                  </div>
-                ) : null}
-
-                <ul className="flex flex-col gap-1.5">
-                  {visibleConfidentRows.map((p) => (
-                    <li key={p.bankTransactionId}>{renderRow(p)}</li>
-                  ))}
-                </ul>
-                {hiddenConfident > 0 ? (
-                  <div className="flex items-center justify-center gap-3 text-sm text-muted-foreground">
-                    <span>
-                      {strings.review.showingCount(
-                        visibleConfidentRows.length,
-                        confident.length,
-                      )}
-                    </span>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setVisibleConfident((c) => c + CONFIDENT_CHUNK)}
-                    >
-                      {strings.review.showMore(
-                        Math.min(CONFIDENT_CHUNK, hiddenConfident),
-                      )}
-                    </Button>
-                  </div>
-                ) : null}
-              </section>
-            ) : null}
+                </section>
+              ) : null}
+            </div>
           </>
         )}
       </CardContent>

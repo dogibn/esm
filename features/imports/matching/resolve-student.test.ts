@@ -1,13 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { buildMatchingContext } from './build-index';
 import { extractSignals } from './extract-signals';
-import { normalize } from './normalize';
 import {
-  assignTier,
   detectMultiStudent,
   resolveStudent,
+  tierFromScore,
 } from './resolve-student';
-import type { BuildIndexInput, SignalKind } from './types';
+import type { BuildIndexInput } from './types';
 
 function ctx(overrides: Partial<BuildIndexInput> = {}) {
   return buildMatchingContext({
@@ -44,37 +43,15 @@ const fullContext = ctx({
   confirmedAccountLinks: [{ senderAccount: 'ACC-ONE', studentId: 1 }],
 });
 
-describe('assignTier', () => {
-  function t(...sigs: SignalKind[]) {
-    return assignTier(new Set(sigs));
-  }
-
-  it('tier 1: two strong signals', () => {
-    expect(t('memo_grade_class', 'memo_name_full')).toBe(1);
-    expect(t('memo_grade_class', 'sender_account')).toBe(1);
-    expect(t('memo_name_full', 'sender_account')).toBe(1);
-  });
-
-  it('tier 2: grade + name_full (non-class grade)', () => {
-    expect(t('memo_grade_level', 'memo_name_full')).toBe(2);
-    expect(t('memo_grade_wildcard', 'memo_name_full')).toBe(2);
-  });
-
-  it('tier 3: sender_account alone, name_full alone, or grade + name_partial', () => {
-    expect(t('sender_account')).toBe(3);
-    expect(t('memo_name_full')).toBe(3);
-    expect(t('memo_grade_class', 'memo_name_partial')).toBe(3);
-    expect(t('memo_grade_level', 'memo_name_partial')).toBe(3);
-  });
-
-  it('tier 4: fuzzy + grade', () => {
-    expect(t('memo_grade_class', 'memo_name_fuzzy')).toBe(4);
-  });
-
-  it('tier 5: weak signal alone', () => {
-    expect(t('memo_grade_level')).toBe(5);
-    expect(t('memo_name_partial')).toBe(5);
-    expect(t('memo_name_fuzzy')).toBe(5);
+describe('tierFromScore', () => {
+  it('reads a tier off the evidence score, best first', () => {
+    expect(tierFromScore(1.7)).toBe(1);
+    expect(tierFromScore(1.2)).toBe(1);
+    expect(tierFromScore(0.9)).toBe(2);
+    expect(tierFromScore(0.6)).toBe(3);
+    expect(tierFromScore(0.35)).toBe(4);
+    expect(tierFromScore(0.2)).toBe(5);
+    expect(tierFromScore(0)).toBe(5);
   });
 });
 
@@ -87,23 +64,35 @@ describe('resolveStudent', () => {
     expect(baatar?.signals.has('memo_name_partial')).toBe(true);
   });
 
-  it("'AGVAANNINJ 4SA' → student 3 gets memo_grade_class + memo_name_partial (tier 3)", () => {
+  it("'AGVAANNINJ 4SA' → class + a name nobody else shares is a top-tier match", () => {
     const signals = extractSignals('AGVAANNINJ 4SA', BigInt('100000'), fullContext);
     const cands = resolveStudent(signals, null, fullContext);
     const agv = cands.find((c) => c.studentId === 3);
     expect(agv).toBeDefined();
-    expect(agv?.tier).toBe(3);
+    expect(agv?.signals.has('memo_grade_class')).toBe(true);
+    expect(agv?.tier).toBe(1);
+    // Classmates share the class but not the name, so they rank below and stay
+    // out of proposal range.
+    const classmate = cands.find((c) => c.studentId === 4);
+    expect(classmate?.tier).toBe(5);
   });
 
-  it('sender_account alone → tier 3 candidate', () => {
+  it('sender_account alone identifies the student outright', () => {
     const signals = extractSignals('random memo', BigInt('100000'), fullContext);
     const cands = resolveStudent(signals, 'ACC-ONE', fullContext);
     const c = cands.find((c) => c.studentId === 1);
     expect(c).toBeDefined();
-    expect(c?.tier).toBe(3);
+    expect(c?.tier).toBe(2);
   });
 
-  it('fuzzy only fires when no exact name match exists', () => {
+  it('a grade with no name proposes nobody — a class is not an identification', () => {
+    const signals = extractSignals('4SA tulbur', BigInt('100000'), fullContext);
+    const cands = resolveStudent(signals, null, fullContext);
+    expect(cands.length).toBeGreaterThan(0);
+    expect(cands.every((c) => c.tier === 5)).toBe(true);
+  });
+
+  it('fuzzy fires for a misspelled name', () => {
     // Misspelled "amartubshin" (b vs v).
     const signals = extractSignals('4BA amartubshin', BigInt('100000'), fullContext);
     const cands = resolveStudent(signals, null, fullContext);
@@ -111,11 +100,45 @@ describe('resolveStudent', () => {
     expect(ama?.fuzzyDistance).toBe(1);
   });
 
-  it("'AGVAANNINJ' (no grade) — single name token = partial, tier 5", () => {
+  it("'AGVAANNINJ' with no grade is still proposable — the name is unique", () => {
     const signals = extractSignals('AGVAANNINJ payment', BigInt('100000'), fullContext);
     const cands = resolveStudent(signals, null, fullContext);
     const agv = cands.find((c) => c.studentId === 3);
-    expect(agv?.tier).toBe(5);
+    expect(agv?.signals.has('memo_name_partial')).toBe(true);
+    expect(agv?.tier).toBeLessThanOrEqual(3);
+  });
+
+  it('scores an initial-form name and marks it as such', () => {
+    const signals = extractSignals('B.BAATAR tulbur', BigInt('100000'), fullContext);
+    const cands = resolveStudent(signals, null, fullContext);
+    const baatar = cands.find((c) => c.studentId === 1);
+    expect(baatar?.signals.has('memo_name_initial')).toBe(true);
+    expect(baatar?.tier).toBeLessThanOrEqual(3);
+  });
+
+  it('weighs a shared name below a unique one', () => {
+    const shared = ctx({
+      students: [
+        { id: 1, firstName: 'Bilguun', lastName: 'A' },
+        { id: 2, firstName: 'Bilguun', lastName: 'B' },
+        { id: 3, firstName: 'Bilguun', lastName: 'C' },
+        { id: 4, firstName: 'Bilguun', lastName: 'D' },
+        { id: 5, firstName: 'Bilguun', lastName: 'E' },
+        { id: 6, firstName: 'Otgonbayar', lastName: 'F' },
+      ],
+      enrollments: [],
+    });
+    const common = resolveStudent(
+      extractSignals('Bilguun tulbur', BigInt('1'), shared),
+      null,
+      shared,
+    );
+    const unique = resolveStudent(
+      extractSignals('Otgonbayar tulbur', BigInt('1'), shared),
+      null,
+      shared,
+    );
+    expect(unique[0]!.score).toBeGreaterThan(common[0]!.score);
   });
 
   it('resolves a name whose memo spelling differs from the directory only by o↔u', () => {

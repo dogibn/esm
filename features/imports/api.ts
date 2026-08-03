@@ -13,7 +13,9 @@ import { HttpError } from "@/lib/errors";
 
 import { isUndoable, recordOperation, undoableUntil } from "@/features/history";
 
-import { buildMatchingContext, match } from "./matching";
+import { insertCharge } from "@/features/students";
+
+import { buildMatchingContext, match, NEW_CHARGE_PLACEHOLDER_ID } from "./matching";
 import { loadMatchingContextInput } from "./matching/load-context";
 import type { BankTransactionInput } from "./matching";
 import {
@@ -249,6 +251,13 @@ export async function listProposals(
  * vanish. Over-paying an individual charge is allowed (its balance just goes
  * negative); under- or over-allocating the *transaction* is not.
  *
+ * `input.createCharges` lets a confirm bring a charge into existence and pay it
+ * in the same breath — the bus case, where the school has a rate but no Charge
+ * rows. Lines refer to such a charge by NEW_CHARGE_PLACEHOLDER_ID and are
+ * rewritten to the real id once it is inserted. Creation, payment and status
+ * flip share one DB transaction and one operations-log row, so undo reverses
+ * the whole thing rather than leaving an orphan charge behind.
+ *
  * The status guard inside the DB transaction (UPDATE ... WHERE status =
  * 'unmatched' RETURNING) makes double-submits a 409, not duplicate payments.
  */
@@ -270,24 +279,38 @@ export async function confirmAllocation(
     throw new HttpError(409, "This transaction has already been matched");
   }
 
-  const chargeIds = input.lines.map((l) => l.chargeId);
-  if (new Set(chargeIds).size !== chargeIds.length) {
+  const newCharges = input.createCharges ?? [];
+  const existingIds = input.lines
+    .map((l) => l.chargeId)
+    .filter((id) => id !== NEW_CHARGE_PLACEHOLDER_ID);
+  if (new Set(existingIds).size !== existingIds.length) {
     throw new HttpError(422, "The same charge appears on more than one line");
   }
+  // A placeholder line resolves by student, so two of them for one student would
+  // both land on the same new charge — the duplicate check above can't see that.
+  const placeholderStudents = input.lines
+    .filter((l) => l.chargeId === NEW_CHARGE_PLACEHOLDER_ID)
+    .map((l) => l.studentId);
+  if (new Set(placeholderStudents).size !== placeholderStudents.length) {
+    throw new HttpError(422, "The same new fee appears on more than one line");
+  }
 
-  const chargeRows = await db
-    .select({ id: charges.id, studentId: charges.studentId })
-    .from(charges)
-    .where(inArray(charges.id, chargeIds));
-  const chargeById = new Map(chargeRows.map((c) => [c.id, c]));
-  for (const line of input.lines) {
-    const charge = chargeById.get(line.chargeId);
-    if (!charge) throw new HttpError(422, `Charge ${line.chargeId} not found`);
-    if (charge.studentId !== line.studentId) {
-      throw new HttpError(
-        422,
-        "A selected charge does not belong to the selected student",
-      );
+  if (existingIds.length > 0) {
+    const chargeRows = await db
+      .select({ id: charges.id, studentId: charges.studentId })
+      .from(charges)
+      .where(inArray(charges.id, existingIds));
+    const chargeById = new Map(chargeRows.map((c) => [c.id, c]));
+    for (const line of input.lines) {
+      if (line.chargeId === NEW_CHARGE_PLACEHOLDER_ID) continue;
+      const charge = chargeById.get(line.chargeId);
+      if (!charge) throw new HttpError(422, `Charge ${line.chargeId} not found`);
+      if (charge.studentId !== line.studentId) {
+        throw new HttpError(
+          422,
+          "A selected charge does not belong to the selected student",
+        );
+      }
     }
   }
 
@@ -314,19 +337,49 @@ export async function confirmAllocation(
       throw new HttpError(409, "This transaction has already been matched");
     }
 
+    // Create the missing charges first so the payment lines can point at them.
+    // insertCharge enforces the same rules as the student page (no tuition, no
+    // duplicate fee in a period), and throwing rolls the whole confirm back.
+    const newChargeIdByStudent = new Map<number, number>();
+    for (const c of newCharges) {
+      const { chargeId } = await insertCharge(dbTx, c.studentId, {
+        feeName: c.feeName,
+        amount: c.amount,
+        scope: c.scope,
+        ...(c.academicTermId !== null ? { academicTermId: c.academicTermId } : {}),
+        notes: `Created from bank transaction #${input.bankTransactionId}`,
+      });
+      newChargeIdByStudent.set(c.studentId, chargeId);
+    }
+
+    const resolvedLines = input.lines.map((l) => {
+      if (l.chargeId !== NEW_CHARGE_PLACEHOLDER_ID) return l;
+      const chargeId = newChargeIdByStudent.get(l.studentId);
+      if (chargeId === undefined) {
+        throw new HttpError(422, "A line refers to a new charge that was not created");
+      }
+      return { ...l, chargeId };
+    });
+
     // Record the confirm as an undoable operation, then stamp its id onto every
-    // payment it creates. Undo voids exactly this operation's payments.
+    // payment it creates. Undo voids exactly this operation's payments and
+    // deletes the charges listed here.
+    const createdChargeIds = [...newChargeIdByStudent.values()];
+    const feeSummary =
+      createdChargeIds.length > 0
+        ? ` · created ${newCharges.map((c) => c.feeName).join(", ")}`
+        : "";
     const op = await recordOperation(dbTx, {
       actorUserId: user.id,
       kind: "confirm_match",
       bankTransactionId: input.bankTransactionId,
       undoableUntil: undoableUntil(new Date()),
-      summary: `Matched transaction #${input.bankTransactionId} · ${input.lines.length} payment(s) · ${allocated.toLocaleString("en-US")} MNT`,
-      details: { lines: input.lines },
+      summary: `Matched transaction #${input.bankTransactionId} · ${resolvedLines.length} payment(s) · ${allocated.toLocaleString("en-US")} MNT${feeSummary}`,
+      details: { lines: resolvedLines, createdChargeIds },
     });
 
     await dbTx.insert(payments).values(
-      input.lines.map((l) => ({
+      resolvedLines.map((l) => ({
         bankTransactionId: input.bankTransactionId,
         chargeId: l.chargeId,
         amount: l.amount,
@@ -337,8 +390,9 @@ export async function confirmAllocation(
 
     return {
       bankTransactionId: input.bankTransactionId,
-      paymentsCreated: input.lines.length,
+      paymentsCreated: resolvedLines.length,
       totalAllocated: allocated,
+      chargesCreated: createdChargeIds.length,
     };
   });
 }
@@ -391,6 +445,19 @@ export async function discardUnmatchedTransaction(
 }
 
 /**
+ * The charge ids a `confirm_match` operation created, read back out of its
+ * details JSON. Written by confirmAllocation; anything else (an older row from
+ * before charges could be created, a hand-edited value) yields an empty list
+ * rather than throwing — undo must still work on historic operations.
+ */
+export function confirmCreatedChargeIds(details: unknown): number[] {
+  if (!details || typeof details !== "object") return [];
+  const raw = (details as { createdChargeIds?: unknown }).createdChargeIds;
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((v): v is number => typeof v === "number" && Number.isInteger(v));
+}
+
+/**
  * Undo a previously-recorded operation, if the actor is allowed (its owner, or
  * any admin) and it is still inside its window and not already undone. Inverts
  * the operation by kind and writes a companion `undo` operation. See
@@ -439,6 +506,27 @@ export async function undoOperation(
             eq(bankTransactions.status, "matched"),
           ),
         );
+      // A confirm that created charges owns them: undoing it must not leave a
+      // fee on a student's ledger that nobody asked for. Charges that picked up
+      // a payment from some *other* operation in the meantime are left alone —
+      // deleting them would take that payment's target with them.
+      const createdChargeIds = confirmCreatedChargeIds(op.details);
+      if (createdChargeIds.length > 0) {
+        const stillReferenced = await dbTx
+          .select({ chargeId: payments.chargeId })
+          .from(payments)
+          .where(
+            and(
+              inArray(payments.chargeId, createdChargeIds),
+              isNull(payments.voidedAt),
+            ),
+          );
+        const keep = new Set(stillReferenced.map((p) => p.chargeId));
+        const deletable = createdChargeIds.filter((id) => !keep.has(id));
+        if (deletable.length > 0) {
+          await dbTx.delete(charges).where(inArray(charges.id, deletable));
+        }
+      }
     } else if (op.kind === "discard_transaction") {
       if (op.bankTransactionId === null) {
         throw new HttpError(500, "Discard operation is missing its transaction link");

@@ -28,15 +28,63 @@ export const SPECIFIC_FEE_TOKENS: Array<{ token: string; tag: FeeTag }> = [
 
 // Tier 2: generic payment tokens. Never fire as a signal alone.
 // Stored so they can be stripped from name_tokens (otherwise they leak into
-// the name index lookup as if they were name fragments).
+// the name index lookup as if they were name fragments, and — worse — a
+// glued digit like the "1" in "CLUB1" gets peeled off as a grade level).
+//
+// Written raw; normalize() runs over them at index-build time, so both a
+// Cyrillic and a Latin spelling of the same word are worth listing (they fold
+// to different strings: "улирлын" → "ulirlin" but "ulirliin" stays as typed).
 export const GENERIC_PAYMENT_TOKENS: string[] = [
+  // payment
   'tulbur',
   'tulber',
   'төлбөр',
   'tolbor',
   'tolber',
+  'tulbur',
+  'tolboriin',
+  'төлбөрт',
   'payment',
   'pay',
+  'paid',
+  // bank / channel noise that survives as a token: "EB -", "MM:8C", "Acd."
+  'eb',
+  'mm',
+  'acd',
+  'esm',
+  'ibank',
+  'guilgee',
+  'гүйлгээ',
+  'shiljuulge',
+  'шилжүүлэг',
+  'рд',
+  'rd',
+  'ут',
+  // words that describe the *period* or *thing* being paid for, never a name
+  'angi',
+  'анги',
+  'grade',
+  'class',
+  'club',
+  'дугуйлан',
+  'дугуйлангийн',
+  'term',
+  'улирал',
+  'улирлын',
+  'улирлийн',
+  'uliral',
+  'ulirliin',
+  'ulirlin',
+  'uliral',
+  'sar',
+  'сар',
+  'сард',
+  'нас',
+  'nas',
+  'үлдэгдэл',
+  'uldegdel',
+  'бүтэн',
+  'buten',
 ];
 
 // Kindergarten keyword — when present without a class match, expands the

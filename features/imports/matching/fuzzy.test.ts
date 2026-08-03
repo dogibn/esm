@@ -20,12 +20,20 @@ describe('levenshtein', () => {
 });
 
 describe('fuzzyMatchNameTokens', () => {
-  it('short tokens (≤6 chars) use threshold 1', () => {
+  it('tokens under 8 chars use threshold 1', () => {
     const hits = fuzzyMatchNameTokens('baatar', ['baatap', 'beetle', 'foo']);
     expect(hits.map((h) => h.token)).toEqual(['baatap']);
   });
 
-  it('long tokens (>6 chars) use threshold 2', () => {
+  it('refuses to fuzzy-match a short token at all', () => {
+    expect(fuzzyMatchNameTokens('shin', ['shine', 'chin', 'shim'])).toEqual([]);
+  });
+
+  it('never proposes a short directory name as a fuzzy hit', () => {
+    expect(fuzzyMatchNameTokens('shine', ['shin', 'kang'])).toEqual([]);
+  });
+
+  it('long tokens (≥8 chars) use threshold 2', () => {
     const hits = fuzzyMatchNameTokens('amartuvshin', ['amartubshin', 'amartuvshim', 'totally-different']);
     expect(hits.map((h) => h.token).sort()).toEqual(['amartubshin', 'amartuvshim']);
   });

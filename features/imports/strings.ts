@@ -80,12 +80,27 @@ export const strings = {
       all: "All",
       attention: "Needs attention",
       confident: "Confident",
+      missingCharge: "Missing fee",
+      notStudent: "Not payments",
     },
     tabCount: (n: number) => `${n}`,
     attentionHeading: "Needs attention",
     attentionHint: "Review and confirm each of these individually.",
     confidentHeading: "Confident matches",
     confidentHint: "Pre-selected. Uncheck any that look wrong, then confirm.",
+    missingChargeHeading: "Fee not on the ledger",
+    missingChargeHint:
+      "The student is identified and the amount matches the school's rate, but they have no such fee. Confirming adds the fee and records the payment against it.",
+    noMissingCharge: "Nothing waiting on a new fee.",
+    notStudentHeading: "Doesn't look like a student payment",
+    notStudentHint:
+      "Tournament fees from other schools, utility bills, refunds. Discarding keeps the row (as discarded) and can be undone.",
+    noNotStudent: "Nothing here.",
+    discardSelected: (n: number) =>
+      n === 1 ? "Discard 1" : `Discard ${n}`,
+    addFeeAndConfirm: "Add fee + confirm",
+    addFeeAndConfirmSelected: (n: number) =>
+      n === 1 ? "Add fee + confirm 1" : `Add fee + confirm ${n}`,
     selectAll: "Select all",
     clear: "Clear",
     selectedCount: (n: number) =>
@@ -113,6 +128,8 @@ export const strings = {
       multi_student: "Split payment",
       multiple_candidates: "Multiple candidates",
       flagged: "Needs a check",
+      missing_charge: "Fee not on the ledger",
+      not_student: "Not a student payment",
       unbalanced: "Amount doesn't balance",
     } as Record<
       | "unmatched"
@@ -120,10 +137,14 @@ export const strings = {
       | "multi_student"
       | "multiple_candidates"
       | "flagged"
+      | "missing_charge"
+      | "not_student"
       | "unbalanced",
       string
     >,
     controls: {
+      addFeeOption: (feeName: string, amount: string) =>
+        `+ Add ${feeName} · ${amount}`,
       classAll: "All classes",
       classLabel: "Class",
       studentValue: "Student",
@@ -134,6 +155,8 @@ export const strings = {
       noOpenCharges: "No open charges for this student",
     },
     split: {
+      acrossCharges: (n: number) =>
+        n === 1 ? "Split · 1" : `Split · ${n}`,
       enable: "Split",
       disable: "Single charge",
       addCharge: "Add charge",
@@ -209,6 +232,7 @@ export const strings = {
       memo_grade_level: "memo grade (level)",
       memo_name_full: "memo name (full)",
       memo_name_partial: "memo name (partial)",
+      memo_name_initial: "memo name (initial form)",
       memo_name_fuzzy: "memo name (fuzzy)",
       sender_account: "sender account",
       fee_hint_explicit: "memo fee hint",
@@ -232,6 +256,7 @@ export const strings = {
     reason: {
       no_candidates: "No candidate students found.",
       filtered: "Candidate filtered out.",
+      not_student: "Doesn't look like a student payment.",
       no_open_charges: "Candidate has no open charges.",
     },
   },

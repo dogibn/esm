@@ -5,6 +5,7 @@ import type {
   MatchProposal,
   MatchResult,
   MultiStudentMatchProposal,
+  ProposedCharge,
   SignalKind,
 } from "./matching";
 
@@ -83,7 +84,12 @@ export type MatchProposalWire = {
   allocations: Array<{ chargeId: number; amount: number }>;
   signals: SignalKind[];
   flags: AllocationFlag[];
+  score: number;
+  proposedCharge?: ProposedChargeWire;
 };
+
+/** `ProposedCharge` with bigint → number for the HTTP boundary. */
+export type ProposedChargeWire = Omit<ProposedCharge, "amount"> & { amount: number };
 
 export type MultiStudentMatchProposalWire = {
   proposals: MatchProposalWire[];
@@ -94,7 +100,7 @@ export type MatchResultWire =
   | { kind: "matched"; proposals: MatchProposalWire[] }
   | { kind: "matched_multi"; proposal: MultiStudentMatchProposalWire }
   | { kind: "low_confidence"; proposals: MatchProposalWire[] }
-  | { kind: "unmatched"; reason: "no_candidates" | "filtered" | "no_open_charges" };
+  | { kind: "unmatched"; reason: "no_candidates" | "filtered" | "not_student" | "no_open_charges" };
 
 export type TransactionPreviewWire = Omit<TransactionPreview, "transactionAt"> & {
   transactionAt: string; // ISO 8601
@@ -117,7 +123,7 @@ export type ProposalListResponseWire = {
 // ----------------------------------------------------------------------
 
 function matchProposalToWire(p: MatchProposal): MatchProposalWire {
-  return {
+  const wire: MatchProposalWire = {
     studentId: p.studentId,
     allocations: p.allocations.map((a) => ({
       chargeId: a.chargeId,
@@ -125,7 +131,15 @@ function matchProposalToWire(p: MatchProposal): MatchProposalWire {
     })),
     signals: [...p.signals],
     flags: [...p.flags],
+    score: p.score,
   };
+  if (p.proposedCharge) {
+    wire.proposedCharge = {
+      ...p.proposedCharge,
+      amount: Number(p.proposedCharge.amount),
+    };
+  }
+  return wire;
 }
 
 function multiToWire(m: MultiStudentMatchProposal): MultiStudentMatchProposalWire {
@@ -170,6 +184,8 @@ export type ConfirmResult = {
   bankTransactionId: number;
   paymentsCreated: number;
   totalAllocated: number;
+  /** Charges this confirm brought into existence (bus and the like). */
+  chargesCreated: number;
 };
 
 // Returned by the undo endpoint. JSON-safe.

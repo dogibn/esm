@@ -76,9 +76,27 @@ export function extractSignals(
     }
   }
 
-  // 3c. Level tokens.
-  if (context.levelAlternation) {
-    const re = new RegExp(context.levelAlternation.source, 'gi');
+  // 3b-2. A class split across a separator — "3 LM", "4 BE.", "10 B". normalize
+  // turns the separator into a space, so the contiguous pass above can't see it.
+  // Only a join that lands on a real class (or a lookalike alias) is accepted,
+  // which is what keeps "5 В" (no such class) from inventing one.
+  {
+    const splitRe = /(?<![a-z0-9~+])(\d{1,2})\s+([a-z]{1,3})(?![a-z0-9])/g;
+    let m: RegExpExecArray | null;
+    while ((m = splitRe.exec(norm)) !== null) {
+      const joined = `${m[1]}${m[2]}`;
+      if (context.classLookup.has(joined)) {
+        classTokens.push(joined);
+        consumeRange(m.index, m[0].length);
+      }
+    }
+  }
+
+  // 3c. Level tokens — digit-first ("5 angi") then keyword-first ("grade 12").
+  const levelPatterns = [context.levelAlternation, context.levelFirstAlternation];
+  for (const pattern of levelPatterns) {
+    if (!pattern) continue;
+    const re = new RegExp(pattern.source, 'gi');
     let m: RegExpExecArray | null;
     while ((m = re.exec(norm)) !== null) {
       const digit = m[1]!;
@@ -154,16 +172,28 @@ export function extractSignals(
   if (buf) remaining.push(buf);
 
   // Strip generic payment tokens and short/numeric tokens.
-  // Grade names sorted longest-first so a glued prefix peels the most specific
-  // class ("8va" before "8v").
-  const sortedClassVocab = [...context.classVocabulary].sort(
+  // Class names (with their lookalike aliases) sorted longest-first so a glued
+  // prefix peels the most specific class ("8va" before "8v").
+  const sortedClassVocab = [...context.classLookup].sort(
     (a, b) => b.length - a.length,
   );
-  const nameTokens: string[] = [];
+  const isGeneric = (t: string) => context.feeVocabulary.genericTokens.has(t);
+  // Each entry is one source token together with its alternate spellings; a
+  // student matching any spelling counts once, not once per variant.
+  const nameGroups: string[][] = [];
+  const bareDigits: string[] = [];
   for (const tok of remaining) {
+    if (/^\d{1,2}$/.test(tok)) {
+      // A lone 1–12 is a grade level far more often than it is anything else
+      // ("Б.ЭЛБЭРЭЛ 3", "ENHBAT TSEGTSHUR 1"). Held back until we know the memo
+      // carries a name too, so a stray number in an otherwise nameless memo
+      // can't drag in a whole grade.
+      bareDigits.push(tok);
+      continue;
+    }
     if (tok.length < 2) continue;
     if (/^\d+$/.test(tok)) continue;
-    if (context.feeVocabulary.genericTokens.has(tok)) continue;
+    if (isGeneric(tok)) continue;
     // Strip leading/trailing punctuation chars except `.` (kept for initials).
     let trimmed = tok.replace(/^[-+]+|[-+]+$/g, '');
     if (trimmed.length < 2) continue;
@@ -173,18 +203,43 @@ export function extractSignals(
     // the grade and the name register instead of the whole blob being a dead
     // name token.
     const peeled = peelGluedGrade(trimmed, sortedClassVocab);
-    if (peeled.classTok) classTokens.push(peeled.classTok);
-    if (peeled.levelTok) levelTokens.push(peeled.levelTok);
-    trimmed = peeled.rest;
+    // Only trust the peel when what's left is a plausible name. "CLUB1" and
+    // "TERM4" peel to a generic word plus a digit, and that digit is not a
+    // grade — committing it would put the whole of grade 1 in the running.
+    const peelRestIsName = peeled.rest.length >= 2 && !isGeneric(peeled.rest);
+    if (peelRestIsName) {
+      if (peeled.classTok) classTokens.push(peeled.classTok);
+      if (peeled.levelTok) levelTokens.push(peeled.levelTok);
+      trimmed = peeled.rest;
+    }
     if (trimmed.length < 2) continue;
     if (/^\d+$/.test(trimmed)) continue;
-    if (context.feeVocabulary.genericTokens.has(trimmed)) continue;
-    nameTokens.push(trimmed);
+    if (isGeneric(trimmed)) continue;
+
+    const group = new Set<string>([trimmed]);
+    // A hyphenated name gets written every way round — "Anhil-Ujin",
+    // "Anhil Ujin", "Anhiljin". The directory indexes all three (see
+    // nameTokenForms); split here so the memo side meets it halfway.
+    if (trimmed.includes('-')) {
+      const parts = trimmed.split('-').filter((p) => p.length >= 2 && !isGeneric(p));
+      for (const p of parts) group.add(p);
+      if (parts.length > 1) group.add(parts.join(''));
+    }
     // Additively recover a name written in the genitive ("Ариунболдын" →
     // "Ariunbold"). Only emitted when it resolves to a real directory name, so
     // it never adds noise.
-    const deg = degenitiveVariant(trimmed, context.nameIndex);
-    if (deg) nameTokens.push(deg);
+    for (const form of [...group]) {
+      const deg = degenitiveVariant(form, context.nameIndex);
+      if (deg) group.add(deg);
+    }
+    nameGroups.push([...group]);
+  }
+
+  if (nameGroups.length > 0) {
+    for (const d of bareDigits) {
+      const n = Number(d);
+      if (n >= 1 && n <= 12) levelTokens.push(String(n));
+    }
   }
 
   return {
@@ -193,7 +248,8 @@ export function extractSignals(
       wildcard: dedupe(wildcardTokens),
       level: dedupe(levelTokens),
     },
-    nameTokens: dedupe(nameTokens),
+    nameTokens: dedupe(nameGroups.flat()),
+    nameGroups,
     feeHints: { explicit: explicitFeeHints, fromAmount },
     senderBlock,
   };

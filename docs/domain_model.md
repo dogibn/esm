@@ -202,8 +202,21 @@ Run continuously by accountants in-app.
 | Non-student rows are soft-discarded at review (reversible), not removed | `status = 'discarded'` + `discarded_at`/`discarded_by_user_id`; the discard is logged in `operations` and undoable (`history_and_reversibility.md`) |
 | One BankTransaction can fund multiple Charges; one Charge can receive multiple Payments | Payment is a separate table from BankTransaction |
 | Match confidence shown as which fields matched, not numeric | No confidence column; UI shows signal badges |
+| A confirm may create the Charge it pays | `confirm_match` operations carry `details.createdChargeIds`; undo deletes those Charges as well as voiding the Payments |
 
 The flow: parse upload → dedupe by `transaction_id` → construct MatchProposals → accountant reviews each row → confirm (creates Payments, sets `BankTransaction.status = 'matched'`), delete (discard), or skip (persist with `status = 'unmatched'`).
+
+**A payment may bring its Charge into existence.** When the memo names a
+school-wide fee, the student holds no Charge for it, and the amount is exactly
+the school's rate, the proposal carries a `proposedCharge` and confirming does
+both — insert the Charge, then the Payment against it — inside one DB
+transaction and one `operations` row, so undo reverses the pair. Bus is the
+motivating case: the school has a bus rate but no bus opt-in source
+(`notes.md`), so no bus Charges exist and every bus payment used to dead-end.
+Restricted to non-club term/year fees: a club is a per-student enrolment with
+per-session pricing, so inventing one from a bank memo would be a guess about
+what a child attends. Matching never creates a Charge on its own — a reviewer
+confirms every one.
 
 ---
 

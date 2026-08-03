@@ -6,10 +6,13 @@ import { db } from "@/db/index";
 import {
   academicTerms,
   academicYears,
+  bankTransactions,
+  charges,
   enrollments,
   feeStructures,
   gradeLevels,
   grades,
+  payments,
   students,
 } from "@/db/schema";
 import { loadChargeBalances } from "@/features/students/balance";
@@ -156,6 +159,42 @@ async function loadCurrentFeesForMatching(termId: number) {
   return { termRows, yearRows };
 }
 
+/**
+ * Sender account → student, learned from what has already been confirmed.
+ *
+ * Every matched transaction is a statement that this account pays for this
+ * student, and parents pay from the same account term after term — so the
+ * strongest signal available (an account link is an identification, not an
+ * inference) costs one query to reconstruct. Voided payments are excluded: an
+ * undone match is not evidence of anything.
+ *
+ * One account maps to several students when siblings share a payer; the index
+ * is many-to-many by design and the charge stage separates them.
+ */
+async function loadConfirmedAccountLinks(): Promise<
+  Array<{ senderAccount: string; studentId: number }>
+> {
+  const rows = await db
+    .selectDistinct({
+      senderAccount: bankTransactions.senderAccount,
+      studentId: charges.studentId,
+    })
+    .from(payments)
+    .innerJoin(charges, eq(charges.id, payments.chargeId))
+    .innerJoin(
+      bankTransactions,
+      eq(bankTransactions.id, payments.bankTransactionId),
+    )
+    .where(isNull(payments.voidedAt));
+
+  const links: Array<{ senderAccount: string; studentId: number }> = [];
+  for (const r of rows) {
+    const account = r.senderAccount?.trim();
+    if (account) links.push({ senderAccount: account, studentId: r.studentId });
+  }
+  return links;
+}
+
 function loadClubAliases(): Record<string, string[]> {
   try {
     const raw = readFileSync(CLUB_ALIASES_URL, "utf-8");
@@ -183,27 +222,30 @@ export type LoadMatchingContextInputResult = {
 export async function loadMatchingContextInput(): Promise<LoadMatchingContextInputResult> {
   const period = await loadCurrentPeriod();
 
-  const [studentsRows, enrollmentsRows, currentFees, openCharges] = await Promise.all([
-    loadStudentsForMatching(),
-    loadEnrollmentsForMatching(period.yearId),
-    loadCurrentFeesForMatching(period.termId),
-    loadChargeBalances({
-      academicYearId: period.yearId,
-      academicTermId: period.termId,
-      openOnly: true,
-    }),
-  ]);
+  const [studentsRows, enrollmentsRows, currentFees, openCharges, accountLinks] =
+    await Promise.all([
+      loadStudentsForMatching(),
+      loadEnrollmentsForMatching(period.yearId),
+      loadCurrentFeesForMatching(period.termId),
+      loadChargeBalances({
+        academicYearId: period.yearId,
+        academicTermId: period.termId,
+        openOnly: true,
+      }),
+      loadConfirmedAccountLinks(),
+    ]);
 
   const currentTermFees = currentFees.termRows.flatMap(feeRowToTermInputs);
   const currentYearFees = currentFees.yearRows.flatMap(feeRowToYearInputs);
 
   const input: BuildIndexInput = {
+    academicTermId: period.termId,
     students: studentsRows,
     enrollments: enrollmentsRows,
     currentTermFees,
     currentYearFees,
     clubAliases: loadClubAliases(),
-    confirmedAccountLinks: [],
+    confirmedAccountLinks: accountLinks,
     openCharges,
   };
 

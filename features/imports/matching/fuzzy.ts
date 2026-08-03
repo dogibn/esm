@@ -25,14 +25,27 @@ export function levenshtein(a: string, b: string): number {
   return prev[n] ?? 0;
 }
 
+/**
+ * Below this length an edit of 1 is most of the word, and the directory holds
+ * plenty of genuinely short names (the school's Korean and Chinese students —
+ * "Shin", "Kang", "Ma") for a short token to land on by accident. Measured: on
+ * the sample file, dropping this floor is what made bank noise like
+ * "ШИНЭ ҮЕ СУРГУУЛЬ" propose a real student.
+ */
+const MIN_FUZZY_LENGTH = 5;
+
 export function fuzzyMatchNameTokens(
   memoToken: string,
   nameTokenList: string[],
 ): Array<{ token: string; distance: number }> {
-  const threshold = memoToken.length <= 6 ? 1 : 2;
+  if (memoToken.length < MIN_FUZZY_LENGTH) return [];
+  // Proportional, not absolute: two edits are a typo in an 11-letter Mongolian
+  // name and a different word entirely in a 6-letter one.
+  const threshold = memoToken.length >= 8 ? 2 : 1;
   // Quick reject: discard tokens with absolute length difference > threshold.
   const hits: Array<{ token: string; distance: number }> = [];
   for (const t of nameTokenList) {
+    if (t.length < MIN_FUZZY_LENGTH) continue;
     if (Math.abs(t.length - memoToken.length) > threshold) continue;
     const d = levenshtein(memoToken, t);
     if (d <= threshold) hits.push({ token: t, distance: d });

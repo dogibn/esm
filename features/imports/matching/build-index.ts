@@ -1,4 +1,4 @@
-import { normalize } from './normalize';
+import { normalize, visualVariants } from './normalize';
 import {
   CLUB_CATEGORIES,
   GENERIC_PAYMENT_TOKENS,
@@ -12,6 +12,7 @@ import type {
   FeeVocabulary,
   FeeVocabularyEntry,
   MatchingContext,
+  ProposedCharge,
 } from './types';
 
 function escapeRegex(s: string): string {
@@ -38,23 +39,69 @@ function buildAlternation(tokens: string[]): RegExp | null {
 }
 
 function levelRegex(): RegExp {
-  // Match patterns like "5 grade", "5grade", "5-р анги", "5-r angi", "5 анги".
+  // Match "5 grade", "5grade", "5-r angi", "5r angi", "5 angi", "5angi".
   // Capture group: the digit(s). Avoid + levels by NOT consuming a trailing +.
-  return /(?<![a-z0-9~+])(\d{1,2})(?!\+)\s*(?:grade|анги|-?\s*р\s*анги|-?\s*r\s*angi)\b/gi;
+  //
+  // The regex runs on NORMALIZED text, so Cyrillic never reaches it — "5-р анги"
+  // arrives as "5-r angi". The `r` (from "-р", the ordinal suffix) is optional:
+  // plain "5 ANGI" and "5B ANGI" are at least as common as the suffixed form and
+  // used to produce no level signal at all.
+  //
+  // `[a-z]{1,3}\s` absorbs a class letter sitting between the digit and the
+  // keyword ("5B ANGI") — the class itself is picked up separately by the class
+  // alternation when it is one the school actually has.
+  return /(?<![a-z0-9~+])(\d{1,2})(?!\+)\s*(?:[a-z]{1,3}\s+)?-?\s*(?:r\s*)?(?:grade|angi)\b/gi;
+}
+
+function levelFirstRegex(): RegExp {
+  // The keyword-first form: "grade 12", "grade-12", "angi 5".
+  return /\b(?:grade|angi)\s*[-#]?\s*(\d{1,2})(?!\+)(?![a-z0-9])/gi;
+}
+
+/**
+ * Alternate spellings of a class name that a Cyrillic-keyboard memo produces
+ * ("8B" ← "8В" → "8v"), keyed alias → canonical class.
+ *
+ * An alias is dropped when it collides with a real class name or with another
+ * class's alias: guessing between two real classes is worse than not resolving
+ * the token at all, and the level signal still survives.
+ */
+export function buildClassAliases(classVocabulary: string[]): Map<string, string> {
+  const real = new Set(classVocabulary);
+  const aliases = new Map<string, string>();
+  const collided = new Set<string>();
+  for (const cls of classVocabulary) {
+    for (const variant of visualVariants(cls)) {
+      if (variant === cls || real.has(variant)) continue;
+      if (aliases.has(variant) && aliases.get(variant) !== cls) {
+        collided.add(variant);
+        continue;
+      }
+      aliases.set(variant, cls);
+    }
+  }
+  for (const c of collided) aliases.delete(c);
+  return aliases;
 }
 
 export function buildMatchingContext(input: BuildIndexInput): MatchingContext {
-  // 1. classAlternation — every distinct normalized grade name in enrollments.
+  // 1. classAlternation — every distinct normalized grade name in enrollments,
+  //    plus the Cyrillic-lookalike aliases of each.
   const classVocabSet = new Set<string>();
   for (const e of input.enrollments) {
     const c = normalize(e.gradeName);
     if (c.length > 0) classVocabSet.add(c);
   }
   const classVocabulary = [...classVocabSet];
-  const classAlternation = buildAlternation(classVocabulary);
+  const classAliases = buildClassAliases(classVocabulary);
+  const classAlternation = buildAlternation([
+    ...classVocabulary,
+    ...classAliases.keys(),
+  ]);
 
-  // 2. levelAlternation — fixed pattern; doesn't need to depend on data.
+  // 2. level patterns — fixed; don't need to depend on data.
   const levelAlternation = levelRegex();
+  const levelFirstAlternation = levelFirstRegex();
 
   // 3. feeVocabulary — combine specific fee tokens + per-term club tokens.
   const entries: FeeVocabularyEntry[] = [];
@@ -116,7 +163,7 @@ export function buildMatchingContext(input: BuildIndexInput): MatchingContext {
     kindergartenTokens: new Set(KINDERGARTEN_TOKENS.map((t) => normalize(t)).filter((t) => t.length > 0)),
   };
 
-  // 4. gradeIndex — normalized class name → student_ids.
+  // 4. gradeIndex — normalized class name (and its aliases) → student_ids.
   const gradeIndex = new Map<string, number[]>();
   // 5. levelIndex — non-+ grade levels → student_ids.
   const levelIndex = new Map<string, number[]>();
@@ -128,18 +175,21 @@ export function buildMatchingContext(input: BuildIndexInput): MatchingContext {
       if (lvl.length > 0) addToMultiMap(levelIndex, lvl, e.studentId);
     }
   }
+  for (const [alias, canonical] of classAliases) {
+    for (const sid of gradeIndex.get(canonical) ?? []) {
+      addToMultiMap(gradeIndex, alias, sid);
+    }
+  }
 
   // 6. nameIndex — name tokens → student_ids.
   const nameIndex = new Map<string, number[]>();
   for (const s of input.students) {
     const tokens = new Set<string>();
     for (const raw of (s.firstName ?? '').split(/\s+/)) {
-      const n = normalize(raw);
-      if (n.length >= 2 && !/^\d+$/.test(n)) tokens.add(n);
+      for (const n of nameTokenForms(raw)) tokens.add(n);
     }
     for (const raw of (s.lastName ?? '').split(/\s+/)) {
-      const n = normalize(raw);
-      if (n.length >= 2 && !/^\d+$/.test(n)) tokens.add(n);
+      for (const n of nameTokenForms(raw)) tokens.add(n);
     }
     // Initial form: lastName[0] . firstName  (e.g. "b.baatar")
     const firstNorm = normalize(s.firstName ?? '');
@@ -189,6 +239,40 @@ export function buildMatchingContext(input: BuildIndexInput): MatchingContext {
     if (tags.length === 1) amountFeeIndex.set(amount, tags[0]!);
   }
 
+  // 8b. proposableFees — the school-wide fees a payment may create.
+  //
+  // Restricted to non-club fees: a bus or registration rate is the same for
+  // every student, so a charge built from it is exactly the one an accountant
+  // would have entered. Clubs are per-student enrolments with per-session
+  // pricing (domain_model.md) — inventing one from a bank memo would be a guess
+  // about what the child attends, so those stay a manual decision.
+  const proposableFees = new Map<string, ProposedCharge>();
+  for (const f of input.currentTermFees) {
+    if (f.isClub) continue;
+    const tag = feeNameToStaticTag(f.feeName);
+    if (!tag || typeof tag !== 'string') continue;
+    if (input.academicTermId == null) continue;
+    proposableFees.set(tag, {
+      feeName: f.feeName,
+      amount: f.amount,
+      scope: 'term',
+      academicTermId: input.academicTermId,
+      reason: 'fee_hint_explicit',
+    });
+  }
+  for (const f of input.currentYearFees) {
+    const tag = feeNameToStaticTag(f.feeName);
+    if (!tag || typeof tag !== 'string') continue;
+    if (proposableFees.has(tag)) continue; // a term rate is more specific
+    proposableFees.set(tag, {
+      feeName: f.feeName,
+      amount: f.amount,
+      scope: 'annual',
+      academicTermId: null,
+      reason: 'fee_hint_explicit',
+    });
+  }
+
   // 9. openChargesByStudent — pre-group if not provided.
   const openChargesByStudent =
     input.openChargesByStudent ?? groupChargesByStudent(input.openCharges);
@@ -196,7 +280,9 @@ export function buildMatchingContext(input: BuildIndexInput): MatchingContext {
   return {
     classAlternation,
     levelAlternation,
+    levelFirstAlternation,
     classVocabulary,
+    classLookup: new Set([...classVocabulary, ...classAliases.keys()]),
     feeVocabulary,
     gradeIndex,
     levelIndex,
@@ -205,7 +291,29 @@ export function buildMatchingContext(input: BuildIndexInput): MatchingContext {
     accountIndex,
     openChargesByStudent,
     amountFeeIndex,
+    proposableFees,
   };
+}
+
+/**
+ * Every indexable form of one directory name part. A hyphenated Mongolian name
+ * gets written all three ways in memos — "Nomin-Erdene", "Nomin Erdene",
+ * "Nominerdene" — so all three are indexed and any of them resolves the student.
+ *
+ * The parts are indexed individually too, which is what lets a memo that writes
+ * the halves as separate words hit this student twice and register as a full
+ * name rather than a partial.
+ */
+export function nameTokenForms(raw: string): string[] {
+  const n = normalize(raw ?? '');
+  if (n.length < 2 || /^\d+$/.test(n)) return [];
+  const forms = new Set<string>([n]);
+  if (n.includes('-')) {
+    const parts = n.split('-').filter((p) => p.length >= 2 && !/^\d+$/.test(p));
+    for (const p of parts) forms.add(p);
+    if (parts.length > 1) forms.add(parts.join(''));
+  }
+  return [...forms];
 }
 
 function feeNameToStaticTag(feeName: string): FeeTag | null {
