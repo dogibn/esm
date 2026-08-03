@@ -32,8 +32,12 @@ export async function middleware(req: NextRequest) {
 
   const { pathname } = req.nextUrl;
   const isLoginPage = pathname === "/login";
+  // The Google OAuth callback must run without an existing session (it's the
+  // request that creates one). Treat it as public so it isn't redirected to
+  // /login before it can exchange the code.
+  const isAuthCallback = pathname.startsWith("/auth/callback");
 
-  if (!user && !isLoginPage) {
+  if (!user && !isLoginPage && !isAuthCallback) {
     const url = req.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);

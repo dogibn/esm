@@ -18,7 +18,12 @@ import { sql } from "drizzle-orm";
 export const users = pgTable(
   "users",
   {
-    id: uuid("id").primaryKey(),
+    // Internal PK, independent of the Supabase auth user id. Authorization
+    // matches on `email` (see lib/auth.ts) so the same allowlist row serves a
+    // password identity and a Google identity for the same address. Default
+    // lets the provisioning script seed the allowlist before any auth user
+    // (e.g. a Google-only account) exists.
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
     email: text("email").notNull().unique(),
     role: text("role").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
