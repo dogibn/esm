@@ -236,6 +236,17 @@ export const charges = pgTable(
     index("charges_student_id_academic_year_id_idx").on(t.studentId, t.academicYearId),
     index("charges_student_id_academic_term_id_idx").on(t.studentId, t.academicTermId),
     index("charges_fee_name_idx").on(t.feeName),
+    // Prevent duplicate charges for the same student + scope + fee. Split into
+    // two partial unique indexes so the nullable scope column is never part of
+    // the comparison (matches charges_scope_check: exactly one of year/term is
+    // set). Guards against a re-run load script or UI action silently creating
+    // a second charge and doubling a student's computed balance.
+    uniqueIndex("charges_student_year_fee_unique")
+      .on(t.studentId, t.academicYearId, t.feeName)
+      .where(sql`${t.academicTermId} IS NULL`),
+    uniqueIndex("charges_student_term_fee_unique")
+      .on(t.studentId, t.academicTermId, t.feeName)
+      .where(sql`${t.academicYearId} IS NULL`),
   ]
 );
 
