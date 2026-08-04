@@ -26,7 +26,7 @@ import { randomBytes } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { sql } from "drizzle-orm";
 
 import { db } from "@/db/index";
@@ -64,7 +64,15 @@ function tempPassword(): string {
   return randomBytes(18).toString("base64url");
 }
 
-async function main(): Promise<void> {
+/**
+ * Built on first use, not up front. Only password users need it, and
+ * constructing a Supabase client pulls in RealtimeClient, which requires a
+ * global WebSocket that Node < 22 doesn't provide. A Google-only allowlist
+ * (every entry "password": false) must not depend on that.
+ */
+let adminClient: SupabaseClient | null = null;
+function getAdmin(): SupabaseClient {
+  if (adminClient) return adminClient;
   const url = process.env["NEXT_PUBLIC_SUPABASE_URL"];
   const serviceRole = process.env["SUPABASE_SERVICE_ROLE_KEY"];
   if (!url || !serviceRole) {
@@ -72,10 +80,13 @@ async function main(): Promise<void> {
       "NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set.",
     );
   }
-  const admin = createClient(url, serviceRole, {
+  adminClient = createClient(url, serviceRole, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
+  return adminClient;
+}
 
+async function main(): Promise<void> {
   const allowlist = loadAllowlist();
   console.log(`Provisioning ${allowlist.length} user(s)...\n`);
 
@@ -96,7 +107,7 @@ async function main(): Promise<void> {
     }
 
     const password = tempPassword();
-    const { error } = await admin.auth.admin.createUser({
+    const { error } = await getAdmin().auth.admin.createUser({
       email: entry.email,
       password,
       email_confirm: true,
