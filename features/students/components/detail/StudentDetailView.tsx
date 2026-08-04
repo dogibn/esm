@@ -42,8 +42,16 @@ function TotalPill({ label, value }: { label: string; value: string }) {
 }
 
 export function StudentDetailView({ detail }: { detail: StudentDetail }) {
-  const { header, tuition, annualFees, terms, termFees, payments, totals } =
-    detail;
+  const {
+    header,
+    tuition,
+    annualFees,
+    terms,
+    termFees,
+    payments,
+    totals,
+    siblingCandidates,
+  } = detail;
   const t = strings.detail;
   const fullName = `${header.firstName} ${header.lastName}`.trim();
   const isNew = header.studentCategory === "new";
@@ -101,7 +109,11 @@ export function StudentDetailView({ detail }: { detail: StudentDetail }) {
         <div className="grid gap-5 lg:grid-cols-[320px_minmax(0,1fr)]">
           <div className="flex flex-col gap-5">
             <PersonalInfoCard header={header} />
-            <TuitionBreakdownCard studentId={header.id} tuition={tuition} />
+            <TuitionBreakdownCard
+              studentId={header.id}
+              tuition={tuition}
+              siblingCandidates={siblingCandidates}
+            />
           </div>
 
           <Card size="sm" className="gap-0 self-start">

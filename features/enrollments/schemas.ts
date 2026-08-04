@@ -19,6 +19,11 @@ export const discountInputSchema = z.object({
   name: z.string().trim().min(1, "Discount needs a name").max(100),
   amount: z.number().int().positive("Discount must be positive"),
   notes: optionalText(500),
+  // Optional link to the sibling Student (DB id) a sibling discount is tied to.
+  // NULL for every non-sibling discount; the UI only offers it when the reason
+  // reads as a sibling discount. `null` is accepted so a cleared picker round-
+  // trips through the form.
+  siblingStudentId: z.number().int().positive().nullish(),
 });
 
 export type DiscountInput = z.infer<typeof discountInputSchema>;

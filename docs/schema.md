@@ -189,10 +189,13 @@ For *what* the entities mean and *why* the schema looks like this, see `domain_m
 | `name` | `text` | NOT NULL — e.g. `"sibling"`, `"scholarship"` |
 | `amount` | `bigint` | NOT NULL — MNT reduction |
 | `notes` | `text` | nullable |
+| `sibling_student_id` | `integer` | nullable, FK → `students.id`, ON DELETE SET NULL — sibling discounts only; see `domain_model.md` § Discount |
 | `created_at` | `timestamptz` | NOT NULL DEFAULT `now()` |
 | `created_by` | `uuid` | NOT NULL, FK → `users.id` |
 
 - INDEX `(enrollment_id)`
+- INDEX `(sibling_student_id)`
+- `sibling_student_id` is the one FK with `ON DELETE SET NULL` (the convention's default is RESTRICT). It's an optional cross-reference: deleting a student clears the pointer rather than blocking the delete, and the discount stays valid.
 
 ### `payments`
 

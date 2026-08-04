@@ -19,6 +19,7 @@ export const studentsRelations = relations(students, ({ many }) => ({
   enrollments: many(enrollments),
   charges: many(charges),
   clubEnrollments: many(clubEnrollments),
+  siblingDiscounts: many(discounts),
 }));
 
 export const enrollmentsRelations = relations(enrollments, ({ one, many }) => ({
@@ -104,6 +105,10 @@ export const discountsRelations = relations(discounts, ({ one }) => ({
   enrollment: one(enrollments, {
     fields: [discounts.enrollmentId],
     references: [enrollments.id],
+  }),
+  sibling: one(students, {
+    fields: [discounts.siblingStudentId],
+    references: [students.id],
   }),
   createdByUser: one(users, {
     fields: [discounts.createdBy],

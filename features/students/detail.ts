@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, ne, or, sql } from "drizzle-orm";
 
 import { db } from "@/db/index";
 import {
@@ -38,7 +38,25 @@ export type StudentDetailHeader = {
   academicYearName: string;
 };
 
-export type DiscountLine = { name: string; amount: number };
+export type DiscountLine = {
+  name: string;
+  amount: number;
+  // Sibling link (sibling discounts only; NULL otherwise). `siblingName` and
+  // `siblingEnrolled` are resolved from the referenced Student — the latter is
+  // true when that sibling has an active enrollment in the current year, which
+  // is what makes a sibling discount valid.
+  siblingStudentId: number | null;
+  siblingName: string | null;
+  siblingEnrolled: boolean;
+};
+
+// A student the accountant can link as a sibling from the tuition editor.
+export type SiblingOption = {
+  id: number;
+  code: string;
+  firstName: string;
+  lastName: string;
+};
 
 export type TuitionBreakdown = {
   gross: number;
@@ -102,6 +120,8 @@ export type StudentDetail = {
   termFees: TermFeeRow[];
   payments: PaymentHistoryRow[];
   totals: { charged: number; paid: number; balance: number };
+  // Students that can be linked as a sibling (everyone but this one).
+  siblingCandidates: SiblingOption[];
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -181,10 +201,52 @@ export async function getStudentDetail(studentDbId: number): Promise<StudentDeta
   if (!base) throw new HttpError(404, "Student not found for the current year");
 
   const discountRows = await db
-    .select({ name: discounts.name, amount: discounts.amount })
+    .select({
+      name: discounts.name,
+      amount: discounts.amount,
+      siblingStudentId: discounts.siblingStudentId,
+    })
     .from(discounts)
     .where(eq(discounts.enrollmentId, base.enrollmentId));
   const discountTotal = discountRows.reduce((s, d) => s + Number(d.amount), 0);
+
+  // Resolve each linked sibling: their name plus whether they hold an active
+  // enrollment this year (what keeps the sibling discount valid). One student
+  // has at most one active enrollment per year (unique constraint), so the
+  // left join yields one row per sibling.
+  const siblingIds = [
+    ...new Set(
+      discountRows
+        .map((d) => d.siblingStudentId)
+        .filter((id): id is number => id !== null),
+    ),
+  ];
+  const siblingInfo = new Map<number, { name: string; enrolled: boolean }>();
+  if (siblingIds.length > 0) {
+    const sibRows = await db
+      .select({
+        id: students.id,
+        firstName: students.firstName,
+        lastName: students.lastName,
+        enrolledId: enrollments.id,
+      })
+      .from(students)
+      .leftJoin(
+        enrollments,
+        and(
+          eq(enrollments.studentId, students.id),
+          eq(enrollments.academicYearId, year.id),
+          eq(enrollments.status, "active"),
+        ),
+      )
+      .where(inArray(students.id, siblingIds));
+    for (const r of sibRows) {
+      siblingInfo.set(r.id, {
+        name: `${r.lastName} ${r.firstName}`.trim(),
+        enrolled: r.enrolledId !== null,
+      });
+    }
+  }
 
   const termIds = termRows.map((t) => t.id);
   const scopeClause =
@@ -265,10 +327,19 @@ export async function getStudentDetail(studentDbId: number): Promise<StudentDeta
   const tuition: TuitionBreakdown | null = tuitionCharge
     ? {
         gross: tuitionCharge.amount,
-        discounts: discountRows.map((d) => ({
-          name: d.name,
-          amount: Number(d.amount),
-        })),
+        discounts: discountRows.map((d) => {
+          const info =
+            d.siblingStudentId !== null
+              ? (siblingInfo.get(d.siblingStudentId) ?? null)
+              : null;
+          return {
+            name: d.name,
+            amount: Number(d.amount),
+            siblingStudentId: d.siblingStudentId,
+            siblingName: info?.name ?? null,
+            siblingEnrolled: info?.enrolled ?? false,
+          };
+        }),
         discountTotal,
         net: tuitionCharge.amount - discountTotal,
         paid: tuitionCharge.paid,
@@ -352,6 +423,18 @@ export async function getStudentDetail(studentDbId: number): Promise<StudentDeta
     { charged: 0, paid: 0, balance: 0 },
   );
 
+  // Every other student, offered in the tuition editor's sibling picker.
+  const siblingCandidates: SiblingOption[] = await db
+    .select({
+      id: students.id,
+      code: students.studentId,
+      firstName: students.firstName,
+      lastName: students.lastName,
+    })
+    .from(students)
+    .where(ne(students.id, studentDbId))
+    .orderBy(asc(students.lastName), asc(students.firstName));
+
   return {
     header: {
       id: base.studentDbId,
@@ -379,5 +462,6 @@ export async function getStudentDetail(studentDbId: number): Promise<StudentDeta
     termFees,
     payments: paymentHistory,
     totals,
+    siblingCandidates,
   };
 }

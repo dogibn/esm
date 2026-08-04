@@ -42,6 +42,12 @@ function money(n: number): string {
   return `${n.toLocaleString("en-US")} MNT`;
 }
 
+// The discount "reason" is free text; a sibling discount is recognised by name
+// (there is no discount-type enum in v1). Only these rows offer a sibling link.
+function isSiblingDiscount(name: string): boolean {
+  return /sibling/i.test(name);
+}
+
 // A label + control + hint/error stack. Uses a div (not <label>) so custom
 // Select/Combobox controls don't get double-focus behavior.
 function Field({
@@ -156,15 +162,34 @@ export function EnrollmentForm({ context, initialMode }: Props) {
     }
   }
 
+  const existingStudentId = watch("existingStudentId");
+  // Only the returning student themselves is in the list; drop them so a
+  // sibling can't point at the enrollee.
+  const siblingOptions = useMemo(
+    () => context.students.filter((s) => s.id !== existingStudentId),
+    [context.students, existingStudentId],
+  );
+
   const submit = handleSubmit(async (values) => {
     setServerError(null);
     setSubmitting(true);
     try {
+      // Keep a sibling link only on rows that read as a sibling discount, so a
+      // later rename to a non-sibling reason doesn't leave a stray pointer.
+      const payload = {
+        ...values,
+        discounts: values.discounts.map((d) => ({
+          ...d,
+          siblingStudentId: isSiblingDiscount(d.name)
+            ? (d.siblingStudentId ?? null)
+            : null,
+        })),
+      };
       const res = await fetch("/api/enrollments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(values),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) {
         const body = (await res.json().catch(() => null)) as {
@@ -513,59 +538,127 @@ export function EnrollmentForm({ context, initialMode }: Props) {
               {strings.discounts.empty}
             </span>
           ) : null}
-          {fields.map((row, index) => (
-            <div
-              key={row.id}
-              className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(10rem,1fr)_10rem_auto]"
-            >
-              <Controller
-                control={control}
-                name={`discounts.${index}.name`}
-                render={({ field }) => (
-                  <Input
-                    {...field}
-                    placeholder={strings.discounts.namePlaceholder}
-                    aria-invalid={!!errors.discounts?.[index]?.name}
+          {fields.map((row, index) => {
+            const showSibling = isSiblingDiscount(discounts[index]?.name ?? "");
+            return (
+              <div key={row.id} className="flex flex-col gap-2">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(10rem,1fr)_10rem_auto]">
+                  <Controller
+                    control={control}
+                    name={`discounts.${index}.name`}
+                    render={({ field }) => (
+                      <Input
+                        {...field}
+                        placeholder={strings.discounts.namePlaceholder}
+                        aria-invalid={!!errors.discounts?.[index]?.name}
+                      />
+                    )}
                   />
-                )}
-              />
-              <Controller
-                control={control}
-                name={`discounts.${index}.amount`}
-                render={({ field }) => (
-                  <Input
-                    type="number"
-                    min={1}
-                    step={1000}
-                    value={field.value === 0 ? "" : field.value}
-                    onChange={(e) =>
-                      field.onChange(
-                        e.target.value === "" ? 0 : Number(e.target.value),
-                      )
-                    }
-                    placeholder={strings.discounts.amount}
-                    aria-invalid={!!errors.discounts?.[index]?.amount}
+                  <Controller
+                    control={control}
+                    name={`discounts.${index}.amount`}
+                    render={({ field }) => (
+                      <Input
+                        type="number"
+                        min={1}
+                        step={1000}
+                        value={field.value === 0 ? "" : field.value}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value === "" ? 0 : Number(e.target.value),
+                          )
+                        }
+                        placeholder={strings.discounts.amount}
+                        aria-invalid={!!errors.discounts?.[index]?.amount}
+                      />
+                    )}
                   />
-                )}
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => remove(index)}
-                aria-label={strings.discounts.remove}
-              >
-                <XIcon />
-              </Button>
-            </div>
-          ))}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => remove(index)}
+                    aria-label={strings.discounts.remove}
+                  >
+                    <XIcon />
+                  </Button>
+                </div>
+                {showSibling ? (
+                  <Controller
+                    control={control}
+                    name={`discounts.${index}.siblingStudentId`}
+                    render={({ field }) => {
+                      const selected =
+                        siblingOptions.find((s) => s.id === field.value) ?? null;
+                      return (
+                        <Field
+                          label={strings.discounts.sibling}
+                          hint={strings.discounts.siblingHint}
+                        >
+                          <Combobox
+                            items={siblingOptions}
+                            value={selected}
+                            onValueChange={(s) =>
+                              field.onChange(
+                                (s as ExistingStudentOption | null)?.id ?? null,
+                              )
+                            }
+                            itemToStringLabel={(s: ExistingStudentOption) =>
+                              `${s.lastName} ${s.firstName} ${s.studentId}`
+                            }
+                          >
+                            <ComboboxTrigger>
+                              <ComboboxValue>
+                                {selected
+                                  ? `${selected.lastName} ${selected.firstName}`
+                                  : strings.discounts.siblingPlaceholder}
+                              </ComboboxValue>
+                            </ComboboxTrigger>
+                            <ComboboxContent>
+                              <ComboboxInputGroup>
+                                <ComboboxInput
+                                  placeholder={strings.discounts.siblingSearch}
+                                />
+                              </ComboboxInputGroup>
+                              <ComboboxList>
+                                {(item: ExistingStudentOption) => (
+                                  <ComboboxItem key={item.id} value={item}>
+                                    <span className="flex flex-col">
+                                      <span>
+                                        {item.lastName} {item.firstName}
+                                      </span>
+                                      <span className="text-xs text-muted-foreground">
+                                        {item.studentId}
+                                        {item.enrolledThisYear
+                                          ? ` · ${strings.mode.existing}`
+                                          : ""}
+                                      </span>
+                                    </span>
+                                  </ComboboxItem>
+                                )}
+                              </ComboboxList>
+                              <ComboboxEmpty>
+                                {strings.discounts.siblingNoMatch}
+                              </ComboboxEmpty>
+                            </ComboboxContent>
+                          </Combobox>
+                        </Field>
+                      );
+                    }}
+                  />
+                ) : null}
+              </div>
+            );
+          })}
           <div>
             <Button
               type="button"
               variant="outline"
               size="sm"
               data-icon="inline-start"
-              onClick={() => append({ name: "", amount: 0, notes: "" })}
+              onClick={() =>
+                append({ name: "", amount: 0, notes: "", siblingStudentId: null })
+              }
             >
               <PlusIcon />
               {strings.discounts.add}

@@ -52,6 +52,9 @@ export const tuitionUpdateSchema = z
         z.object({
           name: z.string().trim().min(1, "Discount name is required").max(100),
           amount: z.coerce.number().int().nonnegative(),
+          // Optional link to the sibling Student (DB id) for a sibling
+          // discount; NULL otherwise. See discounts.sibling_student_id.
+          siblingStudentId: z.coerce.number().int().positive().nullish(),
         }),
       )
       .max(20)

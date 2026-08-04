@@ -249,12 +249,24 @@ export const discounts = pgTable(
     name: text("name").notNull(),
     amount: bigint("amount", { mode: "number" }).notNull(),
     notes: text("notes"),
+    // Optional soft pointer to the sibling Student a sibling discount is tied
+    // to. Nullable — only sibling discounts set it; every other discount type
+    // leaves it NULL. References the Student (not their Enrollment) so the link
+    // is stable across years and enrolled-this-year can be resolved at read
+    // time. ON DELETE SET NULL: removing a student clears the reference rather
+    // than blocking the delete, and the discount itself stays valid.
+    siblingStudentId: integer("sibling_student_id").references(() => students.id, {
+      onDelete: "set null",
+    }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     createdBy: uuid("created_by")
       .notNull()
       .references(() => users.id),
   },
-  (t) => [index("discounts_enrollment_id_idx").on(t.enrollmentId)]
+  (t) => [
+    index("discounts_enrollment_id_idx").on(t.enrollmentId),
+    index("discounts_sibling_student_id_idx").on(t.siblingStudentId),
+  ]
 );
 
 export const payments = pgTable(

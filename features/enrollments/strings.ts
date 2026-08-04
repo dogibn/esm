@@ -64,6 +64,12 @@ export const strings = {
     add: "Add discount",
     remove: "Remove",
     empty: "No discounts.",
+    sibling: "Sibling",
+    siblingPlaceholder: "Link the sibling student",
+    siblingSearch: "Search by name or ID…",
+    siblingNoMatch: "No students match.",
+    siblingClear: "No sibling linked",
+    siblingHint: "Who the discount pairs this student with.",
   },
   summary: {
     title: "Summary",

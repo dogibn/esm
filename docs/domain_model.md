@@ -116,6 +116,8 @@ Modeled as `Discount → Enrollment` (rather than `Discount → Charge`) because
 
 A *recorded outcome*, not a computed rule: v1 stores the amount that was applied without committing to *how* it was calculated. Multiple Discounts can attach to one Enrollment (e.g. sibling + scholarship).
 
+A Discount may carry an optional **`sibling_student_id`** — a soft pointer to the Student the discount pairs this enrollee with. It is populated only for sibling discounts (recognised by `name`, since there is no discount-type enum in v1) and NULL for everything else. It references the Student rather than their Enrollment, so the link is stable across years and "is the sibling enrolled *this* year?" is answered at read time (join the current year's enrollments). This records *who* the sibling is and lets the UI show whether they are currently enrolled — the condition a sibling discount depends on. It is metadata on the recorded outcome, not a discount *rule*: the amount is still stored as-is. `ON DELETE SET NULL`, so removing a student clears the reference without invalidating the discount.
+
 > **v2 evolution.** When discount rules become clear, add columns like `kind` (flat / percentage / override) and `rate`, plus a `DiscountType` reference table to constrain `name`. Existing rows remain valid with those new columns NULL. If non-tuition discounts emerge, re-link to Charge with a constraint that the linked Charge's `fee_name` is in the discountable set.
 
 ### BankTransaction
@@ -216,7 +218,7 @@ These won't be modeled in v1. Each is listed because the AI would otherwise re-d
 - **Per-student detail page.**
 - **Discount rules.** v1 stores recorded amounts only, not the formulas behind them.
 - **Discounts on non-tuition fees.** Would require restructuring Discount back to → Charge.
-- **Family / siblings entity.** Sibling discounts are recorded as flat per-Enrollment Discount rows.
+- **Family / siblings entity.** No Family relationship is modeled. Sibling discounts remain flat per-Enrollment Discount rows; a Discount's optional `sibling_student_id` is only a soft pointer to one sibling Student (see the Discount entity), not a family graph.
 - **Teacher entity.** Teacher info is denormalized on Grade.
 - **ImportBatch entity and original-file storage.** `BankTransaction.transaction_id` UNIQUE is the dedup mechanism.
 - **Refunds.** Money flowing the other direction.

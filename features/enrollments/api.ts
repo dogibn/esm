@@ -267,7 +267,8 @@ export async function createEnrollment(
       registrationChargeId = registrationCharge!.id;
     }
 
-    // 6. Tuition discounts, linked to the enrollment.
+    // 6. Tuition discounts, linked to the enrollment. A sibling link is kept
+    // only when it points at a different student (never the enrollee itself).
     if (input.discounts.length > 0) {
       await tx.insert(discounts).values(
         input.discounts.map((d) => ({
@@ -275,6 +276,10 @@ export async function createEnrollment(
           name: d.name,
           amount: d.amount,
           notes: nullify(d.notes),
+          siblingStudentId:
+            d.siblingStudentId && d.siblingStudentId !== studentDbId
+              ? d.siblingStudentId
+              : null,
           createdBy: user.id,
         })),
       );

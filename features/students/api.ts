@@ -394,6 +394,11 @@ export async function updateTuition(
           enrollmentId: enrollment.id,
           name: d.name,
           amount: d.amount,
+          // Keep a sibling link only when it points at another student.
+          siblingStudentId:
+            d.siblingStudentId && d.siblingStudentId !== studentId
+              ? d.siblingStudentId
+              : null,
           createdBy: user.id,
         })),
       );

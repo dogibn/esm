@@ -72,4 +72,24 @@ describe("createEnrollmentSchema", () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it("accepts a sibling discount linked to a sibling student", () => {
+    const parsed = createEnrollmentSchema.parse({
+      ...base,
+      discounts: [{ name: "sibling", amount: 300_000, siblingStudentId: 77 }],
+    });
+    expect(parsed.discounts[0]).toMatchObject({
+      name: "sibling",
+      amount: 300_000,
+      siblingStudentId: 77,
+    });
+  });
+
+  it("leaves siblingStudentId optional for non-sibling discounts", () => {
+    const parsed = createEnrollmentSchema.parse({
+      ...base,
+      discounts: [{ name: "scholarship", amount: 100_000 }],
+    });
+    expect(parsed.discounts[0]?.siblingStudentId ?? null).toBeNull();
+  });
 });

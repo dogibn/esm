@@ -1,0 +1,3 @@
+ALTER TABLE "discounts" ADD COLUMN "sibling_student_id" integer;--> statement-breakpoint
+ALTER TABLE "discounts" ADD CONSTRAINT "discounts_sibling_student_id_students_id_fk" FOREIGN KEY ("sibling_student_id") REFERENCES "public"."students"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "discounts_sibling_student_id_idx" ON "discounts" USING btree ("sibling_student_id");
