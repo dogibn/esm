@@ -1,0 +1,7 @@
+[
+  { "email": "admin@esm.edu.mn", "role": "admin", "password": true },
+  { "email": "accountant1@esm.edu.mn", "role": "accountant", "password": true },
+  { "email": "accountant2@esm.edu.mn", "role": "accountant", "password": true },
+  { "email": "accountant3@esm.edu.mn", "role": "accountant", "password": false },
+  { "email": "accountant4@esm.edu.mn", "role": "accountant", "password": false }
+]

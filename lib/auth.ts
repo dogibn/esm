@@ -29,7 +29,18 @@ export async function requireUser(req: Request): Promise<{ user: User; applyAuth
     throw new HttpError(401, 'Unauthorized');
   }
 
-  const rows = await db.select().from(users).where(eq(users.id, data.user.id)).limit(1);
+  // Authorize by email against the `users` allowlist. This is the single gate
+  // for BOTH sign-in methods: a password identity and a Google identity for the
+  // same address both resolve to the same allowlist row. A verified Supabase
+  // session with an email that isn't on the allowlist gets 403 — that's how
+  // "Google sign-in" stays restricted to ESM staff and never becomes open
+  // signup. Emails are stored/compared lowercased.
+  const email = data.user.email?.toLowerCase();
+  if (!email) {
+    throw new HttpError(403, 'Forbidden');
+  }
+
+  const rows = await db.select().from(users).where(eq(users.email, email)).limit(1);
 
   if (rows.length === 0) {
     throw new HttpError(403, 'Forbidden');
@@ -82,9 +93,17 @@ export async function requireUserForLayout(): Promise<User> {
     redirect('/login');
   }
 
-  const rows = await db.select().from(users).where(eq(users.id, data.user.id)).limit(1);
-  if (rows.length === 0) {
+  // Same email allowlist as requireUser() (see there for rationale).
+  const email = data.user.email?.toLowerCase();
+  if (!email) {
     redirect('/login');
+  }
+
+  const rows = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  if (rows.length === 0) {
+    // Authenticated (e.g. via Google) but not on the allowlist. Carry a reason
+    // so the login page can explain the bounce instead of looping silently.
+    redirect('/login?error=not_authorized');
   }
 
   return rows[0]!;

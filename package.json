@@ -12,6 +12,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "seed": "tsx --env-file=.env.local db/seed.ts",
+    "provision:users": "tsx --env-file=.env.local scripts/provision-users.ts",
     "load:students": "tsx --env-file=.env.local scripts/load/students.ts",
     "load:grades": "tsx --env-file=.env.local scripts/load/grades.ts",
     "load:enrollments": "tsx --env-file=.env.local scripts/load/enrollments.ts",
@@ -38,6 +39,7 @@
   "dependencies": {
     "@base-ui/react": "^1.4.1",
     "@hookform/resolvers": "^5.2.2",
+    "@sentry/nextjs": "^10.69.0",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.105.3",
     "@tanstack/react-table": "^8.21.3",

@@ -31,7 +31,22 @@ Five accountants at ESM. One admin manages fee structures; the other four record
 - `tech_stack.md` — frameworks, conventions, folder structure
 - `scraping_esmlh.md` — esmlh.edu.mn data import
 - `user_flows.md` — UI workflows
+- `deployment.md` — deploy & operations runbook (env, migrations, backups, users)
 - `CLAUDE.md` — AI entry point
 
 ## Running locally
-*(To be filled in once the project runs.)*
+
+1. **Install:** `pnpm install` (Node 20 LTS).
+2. **Env:** copy `.env.local.example` to `.env.local` and fill in the Supabase
+   values (see `deployment.md` §1 for what each var is).
+3. **Migrate:** `pnpm drizzle-kit migrate` applies the schema to your DB.
+4. **Seed / load data:** `pnpm seed`, then the `load:*` scripts as needed
+   (see `deployment.md` §3 for order).
+5. **Users:** create `scripts/data/users.json` from `scripts/users.example.json`
+   and run `pnpm provision:users` to allowlist yourself.
+6. **Run:** `pnpm dev` → http://localhost:3000.
+7. **Test:** `pnpm test`.
+
+## Deploying
+
+See `deployment.md` for the full runbook and the per-deploy checklist.
