@@ -12,12 +12,14 @@ Five accountants at ESM. One admin manages fee structures; the other four record
 - **Year/term-start scripts** (admin only, run from CLI). Pull roster, classes, and club enrollments from esmlh.edu.mn.
 
 ## Not in v1
-- Per-student detail page
 - Adding/editing fee structures, students, or enrollments through the UI
 - Printing or sending invoices
-- Discount rule engine (v1 records discount amounts, not the formulas behind them)
 - Family / siblings modeling — no family graph. (A sibling discount may carry an optional soft pointer to one sibling student; see `domain_model.md` § Discount.)
 - Refunds
+
+## Beyond the original v1 sketch (now built)
+- Per-student detail page (view + edit tuition, discounts, and ad-hoc fees).
+- Discount catalog: admins define reusable discounts (flat or percent, fixed or custom); accountants apply them to a student, where they compound in order. See `domain_model.md` § DiscountType / Discount.
 
 ## Non-goals
 - Not a general accounting system. Tracks student payments only — no salaries, vendor payments, or expenses.

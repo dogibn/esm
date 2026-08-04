@@ -15,14 +15,17 @@ export type StudentCategory = (typeof STUDENT_CATEGORIES)[number];
 // so react-hook-form's input and output types stay aligned.
 const optionalText = (max: number) => z.string().trim().max(max).optional();
 
+// A discount as applied at enrollment time: a catalog entry, an optional value
+// for "custom" types (entered here), and an optional sibling link. Discounts
+// compound onto the base tuition in array order (top to bottom). Unit, name and
+// the resolved MNT amount are derived server-side from the catalog.
 export const discountInputSchema = z.object({
-  name: z.string().trim().min(1, "Discount needs a name").max(100),
-  amount: z.number().int().positive("Discount must be positive"),
+  discountTypeId: z.number().int().positive("Choose a discount"),
+  // Required only for "custom" catalog entries; ignored for fixed ones.
+  value: z.number().nonnegative().nullish(),
   notes: optionalText(500),
-  // Optional link to the sibling Student (DB id) a sibling discount is tied to.
-  // NULL for every non-sibling discount; the UI only offers it when the reason
-  // reads as a sibling discount. `null` is accepted so a cleared picker round-
-  // trips through the form.
+  // Optional link to the sibling Student (DB id). NULL for non-sibling
+  // discounts; the UI only offers it for sibling-type discounts.
   siblingStudentId: z.number().int().positive().nullish(),
 });
 

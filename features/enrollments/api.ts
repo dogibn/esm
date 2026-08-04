@@ -13,6 +13,12 @@ import {
   type User,
 } from "@/db/schema";
 import { HttpError } from "@/lib/errors";
+import {
+  computeTuition,
+  listDiscountTypes,
+  resolveDiscountApplications,
+  type DiscountTypeRow,
+} from "@/features/discounts";
 
 import type { CreateEnrollmentInput } from "./schemas";
 import { strings } from "./strings";
@@ -85,8 +91,14 @@ async function activeFeeData(feeName: string): Promise<unknown | null> {
 export async function getEnrollmentFormContext(): Promise<EnrollmentFormContext> {
   const year = await currentYear();
 
-  const [classRows, tuitionData, registrationData, studentRows, enrolledRows] =
-    await Promise.all([
+  const [
+    classRows,
+    tuitionData,
+    registrationData,
+    studentRows,
+    enrolledRows,
+    discountTypeRows,
+  ] = await Promise.all([
       db
         .select({
           gradeId: grades.id,
@@ -116,6 +128,7 @@ export async function getEnrollmentFormContext(): Promise<EnrollmentFormContext>
         .select({ studentId: enrollments.studentId })
         .from(enrollments)
         .where(eq(enrollments.academicYearId, year.id)),
+      listDiscountTypes({ activeOnly: true }),
     ]);
 
   const enrolledSet = new Set(enrolledRows.map((r) => r.studentId));
@@ -132,6 +145,7 @@ export async function getEnrollmentFormContext(): Promise<EnrollmentFormContext>
     tuitionByGradeLevel: resolveTuitionMap(tuitionData),
     registrationFee: resolveFlatAmount(registrationData),
     students: studentOptions,
+    discountTypes: discountTypeRows as DiscountTypeRow[],
   };
 }
 
@@ -149,6 +163,14 @@ export async function createEnrollment(
   input: CreateEnrollmentInput,
 ): Promise<CreateEnrollmentResult> {
   const year = await currentYear();
+
+  // Resolve discounts against the catalog (order preserved) and compound them
+  // onto the base tuition, so each stored line carries its resolved reduction.
+  const resolvedDiscounts = await resolveDiscountApplications(input.discounts);
+  const computedTuition = computeTuition(
+    input.tuitionAmount,
+    resolvedDiscounts.map((r) => ({ unit: r.unit, value: r.value })),
+  );
 
   return db.transaction(async (tx) => {
     // 1. The class must belong to the current year (enrollment invariant).
@@ -267,23 +289,24 @@ export async function createEnrollment(
       registrationChargeId = registrationCharge!.id;
     }
 
-    // 6. Tuition discounts, linked to the enrollment. A sibling link is kept
-    // only when it points at a different student (never the enrollee itself).
-    if (input.discounts.length > 0) {
-      // Flat-MNT bridge: this form still records discounts as recorded MNT
-      // amounts. The catalog/compounding rework threads unit/value/type here.
+    // 6. Tuition discounts, linked to the enrollment. Each references a catalog
+    // entry and compounds onto the base tuition in row order; the resolved MNT
+    // reduction is snapshotted per line. A sibling link is kept only when it
+    // points at a different student (never the enrollee itself).
+    if (resolvedDiscounts.length > 0) {
       await tx.insert(discounts).values(
-        input.discounts.map((d, index) => ({
+        resolvedDiscounts.map((r, index) => ({
           enrollmentId,
-          name: d.name,
-          unit: "mnt" as const,
-          value: d.amount,
+          discountTypeId: r.discountTypeId,
+          name: r.name,
+          unit: r.unit,
+          value: r.value,
           position: index,
-          amount: d.amount,
-          notes: nullify(d.notes),
+          amount: computedTuition.lines[index]!.amount,
+          notes: nullify(input.discounts[index]!.notes),
           siblingStudentId:
-            d.siblingStudentId && d.siblingStudentId !== studentDbId
-              ? d.siblingStudentId
+            r.siblingStudentId && r.siblingStudentId !== studentDbId
+              ? r.siblingStudentId
               : null,
           createdBy: user.id,
         })),

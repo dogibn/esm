@@ -70,3 +70,26 @@ After a bank import, the accountant needs a way to verify the import worked, fin
 **Notes**
 - This view doesn't introduce any data the import flow doesn't already create. It's a different read + match surface over existing `BankTransaction` rows.
 - It exists in v1 specifically so the import flow has observability: without it, a row skipped during review only resurfaces if someone remembers it.
+
+---
+
+## 4. Discount catalog & applying discounts
+
+**Purpose**
+
+Standardize tuition discounts so accountants pick from a shared list instead of typing free-text names and amounts, and make the applied result (compounded, in order) transparent.
+
+**Flow — managing the catalog (admin only)**
+
+1. Any accountant opens "Discounts" in the main navigation and sees the catalog. Only admins see the add/edit controls (the API enforces this too).
+2. An admin adds a discount type: a name, a unit (**flat MNT** or **percent**), and either a fixed value or "custom" (left blank — the amount is entered when the discount is applied). Types can be retired (`is_active = false`) so they stop being offered without deleting history.
+
+**Flow — applying discounts to a student**
+
+1. In the New Contract form or a student's Tuition breakdown, the accountant adds a discount row and picks a type from the catalog. For "custom" types they enter the amount/percent.
+2. Rows are ordered (move up/down); discounts **compound top to bottom** — each applies to the running total left by the ones above it. A live preview shows each row's resolved reduction and the net tuition.
+3. For a sibling-type discount, a sibling student can be linked (see flow notes); the student detail view then shows the sibling and whether they're enrolled this year.
+
+**Notes**
+- The net tuition is derived by `computeTuition` (`features/discounts/calc.ts`) and each line's resolved MNT reduction is snapshotted, so the balance stays a simple sum. See `domain_model.md` § Discount.
+- Discounts loaded before the catalog existed show as "legacy" rows: preserved and counted, but not tied to a catalog entry.

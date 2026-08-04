@@ -1,6 +1,8 @@
 // Options and prefill data the New Contract form needs, resolved once on the
 // server and handed to the client component.
 
+import type { DiscountTypeRow } from "@/features/discounts";
+
 export type ClassOption = {
   gradeId: number;
   name: string;
@@ -29,6 +31,8 @@ export type EnrollmentFormContext = {
   // Flat registration fee (MNT) from the active fee structure, if any.
   registrationFee: number | null;
   students: ExistingStudentOption[];
+  // Active catalog entries an accountant can apply as discounts.
+  discountTypes: DiscountTypeRow[];
 };
 
 export type CreateEnrollmentResult = {

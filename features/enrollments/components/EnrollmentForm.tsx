@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, type ReactNode } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
-import { PlusIcon, XIcon } from "lucide-react";
+import { ArrowDownIcon, ArrowUpIcon, PlusIcon, XIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,6 +28,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+// Pure calc from its module (not the barrel) to keep server-only code out of
+// this client bundle.
+import { computeTuition } from "@/features/discounts/calc";
 
 import { createEnrollmentSchema, type CreateEnrollmentInput } from "../schemas";
 import { strings } from "../strings";
@@ -42,8 +45,8 @@ function money(n: number): string {
   return `${n.toLocaleString("en-US")} MNT`;
 }
 
-// The discount "reason" is free text; a sibling discount is recognised by name
-// (there is no discount-type enum in v1). Only these rows offer a sibling link.
+// A sibling discount is recognised by its catalog name (no discount-type flag
+// in v1). Only those rows offer a sibling link.
 function isSiblingDiscount(name: string): boolean {
   return /sibling/i.test(name);
 }
@@ -102,7 +105,10 @@ export function EnrollmentForm({ context, initialMode }: Props) {
     },
   });
   const { control, handleSubmit, setValue, watch } = form;
-  const { fields, append, remove } = useFieldArray({ control, name: "discounts" });
+  const { fields, append, remove, move } = useFieldArray({
+    control,
+    name: "discounts",
+  });
   const errors = form.formState.errors;
 
   const mode = watch("mode");
@@ -111,11 +117,42 @@ export function EnrollmentForm({ context, initialMode }: Props) {
   const registrationAmount = watch("registrationAmount");
   const discounts = watch("discounts");
 
-  const discountTotal = useMemo(
-    () => discounts.reduce((s, d) => s + (Number(d.amount) || 0), 0),
-    [discounts],
+  const typeById = useMemo(
+    () => new Map(context.discountTypes.map((t) => [t.id, t])),
+    [context.discountTypes],
   );
-  const netTuition = Math.max(0, (Number(tuitionAmount) || 0) - discountTotal);
+
+  // Resolve a form row to how it applies (unit/value), or null if incomplete.
+  const resolveRow = (row: {
+    discountTypeId?: number;
+    value?: number | null;
+  }): { unit: "mnt" | "percent"; value: number } | null => {
+    const t = row.discountTypeId ? typeById.get(row.discountTypeId) : undefined;
+    if (!t) return null;
+    if (t.value !== null) return { unit: t.unit, value: t.value };
+    const v = Number(row.value);
+    if (!Number.isFinite(v) || row.value === null || row.value === undefined) return null;
+    return { unit: t.unit, value: v };
+  };
+
+  // Live compounding preview: reductions align to resolvable rows, in order.
+  const preview = useMemo(() => {
+    const resolved = discounts.map(resolveRow);
+    const applied = resolved
+      .map((r, i) => (r ? { i, ...r } : null))
+      .filter((x): x is { i: number; unit: "mnt" | "percent"; value: number } => x !== null);
+    const comp = computeTuition(
+      Number(tuitionAmount) || 0,
+      applied.map((a) => ({ unit: a.unit, value: a.value })),
+    );
+    const amountByRow = new Map<number, number>();
+    applied.forEach((a, idx) => amountByRow.set(a.i, comp.lines[idx]!.amount));
+    return { net: comp.net, discountTotal: comp.discountTotal, amountByRow };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [discounts, tuitionAmount, typeById]);
+
+  const discountTotal = preview.discountTotal;
+  const netTuition = preview.net;
   const registrationApplied =
     category === "new" ? Number(registrationAmount) || 0 : 0;
   const grandTotal = netTuition + registrationApplied;
@@ -174,16 +211,23 @@ export function EnrollmentForm({ context, initialMode }: Props) {
     setServerError(null);
     setSubmitting(true);
     try {
-      // Keep a sibling link only on rows that read as a sibling discount, so a
-      // later rename to a non-sibling reason doesn't leave a stray pointer.
+      // Drop unselected rows; null a custom value for fixed types and a sibling
+      // link for non-sibling types (server derives unit/name/amount anyway).
       const payload = {
         ...values,
-        discounts: values.discounts.map((d) => ({
-          ...d,
-          siblingStudentId: isSiblingDiscount(d.name)
-            ? (d.siblingStudentId ?? null)
-            : null,
-        })),
+        discounts: values.discounts
+          .filter((d) => !!d.discountTypeId)
+          .map((d) => {
+            const t = typeById.get(d.discountTypeId);
+            return {
+              discountTypeId: d.discountTypeId,
+              value: t && t.value === null ? (d.value ?? null) : null,
+              notes: d.notes,
+              siblingStudentId: isSiblingDiscount(t?.name ?? "")
+                ? (d.siblingStudentId ?? null)
+                : null,
+            };
+          }),
       };
       const res = await fetch("/api/enrollments", {
         method: "POST",
@@ -533,46 +577,112 @@ export function EnrollmentForm({ context, initialMode }: Props) {
           </span>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
-          {fields.length === 0 ? (
+          {context.discountTypes.length === 0 ? (
+            <span className="text-sm text-muted-foreground">
+              {strings.discounts.noCatalog}
+            </span>
+          ) : null}
+          {fields.length === 0 && context.discountTypes.length > 0 ? (
             <span className="text-sm text-muted-foreground">
               {strings.discounts.empty}
             </span>
           ) : null}
           {fields.map((row, index) => {
-            const showSibling = isSiblingDiscount(discounts[index]?.name ?? "");
+            const rowTypeId = discounts[index]?.discountTypeId;
+            const rowType = rowTypeId ? typeById.get(rowTypeId) : undefined;
+            const isCustom = !!rowType && rowType.value === null;
+            const showSibling = isSiblingDiscount(rowType?.name ?? "");
+            const reduction = preview.amountByRow.get(index);
             return (
-              <div key={row.id} className="flex flex-col gap-2">
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(10rem,1fr)_10rem_auto]">
-                  <Controller
-                    control={control}
-                    name={`discounts.${index}.name`}
-                    render={({ field }) => (
-                      <Input
-                        {...field}
-                        placeholder={strings.discounts.namePlaceholder}
-                        aria-invalid={!!errors.discounts?.[index]?.name}
+              <div key={row.id} className="flex flex-col gap-2 rounded-lg border p-2">
+                <div className="flex items-start gap-1.5">
+                  <div className="flex flex-col">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={strings.discounts.moveUp}
+                      disabled={index === 0}
+                      onClick={() => move(index, index - 1)}
+                    >
+                      <ArrowUpIcon />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={strings.discounts.moveDown}
+                      disabled={index === fields.length - 1}
+                      onClick={() => move(index, index + 1)}
+                    >
+                      <ArrowDownIcon />
+                    </Button>
+                  </div>
+                  <div className="grid flex-1 grid-cols-1 gap-2 sm:grid-cols-[minmax(10rem,1fr)_9rem]">
+                    <Controller
+                      control={control}
+                      name={`discounts.${index}.discountTypeId`}
+                      render={({ field }) => (
+                        <Select
+                          items={Object.fromEntries(
+                            context.discountTypes.map((d) => [String(d.id), d.name]),
+                          )}
+                          value={field.value ? String(field.value) : ""}
+                          onValueChange={(v) => field.onChange(v ? Number(v) : 0)}
+                        >
+                          <SelectTrigger
+                            className="w-full"
+                            aria-invalid={!!errors.discounts?.[index]?.discountTypeId}
+                          >
+                            <SelectValue placeholder={strings.discounts.choose} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {context.discountTypes.map((d) => (
+                              <SelectItem key={d.id} value={String(d.id)}>
+                                {d.name}
+                                {d.value !== null
+                                  ? ` · ${strings.discounts.expressed(d.unit, d.value)}`
+                                  : ""}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                    {isCustom ? (
+                      <Controller
+                        control={control}
+                        name={`discounts.${index}.value`}
+                        render={({ field }) => (
+                          <Input
+                            type="number"
+                            min={0}
+                            step={rowType!.unit === "percent" ? 0.5 : 1000}
+                            value={
+                              field.value === null || field.value === undefined
+                                ? ""
+                                : field.value
+                            }
+                            onChange={(e) =>
+                              field.onChange(
+                                e.target.value === "" ? null : Number(e.target.value),
+                              )
+                            }
+                            placeholder={
+                              rowType!.unit === "percent"
+                                ? strings.discounts.customValuePercent
+                                : strings.discounts.customValueMnt
+                            }
+                            className="text-right tabular-nums"
+                          />
+                        )}
                       />
+                    ) : (
+                      <span className="flex items-center justify-end text-xs text-muted-foreground tabular-nums">
+                        {reduction !== undefined ? `−${money(reduction)}` : ""}
+                      </span>
                     )}
-                  />
-                  <Controller
-                    control={control}
-                    name={`discounts.${index}.amount`}
-                    render={({ field }) => (
-                      <Input
-                        type="number"
-                        min={1}
-                        step={1000}
-                        value={field.value === 0 ? "" : field.value}
-                        onChange={(e) =>
-                          field.onChange(
-                            e.target.value === "" ? 0 : Number(e.target.value),
-                          )
-                        }
-                        placeholder={strings.discounts.amount}
-                        aria-invalid={!!errors.discounts?.[index]?.amount}
-                      />
-                    )}
-                  />
+                  </div>
                   <Button
                     type="button"
                     variant="ghost"
@@ -583,6 +693,11 @@ export function EnrollmentForm({ context, initialMode }: Props) {
                     <XIcon />
                   </Button>
                 </div>
+                {isCustom && reduction !== undefined ? (
+                  <span className="pl-9 text-xs text-muted-foreground tabular-nums">
+                    −{money(reduction)}
+                  </span>
+                ) : null}
                 {showSibling ? (
                   <Controller
                     control={control}
@@ -656,8 +771,14 @@ export function EnrollmentForm({ context, initialMode }: Props) {
               variant="outline"
               size="sm"
               data-icon="inline-start"
+              disabled={context.discountTypes.length === 0}
               onClick={() =>
-                append({ name: "", amount: 0, notes: "", siblingStudentId: null })
+                append({
+                  discountTypeId: 0,
+                  value: null,
+                  notes: "",
+                  siblingStudentId: null,
+                })
               }
             >
               <PlusIcon />

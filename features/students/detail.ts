@@ -14,6 +14,11 @@ import {
   students,
 } from "@/db/schema";
 import { HttpError } from "@/lib/errors";
+import {
+  listDiscountTypes,
+  type DiscountTypeRow,
+  type DiscountUnit,
+} from "@/features/discounts";
 
 import { computeChargeBalance } from "./balance";
 import type { FeeStatus } from "./types";
@@ -39,7 +44,12 @@ export type StudentDetailHeader = {
 };
 
 export type DiscountLine = {
+  discountTypeId: number | null;
   name: string;
+  // How the discount was expressed: 'percent' (value is a %) or 'mnt' (flat).
+  unit: DiscountUnit;
+  value: number;
+  // Resolved MNT reduction this line contributed, in compounding order.
   amount: number;
   // Sibling link (sibling discounts only; NULL otherwise). `siblingName` and
   // `siblingEnrolled` are resolved from the referenced Student — the latter is
@@ -122,6 +132,8 @@ export type StudentDetail = {
   totals: { charged: number; paid: number; balance: number };
   // Students that can be linked as a sibling (everyone but this one).
   siblingCandidates: SiblingOption[];
+  // Active catalog entries offered when editing the tuition discounts.
+  discountTypes: DiscountTypeRow[];
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -202,12 +214,17 @@ export async function getStudentDetail(studentDbId: number): Promise<StudentDeta
 
   const discountRows = await db
     .select({
+      discountTypeId: discounts.discountTypeId,
       name: discounts.name,
+      unit: discounts.unit,
+      value: discounts.value,
       amount: discounts.amount,
       siblingStudentId: discounts.siblingStudentId,
     })
     .from(discounts)
-    .where(eq(discounts.enrollmentId, base.enrollmentId));
+    .where(eq(discounts.enrollmentId, base.enrollmentId))
+    // Compounding order — the ledger must read top-to-bottom as applied.
+    .orderBy(asc(discounts.position));
   const discountTotal = discountRows.reduce((s, d) => s + Number(d.amount), 0);
 
   // Resolve each linked sibling: their name plus whether they hold an active
@@ -333,7 +350,10 @@ export async function getStudentDetail(studentDbId: number): Promise<StudentDeta
               ? (siblingInfo.get(d.siblingStudentId) ?? null)
               : null;
           return {
+            discountTypeId: d.discountTypeId,
             name: d.name,
+            unit: d.unit as DiscountUnit,
+            value: Number(d.value),
             amount: Number(d.amount),
             siblingStudentId: d.siblingStudentId,
             siblingName: info?.name ?? null,
@@ -435,6 +455,8 @@ export async function getStudentDetail(studentDbId: number): Promise<StudentDeta
     .where(ne(students.id, studentDbId))
     .orderBy(asc(students.lastName), asc(students.firstName));
 
+  const discountTypeRows = await listDiscountTypes({ activeOnly: true });
+
   return {
     header: {
       id: base.studentDbId,
@@ -463,5 +485,6 @@ export async function getStudentDetail(studentDbId: number): Promise<StudentDeta
     payments: paymentHistory,
     totals,
     siblingCandidates,
+    discountTypes: discountTypeRows,
   };
 }

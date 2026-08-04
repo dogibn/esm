@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Pencil, Plus, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Pencil, Plus, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -18,7 +18,18 @@ import {
   ComboboxValue,
 } from "@/components/ui/combobox";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/components/ui/toast";
+// Pure calc imported from its module (not the barrel) so this client component
+// never pulls server-only code (db) into the bundle.
+import { computeTuition } from "@/features/discounts/calc";
+import type { DiscountTypeRow } from "@/features/discounts";
 
 import type { SiblingOption, TuitionBreakdown } from "../../detail";
 import { formatMnt } from "../../format";
@@ -28,27 +39,43 @@ import { SectionHeading } from "./SectionHeading";
 
 const s = strings.detail.tuition;
 
-type DiscountDraft = { name: string; amount: string; siblingStudentId: number | null };
-
-function toAmount(v: string): number {
-  const n = Math.trunc(Number(v));
-  return Number.isFinite(n) && n > 0 ? n : 0;
-}
-
-// A sibling discount is recognised by its name (no discount-type enum in v1);
-// only those rows carry a sibling link.
+// A discount a sibling can be linked on is recognised by name (no type flag in
+// v1) — same heuristic the enrollment form uses.
 function isSiblingDiscount(name: string): boolean {
   return /sibling/i.test(name);
+}
+
+type DiscountDraft = {
+  key: string;
+  // Catalog entry id, or null for a legacy/manual row (pre-catalog).
+  discountTypeId: number | null;
+  isLegacy: boolean;
+  customValue: string;
+  siblingStudentId: number | null;
+  // Snapshot carried for legacy rows so they survive a save unchanged.
+  legacyName?: string;
+  legacyUnit?: "mnt" | "percent";
+  legacyValue?: number;
+};
+
+let keySeq = 0;
+const nextKey = () => `d${keySeq++}`;
+
+function toIntOrZero(v: string): number {
+  const n = Number(v);
+  return Number.isFinite(n) && n > 0 ? n : 0;
 }
 
 export function TuitionBreakdownCard({
   studentId,
   tuition,
   siblingCandidates,
+  discountTypes,
 }: {
   studentId: number;
   tuition: TuitionBreakdown | null;
   siblingCandidates: SiblingOption[];
+  discountTypes: DiscountTypeRow[];
 }) {
   const router = useRouter();
   const { toast } = useToast();
@@ -58,46 +85,104 @@ export function TuitionBreakdownCard({
   const [base, setBase] = useState("0");
   const [rows, setRows] = useState<DiscountDraft[]>([]);
 
+  const typeById = useMemo(
+    () => new Map(discountTypes.map((t) => [t.id, t])),
+    [discountTypes],
+  );
+
   const startEdit = () => {
     if (!tuition) return;
     setBase(String(tuition.gross));
     setRows(
       tuition.discounts.map((d) => ({
-        name: d.name,
-        amount: String(d.amount),
+        key: nextKey(),
+        discountTypeId: d.discountTypeId,
+        isLegacy: d.discountTypeId === null,
+        customValue: String(d.value),
         siblingStudentId: d.siblingStudentId,
+        legacyName: d.discountTypeId === null ? d.name : undefined,
+        legacyUnit: d.discountTypeId === null ? d.unit : undefined,
+        legacyValue: d.discountTypeId === null ? d.value : undefined,
       })),
     );
     setError(null);
     setEditing(true);
   };
 
-  const baseNum = toAmount(base);
-  const discountTotal = rows.reduce((sum, r) => sum + toAmount(r.amount), 0);
-  const netPreview = baseNum - discountTotal;
+  const baseNum = toIntOrZero(base);
+
+  // Resolve a draft to how it will be applied, or null if incomplete.
+  const resolveDraft = (
+    d: DiscountDraft,
+  ): { name: string; unit: "mnt" | "percent"; value: number } | null => {
+    if (d.isLegacy) {
+      return { name: d.legacyName ?? "", unit: d.legacyUnit ?? "mnt", value: d.legacyValue ?? 0 };
+    }
+    if (d.discountTypeId === null) return null;
+    const t = typeById.get(d.discountTypeId);
+    if (!t) return null;
+    const value = t.value !== null ? t.value : toIntOrZero(d.customValue);
+    if (t.value === null && d.customValue.trim() === "") return null;
+    return { name: t.name, unit: t.unit, value };
+  };
+
+  // Live compounding preview: reductions align to the resolvable rows, in order.
+  const preview = useMemo(() => {
+    const resolvedByRow = rows.map(resolveDraft);
+    const applied = resolvedByRow
+      .map((r, i) => (r ? { i, unit: r.unit, value: r.value } : null))
+      .filter((x): x is { i: number; unit: "mnt" | "percent"; value: number } => x !== null);
+    const comp = computeTuition(baseNum, applied.map((a) => ({ unit: a.unit, value: a.value })));
+    const amountByRow = new Map<number, number>();
+    applied.forEach((a, idx) => amountByRow.set(a.i, comp.lines[idx]!.amount));
+    return { net: comp.net, discountTotal: comp.discountTotal, amountByRow };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rows, baseNum, typeById]);
+
+  const move = (i: number, dir: -1 | 1) => {
+    setRows((rs) => {
+      const j = i + dir;
+      if (j < 0 || j >= rs.length) return rs;
+      const copy = [...rs];
+      [copy[i], copy[j]] = [copy[j]!, copy[i]!];
+      return copy;
+    });
+  };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setError(null);
     try {
+      const payload = rows
+        .map((d) => {
+          if (d.isLegacy) {
+            return {
+              discountTypeId: null,
+              name: d.legacyName,
+              unit: d.legacyUnit,
+              value: d.legacyValue,
+              siblingStudentId: d.siblingStudentId,
+            };
+          }
+          if (d.discountTypeId === null) return null; // unselected row → drop
+          const t = typeById.get(d.discountTypeId);
+          const custom = t && t.value === null;
+          return {
+            discountTypeId: d.discountTypeId,
+            value: custom ? toIntOrZero(d.customValue) : null,
+            siblingStudentId: isSiblingDiscount(t?.name ?? "")
+              ? d.siblingStudentId
+              : null,
+          };
+        })
+        .filter((x) => x !== null);
+
       const res = await fetch(`/api/students/${studentId}/tuition`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({
-          baseAmount: baseNum,
-          discounts: rows
-            .filter((r) => r.name.trim().length > 0)
-            .map((r) => ({
-              name: r.name.trim(),
-              amount: toAmount(r.amount),
-              // Keep the link only for rows that read as a sibling discount.
-              siblingStudentId: isSiblingDiscount(r.name)
-                ? r.siblingStudentId
-                : null,
-            })),
-        }),
+        body: JSON.stringify({ baseAmount: baseNum, discounts: payload }),
       });
       if (!res.ok) {
         const body = (await res.json().catch(() => null)) as { error?: string } | null;
@@ -135,33 +220,95 @@ export function TuitionBreakdownCard({
 
             <div className="flex flex-col gap-2">
               {rows.map((row, i) => {
+                const t = row.discountTypeId !== null ? typeById.get(row.discountTypeId) : undefined;
+                const isCustom = !row.isLegacy && !!t && t.value === null;
+                const rowName = row.isLegacy ? (row.legacyName ?? "") : (t?.name ?? "");
+                const showSibling = isSiblingDiscount(rowName);
                 const selectedSibling =
                   siblingCandidates.find((c) => c.id === row.siblingStudentId) ?? null;
+                const reduction = preview.amountByRow.get(i);
                 return (
-                  <div key={i} className="flex flex-col gap-1.5">
-                    <div className="flex items-center gap-2">
-                      <Input
-                        value={row.name}
-                        placeholder={s.discountNamePlaceholder}
-                        aria-label={s.discountName}
-                        onChange={(e) =>
-                          setRows((rs) =>
-                            rs.map((r, j) => (j === i ? { ...r, name: e.target.value } : r)),
-                          )
-                        }
-                        className="flex-1"
-                      />
-                      <Input
-                        type="number"
-                        min={0}
-                        value={row.amount}
-                        onChange={(e) =>
-                          setRows((rs) =>
-                            rs.map((r, j) => (j === i ? { ...r, amount: e.target.value } : r)),
-                          )
-                        }
-                        className="w-28 text-right tabular-nums"
-                      />
+                  <div key={row.key} className="flex flex-col gap-1.5 rounded-lg border p-2">
+                    <div className="flex items-center gap-1.5">
+                      <div className="flex flex-col">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label={s.moveUp}
+                          disabled={i === 0}
+                          onClick={() => move(i, -1)}
+                        >
+                          <ArrowUp />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label={s.moveDown}
+                          disabled={i === rows.length - 1}
+                          onClick={() => move(i, 1)}
+                        >
+                          <ArrowDown />
+                        </Button>
+                      </div>
+
+                      <div className="flex flex-1 flex-col gap-1">
+                        {row.isLegacy ? (
+                          <span className="flex items-center gap-2">
+                            <span className="font-medium">{row.legacyName}</span>
+                            <span className="rounded-full bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+                              {s.legacyTag} · {s.expressed(row.legacyUnit ?? "mnt", row.legacyValue ?? 0)}
+                            </span>
+                          </span>
+                        ) : (
+                          <Select
+                            items={Object.fromEntries(discountTypes.map((d) => [String(d.id), d.name]))}
+                            value={row.discountTypeId === null ? "" : String(row.discountTypeId)}
+                            onValueChange={(v) =>
+                              setRows((rs) =>
+                                rs.map((r, j) =>
+                                  j === i ? { ...r, discountTypeId: v ? Number(v) : null } : r,
+                                ),
+                              )
+                            }
+                          >
+                            <SelectTrigger size="sm" className="w-full">
+                              <SelectValue placeholder={s.chooseDiscount} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {discountTypes.map((d) => (
+                                <SelectItem key={d.id} value={String(d.id)}>
+                                  {d.name}
+                                  {d.value !== null
+                                    ? ` · ${s.expressed(d.unit, d.value)}`
+                                    : ""}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </div>
+
+                      {isCustom ? (
+                        <Input
+                          type="number"
+                          min={0}
+                          value={row.customValue}
+                          placeholder={t!.unit === "percent" ? s.customValuePercent : s.customValueMnt}
+                          onChange={(e) =>
+                            setRows((rs) =>
+                              rs.map((r, j) => (j === i ? { ...r, customValue: e.target.value } : r)),
+                            )
+                          }
+                          className="w-24 text-right tabular-nums"
+                        />
+                      ) : null}
+
+                      <span className="w-24 shrink-0 text-right text-xs text-muted-foreground tabular-nums">
+                        {reduction !== undefined ? `−${formatMnt(reduction)}` : "—"}
+                      </span>
+
                       <Button
                         type="button"
                         variant="ghost"
@@ -172,7 +319,8 @@ export function TuitionBreakdownCard({
                         <X />
                       </Button>
                     </div>
-                    {isSiblingDiscount(row.name) ? (
+
+                    {showSibling ? (
                       <Combobox
                         items={siblingCandidates}
                         value={selectedSibling}
@@ -180,18 +328,12 @@ export function TuitionBreakdownCard({
                           setRows((rs) =>
                             rs.map((r, j) =>
                               j === i
-                                ? {
-                                    ...r,
-                                    siblingStudentId:
-                                      (c as SiblingOption | null)?.id ?? null,
-                                  }
+                                ? { ...r, siblingStudentId: (c as SiblingOption | null)?.id ?? null }
                                 : r,
                             ),
                           )
                         }
-                        itemToStringLabel={(c: SiblingOption) =>
-                          `${c.lastName} ${c.firstName} ${c.code}`
-                        }
+                        itemToStringLabel={(c: SiblingOption) => `${c.lastName} ${c.firstName} ${c.code}`}
                       >
                         <ComboboxTrigger className="w-full">
                           <ComboboxValue>
@@ -211,9 +353,7 @@ export function TuitionBreakdownCard({
                                   <span>
                                     {item.lastName} {item.firstName}
                                   </span>
-                                  <span className="text-xs text-muted-foreground">
-                                    {item.code}
-                                  </span>
+                                  <span className="text-xs text-muted-foreground">{item.code}</span>
                                 </span>
                               </ComboboxItem>
                             )}
@@ -225,29 +365,41 @@ export function TuitionBreakdownCard({
                   </div>
                 );
               })}
+
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 className="self-start"
+                disabled={discountTypes.length === 0}
                 onClick={() =>
-                  setRows((rs) => [...rs, { name: "", amount: "0", siblingStudentId: null }])
+                  setRows((rs) => [
+                    ...rs,
+                    {
+                      key: nextKey(),
+                      discountTypeId: null,
+                      isLegacy: false,
+                      customValue: "",
+                      siblingStudentId: null,
+                    },
+                  ])
                 }
               >
                 <Plus />
                 {s.addDiscount}
               </Button>
+              <p className="text-xs text-muted-foreground">
+                {discountTypes.length === 0 ? s.noCatalog : s.orderHint}
+              </p>
             </div>
 
             <div className="flex items-center justify-between gap-2 border-t pt-2">
               <span className="font-semibold">{s.net}</span>
-              <span className="font-semibold tabular-nums">{formatMnt(netPreview)}</span>
+              <span className="font-semibold tabular-nums">{formatMnt(preview.net)}</span>
             </div>
 
             {tuition.paid > 0 ? (
-              <p className="text-xs text-muted-foreground">
-                {s.paidHint(formatMnt(tuition.paid))}
-              </p>
+              <p className="text-xs text-muted-foreground">{s.paidHint(formatMnt(tuition.paid))}</p>
             ) : null}
             {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
@@ -294,18 +446,19 @@ export function TuitionBreakdownCard({
           <div className="flex flex-col gap-2 text-sm">
             <div className="flex items-center justify-between gap-2">
               <span>{s.base}</span>
-              <span className="font-medium tabular-nums">
-                {formatMnt(tuition.gross)}
-              </span>
+              <span className="font-medium tabular-nums">{formatMnt(tuition.gross)}</span>
             </div>
             {tuition.discounts.map((d, i) => (
               <div key={`${d.name}-${i}`} className="flex flex-col gap-0.5">
                 <div className="flex items-center justify-between gap-2 text-muted-foreground">
-                  <span className="break-words">{d.name}</span>
+                  <span className="break-words">
+                    {d.name}
+                    <span className="ml-1 text-xs">· {s.expressed(d.unit, d.value)}</span>
+                  </span>
                   <span className="tabular-nums">−{formatMnt(d.amount)}</span>
                 </div>
                 {d.siblingName ? (
-                  <div className="flex flex-wrap items-center gap-1.5 pl-0 text-xs text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
                     <span className="break-words">{s.siblingLabel(d.siblingName)}</span>
                     <span
                       className={
@@ -322,9 +475,7 @@ export function TuitionBreakdownCard({
             ))}
             <div className="mt-1 flex items-center justify-between gap-2 border-t pt-2">
               <span className="font-semibold">{s.net}</span>
-              <span className="font-semibold tabular-nums">
-                {formatMnt(tuition.net)}
-              </span>
+              <span className="font-semibold tabular-nums">{formatMnt(tuition.net)}</span>
             </div>
           </div>
         )}

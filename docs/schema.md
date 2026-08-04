@@ -180,14 +180,36 @@ For *what* the entities mean and *why* the schema looks like this, see `domain_m
 - INDEX `(student_id, academic_term_id)`
 - INDEX `(fee_name)`
 
+### `discount_types`
+
+The reusable discount catalog (`domain_model.md` § DiscountType). Admin-curated.
+
+| Column | Type | Constraints |
+|---|---|---|
+| `id` | `serial` | PK |
+| `name` | `text` | NOT NULL, UNIQUE — e.g. `"Early-bird"` |
+| `unit` | `text` | NOT NULL, CHECK in (`'percent'`, `'mnt'`) |
+| `value` | `numeric(12,4)` | nullable — fixed percent/amount, or NULL = "custom" (entered on apply) |
+| `note` | `text` | nullable |
+| `is_active` | `boolean` | NOT NULL DEFAULT `true` |
+| `created_at` | `timestamptz` | NOT NULL DEFAULT `now()` |
+| `updated_at` | `timestamptz` | NOT NULL DEFAULT `now()` |
+| `created_by` | `uuid` | NOT NULL, FK → `users.id` |
+
+- CHECK `value IS NULL OR (value >= 0 AND (unit <> 'percent' OR value <= 100))`
+
 ### `discounts`
 
 | Column | Type | Constraints |
 |---|---|---|
 | `id` | `serial` | PK |
 | `enrollment_id` | `integer` | NOT NULL, FK → `enrollments.id` |
-| `name` | `text` | NOT NULL — e.g. `"sibling"`, `"scholarship"` |
-| `amount` | `bigint` | NOT NULL — MNT reduction |
+| `discount_type_id` | `integer` | nullable, FK → `discount_types.id` — the catalog entry; NULL for legacy/pre-catalog rows |
+| `name` | `text` | NOT NULL — snapshot of the type's name at apply time |
+| `unit` | `text` | NOT NULL, CHECK in (`'percent'`, `'mnt'`) — snapshot |
+| `value` | `numeric(12,4)` | NOT NULL — the percent/amount applied (snapshot) |
+| `position` | `integer` | NOT NULL — 0-based application order; discounts compound in this order |
+| `amount` | `bigint` | NOT NULL — resolved MNT reduction this line contributed, in sequence |
 | `notes` | `text` | nullable |
 | `sibling_student_id` | `integer` | nullable, FK → `students.id`, ON DELETE SET NULL — sibling discounts only; see `domain_model.md` § Discount |
 | `created_at` | `timestamptz` | NOT NULL DEFAULT `now()` |
@@ -195,7 +217,10 @@ For *what* the entities mean and *why* the schema looks like this, see `domain_m
 
 - INDEX `(enrollment_id)`
 - INDEX `(sibling_student_id)`
+- INDEX `(discount_type_id)`
+- UNIQUE `(enrollment_id, position)`
 - `sibling_student_id` is the one FK with `ON DELETE SET NULL` (the convention's default is RESTRICT). It's an optional cross-reference: deleting a student clears the pointer rather than blocking the delete, and the discount stays valid.
+- `amount` is the **resolved** reduction after compounding, so the balance formula stays a `SUM`. `unit`/`value`/`position` record the rule that produced it.
 
 ### `payments`
 
@@ -218,6 +243,10 @@ For *what* the entities mean and *why* the schema looks like this, see `domain_m
 Belongs in a service-layer helper (`features/students/balance.ts`), not duplicated across queries.
 
 For Charge `C`:
+
+`d.amount` is each discount's **resolved** MNT reduction (compounding order already
+baked in by `computeTuition` at write time — see `domain_model.md` § Discount), so
+the total is a plain `SUM`, not a re-computed fold.
 
 ```
 discount_total =
@@ -255,8 +284,9 @@ Drizzle's `drizzle-kit generate` handles ordering automatically. This list is fo
 9. `club_enrollments`
 10. `bank_transactions`
 11. `charges`
-12. `discounts`
-13. `payments`
+12. `discount_types`
+13. `discounts` (FK → `discount_types`)
+14. `payments`
 
 ---
 

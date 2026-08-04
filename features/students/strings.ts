@@ -99,6 +99,19 @@ export const strings = {
       addDiscount: "Add discount",
       removeDiscount: "Remove discount",
       paidHint: (paid: string) => `${paid} already paid — net can't go below this.`,
+      chooseDiscount: "Choose a discount",
+      customValueMnt: "Amount (₮)",
+      customValuePercent: "Percent (%)",
+      moveUp: "Move up",
+      moveDown: "Move down",
+      legacyTag: "legacy",
+      orderHint: "Discounts apply top to bottom, each onto the running total.",
+      noCatalog: "No discounts in the catalog yet.",
+      // How a discount reads: "10%" or "300,000₮".
+      expressed: (unit: "mnt" | "percent", value: number): string =>
+        unit === "percent"
+          ? `${value}%`
+          : `${value.toLocaleString("en-US")}₮`,
       sibling: "Sibling",
       siblingSelect: "Link the sibling student",
       siblingSearch: "Search by name or ID…",

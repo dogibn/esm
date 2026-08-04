@@ -51,6 +51,7 @@ export function StudentDetailView({ detail }: { detail: StudentDetail }) {
     payments,
     totals,
     siblingCandidates,
+    discountTypes,
   } = detail;
   const t = strings.detail;
   const fullName = `${header.firstName} ${header.lastName}`.trim();
@@ -113,6 +114,7 @@ export function StudentDetailView({ detail }: { detail: StudentDetail }) {
               studentId={header.id}
               tuition={tuition}
               siblingCandidates={siblingCandidates}
+              discountTypes={discountTypes}
             />
           </div>
 

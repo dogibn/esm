@@ -12,9 +12,14 @@ export type {
 export {
   createDiscountType,
   listDiscountTypes,
+  resolveDiscountApplications,
   updateDiscountType,
 } from "./api";
-export type { DiscountTypeRow } from "./api";
+export type {
+  AppliedDiscountInput,
+  DiscountTypeRow,
+  ResolvedApplication,
+} from "./api";
 export {
   discountTypeIdParamSchema,
   discountTypeInputSchema,
