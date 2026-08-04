@@ -16,7 +16,7 @@ Five accountants at ESM. One admin manages fee structures; the other four record
 - Adding/editing fee structures, students, or enrollments through the UI
 - Printing or sending invoices
 - Discount rule engine (v1 records discount amounts, not the formulas behind them)
-- Family / siblings modeling
+- Family / siblings modeling — no family graph. (A sibling discount may carry an optional soft pointer to one sibling student; see `domain_model.md` § Discount.)
 - Refunds
 
 ## Non-goals
