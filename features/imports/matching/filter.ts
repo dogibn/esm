@@ -31,3 +31,44 @@ export function shouldAttemptMatch(tx: BankTransactionInput): boolean {
   }
   return true;
 }
+
+/**
+ * Incoming money that is real, but is not a parent paying a fee: another school
+ * settling a basketball tournament invoice, an electricity refund, a social
+ * insurance transfer, the cash register.
+ *
+ * These reach matching (they are ordinary incoming transfers) and used to sit
+ * in the unmatched pile beside genuine failures, where they cost a reviewer the
+ * same attention as a payment that needs fixing. Recognising them lets the
+ * review screen offer them as a batch to discard.
+ *
+ * Deliberately conservative: a hit means "do not treat as a student payment",
+ * so a keyword that could plausibly appear in a parent's memo does not belong
+ * here. Counterparty words ("сургууль" — school) only count alongside a second
+ * signal, because a parent might well name the school in their memo.
+ */
+const NON_STUDENT_KEYWORDS: string[] = [
+  'ubac', // the inter-school sports league
+  'тэмцээн', // tournament
+  'play off',
+  'play-off',
+  'playoff',
+  'playoffs',
+  'invoice',
+  'цахилгаан', // electricity
+  'кассаас', // from the cash register
+  'тэтгэмж', // benefit / allowance
+  'буцаалт', // refund returned
+  'butsaalt',
+  'conference',
+  'зар сурталчилгаа', // advertising
+];
+
+const NON_STUDENT_NORMALIZED = NON_STUDENT_KEYWORDS.map((k) => normalize(k)).filter(
+  (k) => k.length > 0,
+);
+
+export function looksNonStudent(tx: BankTransactionInput): boolean {
+  const haystack = `${normalize(tx.memo ?? '')} ${normalize(tx.senderAccountName ?? '')}`;
+  return NON_STUDENT_NORMALIZED.some((kw) => haystack.includes(kw));
+}

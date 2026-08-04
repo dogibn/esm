@@ -1,4 +1,8 @@
-export { createEnrollment, getEnrollmentFormContext } from "./api";
+export {
+  createEnrollment,
+  getEnrollmentFormContext,
+  undoCreateEnrollment,
+} from "./api";
 export {
   ENROLLMENT_MODES,
   STUDENT_CATEGORIES,

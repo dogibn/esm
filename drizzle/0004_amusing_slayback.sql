@@ -1,0 +1,2 @@
+CREATE UNIQUE INDEX "charges_student_year_fee_unique" ON "charges" USING btree ("student_id","academic_year_id","fee_name") WHERE "charges"."academic_term_id" IS NULL;--> statement-breakpoint
+CREATE UNIQUE INDEX "charges_student_term_fee_unique" ON "charges" USING btree ("student_id","academic_term_id","fee_name") WHERE "charges"."academic_year_id" IS NULL;

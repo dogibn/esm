@@ -1,4 +1,4 @@
-import { eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 
 import { charges, discounts, enrollments, payments } from "@/db/schema";
 
@@ -73,7 +73,8 @@ export async function loadStudentChargeDetails(opts: {
       paid: sql<number>`COALESCE(SUM(${payments.amount}), 0)`.as("paid"),
     })
     .from(payments)
-    .where(inArray(payments.chargeId, chargeIds))
+    // Voided payments (undone confirms) never count toward paid/balance.
+    .where(and(inArray(payments.chargeId, chargeIds), isNull(payments.voidedAt)))
     .groupBy(payments.chargeId);
   const paidByCharge = new Map<number, number>();
   for (const p of paymentSums) paidByCharge.set(p.chargeId, Number(p.paid));

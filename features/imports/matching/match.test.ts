@@ -241,3 +241,82 @@ describe('match — orchestrator', () => {
     expect(result.kind).toBe('unmatched');
   });
 });
+
+describe('match — siblings sharing one transfer', () => {
+  it('splits an exact multiple of the bus rate across the named siblings', () => {
+    // "BUS FEE, BAT-ERDENE 8B, ANAR 6E" — neither child has a bus charge, so
+    // each share proposes creating one.
+    const ctx = buildMatchingContext({
+      academicTermId: 4,
+      students: [
+        { id: 1, firstName: 'Bat-Erdene', lastName: 'Dorj' },
+        { id: 2, firstName: 'Anar', lastName: 'Dorj' },
+      ],
+      enrollments: [
+        { studentId: 1, gradeName: '8B', gradeLevelCode: '8' },
+        { studentId: 2, gradeName: '6E', gradeLevelCode: '6' },
+      ],
+      currentTermFees: [
+        { feeStructureId: 1, feeName: 'bus', amount: BigInt('375000'), isClub: false },
+      ],
+      currentYearFees: [],
+      clubAliases: {},
+      confirmedAccountLinks: [],
+      openCharges: [],
+    });
+    const result = match(
+      {
+        memo: 'BUS FEE, BAT-ERDENE 8B, ANAR 6E',
+        amount: BigInt('750000'),
+        senderAccount: 'ACC',
+      },
+      ctx,
+    );
+    expect(result.kind).toBe('matched_multi');
+    if (result.kind === 'matched_multi') {
+      expect(result.proposal.proposals.map((p) => p.studentId).sort()).toEqual([1, 2]);
+      for (const p of result.proposal.proposals) {
+        expect(p.proposedCharge?.feeName).toBe('bus');
+        expect(p.allocations[0]?.amount).toBe(BigInt('375000'));
+      }
+    }
+  });
+
+  it('refuses a split that does not divide evenly', () => {
+    const ctx = buildContext({
+      students: baseStudents,
+      enrollments: baseEnrollments,
+      openCharges: [
+        {
+          studentId: 1,
+          id: 1,
+          feeName: 'tuition',
+          scope: { kind: 'year', academicYearId: 1 },
+          grossAmount: BigInt('2000000'),
+          outstandingBalance: BigInt('2000000'),
+        },
+      ],
+    });
+    const result = match(
+      { memo: 'Baatar 8Д and Amartuvshin 4BA', amount: BigInt('999999'), senderAccount: 'A' },
+      ctx,
+    );
+    expect(result.kind).not.toBe('matched_multi');
+  });
+});
+
+describe('match — income that is not a student payment', () => {
+  it('flags a tournament invoice from another school instead of guessing', () => {
+    const ctx = buildContext({ students: baseStudents, enrollments: baseEnrollments });
+    const result = match(
+      {
+        memo: 'EB-ШИНЭ ҮЕ СУРГУУЛЬ UBAC САГСАН БӨМБӨГ ХУРААМЖ',
+        amount: BigInt('240000'),
+        senderAccount: 'ACC',
+      },
+      ctx,
+    );
+    expect(result.kind).toBe('unmatched');
+    if (result.kind === 'unmatched') expect(result.reason).toBe('not_student');
+  });
+});

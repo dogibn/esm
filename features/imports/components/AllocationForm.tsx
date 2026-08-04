@@ -58,6 +58,7 @@ const SIGNAL_CATEGORY: Record<SignalKind, SignalCategory | null> = {
   memo_grade_level: "memo_grade",
   memo_name_full: "memo_name",
   memo_name_partial: "memo_name",
+  memo_name_initial: "memo_name",
   memo_name_fuzzy: "memo_name",
   sender_account: "account",
   fee_hint_from_amount: "amount",

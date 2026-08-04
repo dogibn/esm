@@ -1,13 +1,15 @@
-import { and, count, desc, eq, ilike, inArray, or, type SQL } from "drizzle-orm";
+import { and, count, desc, eq, ilike, inArray, isNull, or, type SQL } from "drizzle-orm";
 
 import { db } from "@/db/index";
 import {
   bankTransactions,
   charges,
+  operations,
   payments,
   students,
   type User,
 } from "@/db/schema";
+import { isUndoable } from "@/features/history";
 
 import type { TransactionListParams } from "./schemas";
 import type {
@@ -25,7 +27,7 @@ import type { TxStatusValue } from "./schemas";
  * `user` accepted for future per-user scoping; not used yet.
  */
 export async function listTransactions(
-  _user: User,
+  user: User,
   params: TransactionListParams,
 ): Promise<TransactionListResponse> {
   const filters: SQL[] = [];
@@ -83,7 +85,12 @@ export async function listTransactions(
           .from(payments)
           .innerJoin(charges, eq(charges.id, payments.chargeId))
           .innerJoin(students, eq(students.id, charges.studentId))
-          .where(inArray(payments.bankTransactionId, matchedIds))
+          .where(
+            and(
+              inArray(payments.bankTransactionId, matchedIds),
+              isNull(payments.voidedAt),
+            ),
+          )
       : [];
 
   const paymentsByTx = new Map<number, TransactionPaymentInfo[]>();
@@ -101,11 +108,48 @@ export async function listTransactions(
     });
   }
 
-  const rows: TransactionRow[] = pageRows.map((r) => ({
-    ...r,
-    status: r.status as TxStatusValue,
-    payments: paymentsByTx.get(r.id) ?? [],
-  }));
+  // The active (not-yet-undone) confirm/discard operation per row on this page,
+  // used to offer an Undo/Restore action. At most one such op per transaction.
+  const pageIds = pageRows.map((r) => r.id);
+  const opRows =
+    pageIds.length > 0
+      ? await db
+          .select({
+            id: operations.id,
+            bankTransactionId: operations.bankTransactionId,
+            actorUserId: operations.actorUserId,
+            undoableUntil: operations.undoableUntil,
+            undoneAt: operations.undoneAt,
+          })
+          .from(operations)
+          .where(
+            and(
+              inArray(operations.bankTransactionId, pageIds),
+              inArray(operations.kind, ["confirm_match", "discard_transaction"]),
+              isNull(operations.undoneAt),
+            ),
+          )
+      : [];
+  const opByTx = new Map<number, (typeof opRows)[number]>();
+  for (const o of opRows) {
+    if (o.bankTransactionId !== null) opByTx.set(o.bankTransactionId, o);
+  }
+
+  const now = new Date();
+  const rows: TransactionRow[] = pageRows.map((r) => {
+    const op = opByTx.get(r.id);
+    // Admins may undo anyone's action; accountants only their own.
+    const mayUndo =
+      op !== undefined &&
+      isUndoable(op, now) &&
+      (op.actorUserId === user.id || user.role === "admin");
+    return {
+      ...r,
+      status: r.status as TxStatusValue,
+      payments: paymentsByTx.get(r.id) ?? [],
+      undoOperationId: mayUndo ? op.id : null,
+    };
+  });
 
   return {
     rows,

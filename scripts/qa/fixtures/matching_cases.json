@@ -1,0 +1,200 @@
+{
+  "note": "Hand-labelled memos from features/imports/data/bank_transactions_sample.xlsx. `student` is the expected top-ranked student, written 'FirstName LastName' as stored in the students table; matching is case- and space-insensitive. `student: null` with kind 'not_student' means the row is not a student payment at all (bank noise, another school, a refund). Only cases whose correct answer is determinable from the memo plus the student directory are listed — do not guess labels, an unlabelled row is better than a wrong one. `charge` is the fee_name the payment should land on when that is unambiguous.",
+  "cases": [
+    {
+      "memo": "O.ERHEMBAYAR",
+      "amount": 4900000,
+      "student": "Erkhembayar Otgonkhuyag",
+      "why": "initial form: last-initial O + first name ERHEMBAYAR; unique in the directory"
+    },
+    {
+      "memo": "S.ANUJIN,5B ANGI 99706387",
+      "amount": 2150000,
+      "student": "Anujin Sarantsetseg",
+      "why": "initial form + bare 'angi' level keyword"
+    },
+    {
+      "memo": "GRADE 12 E.TEMUULEN",
+      "amount": 2500000,
+      "student": "Temuulen Enkhbat",
+      "why": "'grade' keyword before the digit + initial form"
+    },
+    {
+      "memo": "БОЛД НОМИН ЭРДЭНЭ",
+      "amount": 210000,
+      "student": "Nomin-Erdene Bold",
+      "why": "hyphenated first name written as two tokens"
+    },
+    {
+      "memo": "ХОНГОРЗРЛ 8В ВОЛЛЕЙБОЛ",
+      "amount": 210000,
+      "student": null,
+      "kind": "ambiguous",
+      "why": "typo'd name with three plausible Khongorzul candidates; class 8В disambiguates only if the homoglyph maps to 8B"
+    },
+    {
+      "memo": "EB-ANIR 1-R ANGI 99102455",
+      "amount": 400000,
+      "student": null,
+      "kind": "ambiguous",
+      "why": "EB- prefix glues onto the name; several Anir in grade 1"
+    },
+    {
+      "memo": "Erdembileg.B, 3CL. Bus",
+      "amount": 375000,
+      "student": "Erdembileg Batmunkh",
+      "charge": "bus_fee",
+      "why": "class 3CL + name; no bus charge exists, so the bus fee must be proposed"
+    },
+    {
+      "memo": "BUS 11A KHERLEN",
+      "amount": 375000,
+      "student": "Kherlen Tuvshintur",
+      "charge": "bus_fee",
+      "why": "class + name + explicit bus keyword at the term bus rate"
+    },
+    {
+      "memo": "TANAKA KANON 8E BUS (TERM4)",
+      "amount": 375000,
+      "charge": "bus_fee",
+      "why": "explicit bus keyword at the term bus rate"
+    },
+    {
+      "memo": "Э. ЭРХЭМБИЛЭГ 11D 99141591 АВТОБУСНЫ ТӨЛБӨР",
+      "amount": 375000,
+      "charge": "bus_fee",
+      "why": "Cyrillic bus keyword with a case suffix"
+    },
+    {
+      "memo": "YI,ERGUI. 6B, VOLLEYBALL",
+      "amount": 270000,
+      "student": "Yi Ergui",
+      "charge": "Volleyball 11 am to 1pm Term 4",
+      "why": "club named in memo; paid 270,000 against a 255,000 per-session balance"
+    },
+    {
+      "memo": "KHULAN 10A, MATH",
+      "amount": 414000,
+      "student": "Khulan Ganbat",
+      "charge": "Math's club /Joel/ Term 4 Tue, Thu",
+      "why": "club over-payment: 414,000 against a 360,000 balance"
+    },
+    {
+      "memo": "Solongo Enkhbaatar, 11A, Math club",
+      "amount": 360000,
+      "student": "Solongo Enkhbaatar",
+      "charge": "Math's club /Jamsran/ Term 4 Mon, Wed",
+      "why": "club over-payment: 360,000 against a 342,000 balance"
+    },
+    {
+      "memo": "OYU MUNKHERDENE, 2AB, HOMEWORK CLUB",
+      "amount": 690000,
+      "student": "Oyu Munkh-Erdene",
+      "charge": "HW GR 2 Term 4",
+      "why": "per-session homework club: 690,000 against a 570,000 balance"
+    },
+    {
+      "memo": "BAYANMUNKH MUNKHBAYASGALAN.1JA.HOMEWORK",
+      "amount": 690000,
+      "student": "Munkhbayasgalan Bayanmunkh",
+      "charge": "HW GR1 Term 4",
+      "why": "per-session homework club: 690,000 against a 555,000 balance"
+    },
+    {
+      "memo": "E.MISHEEL 1JA HOMEWORK CLUB1",
+      "amount": 225000,
+      "student": "Misheel Erdenetsogt",
+      "charge": "HW GR1 Term 4",
+      "why": "two Misheels; the fee word picks the one holding a homework charge"
+    },
+    {
+      "memo": "ENKHDOLGOR LKHAGVASUREN, 1WL, ART",
+      "amount": 300000,
+      "student": "Enkhdolgor Lkhagvasuren",
+      "charge": "Art KS1 /Term 4/",
+      "why": "two Lkhagvasuren siblings; art charge amount matches exactly"
+    },
+    {
+      "memo": "Б.БААТАР 8Д САГСАН БӨМБӨГ",
+      "amount": 210000,
+      "student": "Baatar Boldtseren",
+      "why": "initial form + Cyrillic class + Cyrillic club alias"
+    },
+    {
+      "memo": "EB -B.Margad 11B bus fee term3",
+      "amount": 375000,
+      "charge": "bus_fee",
+      "why": "EB- prefix with a space, initial form, class, explicit bus"
+    },
+    {
+      "memo": "EB -Acd. 5395348, UBAC HS girls Basketball Playoffs, ESM",
+      "amount": 120000,
+      "student": null,
+      "kind": "not_student",
+      "why": "another school paying a tournament fee"
+    },
+    {
+      "memo": "EB-ШИНЭ ҮЕ СУРГУУЛЬ САГСАН БӨМБӨГ ХУРААМЖ",
+      "amount": 240000,
+      "student": null,
+      "kind": "not_student",
+      "why": "Shine Ue school paying a basketball tournament fee"
+    },
+    {
+      "memo": "EB -цахилгааны төлбөрт",
+      "amount": 9189688,
+      "student": null,
+      "kind": "not_student",
+      "why": "electricity bill"
+    },
+    {
+      "memo": "кассаас",
+      "amount": 40000000,
+      "student": null,
+      "kind": "not_student",
+      "why": "cash-register transfer"
+    },
+    {
+      "memo": "РС74070108",
+      "amount": 526083,
+      "student": null,
+      "kind": "not_student",
+      "why": "social-insurance benefit transfer"
+    },
+    {
+      "memo": "EB -Education conference",
+      "amount": 2500000,
+      "student": null,
+      "kind": "not_student",
+      "why": "conference income, not a student payment"
+    },
+    {
+      "memo": "TAETSEG BUTSAALT",
+      "amount": 500000,
+      "student": null,
+      "kind": "not_student",
+      "why": "a refund coming back"
+    },
+    {
+      "memo": "Х.ЕСҮЙ, Х.ЕСҮХЭЙ ТӨЛБӨР",
+      "amount": 15000000,
+      "kind": "multi_student",
+      "students": ["Yesui Kherlen", "Esukhei Kherlen"],
+      "why": "two siblings in initial form, comma separated"
+    },
+    {
+      "memo": "BUS12 Х. ЕСҮХЭЙ, ЕСҮЙ, ЕСҮТЭЙ",
+      "amount": 1125000,
+      "kind": "multi_student",
+      "students": ["Esukhei Kherlen", "Yesui Kherlen", "Esutei Kherlen"],
+      "why": "three siblings, one 375,000 bus fee each, none has a bus charge"
+    },
+    {
+      "memo": "BUS FEE, BAT-ERDENE 8B, ANAR 6E",
+      "amount": 750000,
+      "kind": "multi_student",
+      "students": ["Bat-Erdene Dorj", "Anar Dorj"],
+      "why": "two siblings disambiguated by class, one bus fee each, neither has a bus charge"
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 export { buildMatchingContext, match } from './match';
+export { NEW_CHARGE_PLACEHOLDER_ID } from './types';
 export type {
   AllocationFlag,
   BankTransactionInput,
@@ -13,6 +14,7 @@ export type {
   MatchProposal,
   MatchResult,
   MultiStudentMatchProposal,
+  ProposedCharge,
   SignalKind,
   StudentCandidate,
 } from './types';

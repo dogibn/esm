@@ -1,34 +1,41 @@
 /**
  * Dry-run the matching pipeline against a bank Excel file.
  *
- * Reads the bank file (default: features/imports/data/bank_transaction.xlsx),
+ * Reads the bank file (default: features/imports/data/bank_transactions_sample.xlsx),
  * pulls the matching context via the shared loader, runs match() on each
- * transaction, and writes a markdown report to scripts/reports/matching_dry_run.md.
+ * transaction, and writes a markdown report to scripts/reports/matching_dry_run.md
+ * plus a machine-readable CSV at scripts/reports/matching_dry_run.csv.
  *
  * No DB writes. No payments persisted.
+ *
+ * The headline number is the **reviewer-facing tier** (confident / attention),
+ * not the raw MatchResult kind: a "matched" row that still needs a human is not
+ * a win, and only the triage classification knows the difference.
  *
  * Usage:
  *   pnpm tsx --env-file=.env.local scripts/qa/dry_run_matching.ts [bank.xlsx]
  *
  * Required env vars: DATABASE_URL (and the rest validated by @/lib/env).
  */
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-
-import * as XLSX from "xlsx";
 
 import { buildMatchingContext, match } from "@/features/imports/matching";
 import { loadMatchingContextInput } from "@/features/imports/matching/load-context";
-import type {
-  BankTransactionInput,
-  ChargeWithBalance,
-  MatchResult,
-} from "@/features/imports/matching";
+import type { ChargeWithBalance, MatchResult } from "@/features/imports/matching";
 
-const DEFAULT_BANK_PATH = "features/imports/data/bank_transaction.xlsx";
+import {
+  analyzeRow,
+  csvEscape,
+  fmtMNT,
+  readBankFile,
+  type RowAnalysis,
+} from "./_harness";
+
+const DEFAULT_BANK_PATH = "features/imports/data/bank_transactions_sample.xlsx";
 const REPORT_PATH = "scripts/reports/matching_dry_run.md";
+const CSV_PATH = "scripts/reports/matching_dry_run.csv";
 
-// --------------------------- CLI / env ---------------------------
 const bankPathArg = process.argv[2] ?? DEFAULT_BANK_PATH;
 const bankAbsPath = resolve(process.cwd(), bankPathArg);
 if (!existsSync(bankAbsPath)) {
@@ -37,104 +44,21 @@ if (!existsSync(bankAbsPath)) {
   process.exit(1);
 }
 
-// --------------------------- bank file ---------------------------
-function readBankFile(path: string): BankTransactionInput[] {
-  const buf = readFileSync(path);
-  const wb = XLSX.read(buf, { type: "buffer" });
-  const sheet = wb.Sheets[wb.SheetNames[0]!]!;
-  const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, {
-    raw: true,
-    defval: null,
-  });
-  if (rows.length === 0) return [];
-
-  // Detect column names by inspecting the first row.
-  const sampleKeys = Object.keys(rows[0]!);
-  const find = (...candidates: RegExp[]): string | null => {
-    for (const re of candidates) {
-      const hit = sampleKeys.find((k) => re.test(k));
-      if (hit) return hit;
-    }
-    return null;
-  };
-
-  const memoCol = find(
-    /memo/i,
-    /^утга$/i,
-    /гүйлгээний\s*утга/i,
-    /utga/i,
-    /description/i,
-    /narration/i,
-  );
-  const amountInCol = find(/орлого/i, /credit/i, /income/i, /^amount$/i, /amount.*in/i);
-  const amountOutCol = find(/зарлага/i, /debit/i, /expense/i, /amount.*out/i);
-  const senderAccCol = find(
-    /харьцсан\s*данс/i,
-    /sender.*account/i,
-    /from.*account/i,
-    /дансны\s*дугаар/i,
-    /данс.*дугаар/i,
-    /account.*no/i,
-  );
-  const senderNameCol = find(/sender.*name/i, /from.*name/i, /дансны\s*нэр/i, /данс.*нэр/i);
-  const txIdCol = find(/transaction.*id/i, /журнал/i, /гүйлгээний\s*дугаар/i, /reference/i, /tx.*id/i);
-
-  console.log(
-    `Column map: memo=${memoCol} in=${amountInCol} out=${amountOutCol} senderAcc=${senderAccCol} senderName=${senderNameCol} txId=${txIdCol}`,
-  );
-
-  const result: BankTransactionInput[] = [];
-  for (const row of rows) {
-    const memo = strVal(memoCol ? row[memoCol] : null);
-    const amtIn = numVal(amountInCol ? row[amountInCol] : null);
-    const amtOut = numVal(amountOutCol ? row[amountOutCol] : null);
-    const senderAccount = strVal(senderAccCol ? row[senderAccCol] : null);
-    const senderName = strVal(senderNameCol ? row[senderNameCol] : null);
-    const isOutgoing = amtOut !== null && amtOut > 0;
-    const amount = BigInt(Math.round(amtIn ?? amtOut ?? 0));
-    void txIdCol;
-    result.push({
-      memo: memo ?? "",
-      amount,
-      senderAccount,
-      senderAccountName: senderName,
-      isOutgoing,
-    });
-  }
-  return result;
-}
-
-function strVal(v: unknown): string | null {
-  if (v === null || v === undefined) return null;
-  const s = String(v).trim();
-  return s.length === 0 ? null : s;
-}
-function numVal(v: unknown): number | null {
-  if (v === null || v === undefined) return null;
-  if (typeof v === "number") return v;
-  const n = Number(String(v).replace(/[, ]/g, ""));
-  return Number.isFinite(n) ? n : null;
-}
-
-// --------------------------- report ---------------------------
-function fmtMNT(n: bigint): string {
-  return n.toLocaleString("en-US") + " MNT";
-}
-
 function describeResult(
-  tx: BankTransactionInput,
-  result: MatchResult,
+  a: RowAnalysis,
   index: number,
   studentNamesById: Map<number, string>,
   chargesById: Map<number, ChargeWithBalance & { studentId: number }>,
 ): string {
-  const header = `### Row ${index + 1} — ${fmtMNT(tx.amount)}`;
-  const memoLine = `- Memo: \`${tx.memo ?? ""}\``;
-  const senderLine = `- Sender: ${tx.senderAccount ?? "(none)"} ${
-    tx.senderAccountName ? `(${tx.senderAccountName})` : ""
-  }`.trimEnd();
-
-  const lines: string[] = [header, memoLine, senderLine];
+  const { tx, result } = a;
+  const lines: string[] = [
+    `### Row ${index + 1} — ${fmtMNT(tx.amount)}`,
+    `- Memo: \`${tx.memo ?? ""}\``,
+    `- Sender: ${tx.senderAccount ?? "(none)"} ${
+      tx.senderAccountName ? `(${tx.senderAccountName})` : ""
+    }`.trimEnd(),
+    `- Tier: **${a.tier ?? "filtered"}** (${a.reason})`,
+  ];
 
   if (result.kind === "unmatched") {
     lines.push(`- Status: **unmatched** (${result.reason})`);
@@ -142,14 +66,16 @@ function describeResult(
   }
 
   if (result.kind === "matched_multi") {
-    lines.push(`- Status: **matched_multi** (total ${fmtMNT(result.proposal.totalAmount)})`);
+    lines.push(
+      `- Status: **matched_multi** (total ${fmtMNT(result.proposal.totalAmount)})`,
+    );
     for (const p of result.proposal.proposals) {
       const name = studentNamesById.get(p.studentId) ?? `student #${p.studentId}`;
       lines.push(`  - → ${name}`);
-      for (const a of p.allocations) {
-        const ch = chargesById.get(a.chargeId);
+      for (const al of p.allocations) {
+        const ch = chargesById.get(al.chargeId);
         lines.push(
-          `    - alloc charge #${a.chargeId} "${ch?.feeName ?? "?"}" ${fmtMNT(a.amount)}`,
+          `    - alloc charge #${al.chargeId} "${ch?.feeName ?? "?"}" ${fmtMNT(al.amount)}`,
         );
       }
     }
@@ -162,21 +88,38 @@ function describeResult(
     const name = studentNamesById.get(p.studentId) ?? `student #${p.studentId}`;
     const sigs = [...p.signals].join(", ");
     const flags = [...p.flags].join(", ");
-    lines.push(`  - → ${name} | signals: ${sigs || "(none)"}${flags ? ` | flags: ${flags}` : ""}`);
-    for (const a of p.allocations) {
-      const ch = chargesById.get(a.chargeId);
+    lines.push(
+      `  - → ${name} | signals: ${sigs || "(none)"}${flags ? ` | flags: ${flags}` : ""}`,
+    );
+    for (const al of p.allocations) {
+      const ch = chargesById.get(al.chargeId);
       lines.push(
-        `    - alloc charge #${a.chargeId} "${ch?.feeName ?? "?"}" ${fmtMNT(a.amount)}`,
+        `    - alloc charge #${al.chargeId} "${ch?.feeName ?? "?"}" ${fmtMNT(al.amount)}`,
       );
     }
-    if (p.allocations.length === 0) {
+    if (p.proposedCharge) {
+      lines.push(
+        `    - proposes NEW charge "${p.proposedCharge.feeName}" ${fmtMNT(
+          p.proposedCharge.amount,
+        )} (${p.proposedCharge.reason})`,
+      );
+    }
+    if (p.allocations.length === 0 && !p.proposedCharge) {
       lines.push(`    - (no allocation)`);
     }
   }
   return lines.join("\n");
 }
 
-// --------------------------- main ---------------------------
+function countBy<T>(items: T[], key: (t: T) => string): Array<[string, number]> {
+  const m = new Map<string, number>();
+  for (const it of items) {
+    const k = key(it);
+    m.set(k, (m.get(k) ?? 0) + 1);
+  }
+  return [...m.entries()].sort((a, b) => b[1] - a[1]);
+}
+
 async function main(): Promise<void> {
   console.log(`Reading bank file: ${bankAbsPath}`);
   const txs = readBankFile(bankAbsPath);
@@ -201,58 +144,127 @@ async function main(): Promise<void> {
   for (const c of input.openCharges) chargesById.set(c.id, c);
 
   console.log(`Matching ${txs.length} rows...`);
-  const summary = { matched: 0, matched_multi: 0, low_confidence: 0, unmatched: 0 };
-  const reasonCounts = new Map<string, number>();
-  const reportSections: string[] = [];
-  for (let i = 0; i < txs.length; i++) {
-    const tx = txs[i]!;
-    const result = match(tx, context);
-    switch (result.kind) {
-      case "matched":
-        summary.matched++;
-        break;
-      case "matched_multi":
-        summary.matched_multi++;
-        break;
-      case "low_confidence":
-        summary.low_confidence++;
-        break;
-      case "unmatched":
-        summary.unmatched++;
-        reasonCounts.set(result.reason, (reasonCounts.get(result.reason) ?? 0) + 1);
-        break;
-    }
-    reportSections.push(describeResult(tx, result, i, studentNamesById, chargesById));
-  }
+  const analyses: RowAnalysis[] = txs.map((tx) => {
+    const result: MatchResult = match(tx, context);
+    return analyzeRow(tx, result, context);
+  });
 
-  const reportHeader: string[] = [
+  // Rows that never reach matching (outgoing, bank fees, own-account transfers)
+  // are excluded from every rate below — in production the parser drops them at
+  // upload, so counting them would flatter the numbers.
+  const incoming = analyses.filter((a) => a.tier !== null);
+  const filtered = analyses.length - incoming.length;
+  const confident = incoming.filter((a) => a.tier === "confident");
+  const attention = incoming.filter((a) => a.tier === "attention");
+
+  const kindCounts = countBy(incoming, (a) => a.result.kind);
+  const reasonCounts = countBy(attention, (a) => a.reason);
+  const unmatchedReasons = countBy(
+    incoming.filter((a) => a.result.kind === "unmatched"),
+    (a) => (a.result.kind === "unmatched" ? a.result.reason : ""),
+  );
+  const stageCounts = countBy(incoming, (a) => {
+    const parts: string[] = [];
+    if (a.stages.class) parts.push("class");
+    else if (a.stages.wildcard) parts.push("wildcard");
+    else if (a.stages.level) parts.push("level");
+    if (a.stages.name) parts.push("name");
+    if (a.stages.fee) parts.push("fee");
+    return parts.length > 0 ? parts.join("+") : "(no signal)";
+  });
+
+  const pct = (n: number) =>
+    incoming.length === 0 ? "0%" : `${Math.round((n / incoming.length) * 100)}%`;
+
+  const header: string[] = [
     "# Bank Transaction Matching — Dry Run",
     "",
     `- Generated: ${new Date().toISOString()}`,
     `- Source: \`${bankPathArg}\``,
     `- Academic year: ${period.yearName} (id=${period.yearId}), term: ${period.termName} (id=${period.termId})`,
     `- Students=${input.students.length}, enrollments=${input.enrollments.length}, open charges=${input.openCharges.length}`,
-    `- Rows: ${txs.length}`,
+    `- Rows: ${txs.length} (${filtered} filtered before matching, ${incoming.length} incoming)`,
     "",
-    "## Summary",
+    "## Summary — what the reviewer sees",
     "",
-    `- matched: ${summary.matched}`,
-    `- matched_multi: ${summary.matched_multi}`,
-    `- low_confidence: ${summary.low_confidence}`,
-    `- unmatched: ${summary.unmatched}`,
+    `- confident (bulk-confirmable): ${confident.length} / ${incoming.length} (${pct(confident.length)})`,
+    `- attention (needs a human): ${attention.length} / ${incoming.length} (${pct(attention.length)})`,
+    "",
+    "Attention reasons:",
+    ...reasonCounts.map(([r, n]) => `- ${r}: ${n}`),
+    "",
+    "Raw MatchResult kinds (incoming only):",
+    ...kindCounts.map(([k, n]) => `- ${k}: ${n}`),
   ];
-  if (reasonCounts.size > 0) {
-    reportHeader.push("");
-    reportHeader.push("Unmatched reasons:");
-    for (const [r, n] of reasonCounts) reportHeader.push(`- ${r}: ${n}`);
+  if (unmatchedReasons.length > 0) {
+    header.push("", "Unmatched reasons:");
+    for (const [r, n] of unmatchedReasons) header.push(`- ${r}: ${n}`);
   }
-  reportHeader.push("", "## Rows", "");
+  header.push(
+    "",
+    "## Stage coverage",
+    "",
+    "Which stages produced evidence, per incoming row (grade stage collapses to its",
+    "strongest hit: class > wildcard > level).",
+    "",
+    ...stageCounts.map(([s, n]) => `- ${s}: ${n}`),
+    "",
+    "## Rows",
+    "",
+  );
 
-  const reportText = [...reportHeader, reportSections.join("\n\n")].join("\n");
-  const reportAbs = resolve(process.cwd(), REPORT_PATH);
-  writeFileSync(reportAbs, reportText, "utf-8");
-  console.log(`Report written to ${reportAbs}`);
-  console.log(JSON.stringify(summary, null, 2));
+  const sections = analyses.map((a, i) =>
+    describeResult(a, i, studentNamesById, chargesById),
+  );
+  writeFileSync(
+    resolve(process.cwd(), REPORT_PATH),
+    [...header, sections.join("\n\n")].join("\n"),
+    "utf-8",
+  );
+
+  const csv: string[] = [
+    "row,amount,memo,sender_account,tier,reason,result_kind,stage_class,stage_wildcard,stage_level,stage_name,stage_fee,top_student,allocations",
+  ];
+  analyses.forEach((a, i) => {
+    csv.push(
+      [
+        String(i + 1),
+        String(a.tx.amount),
+        csvEscape(a.tx.memo ?? ""),
+        csvEscape(a.tx.senderAccount ?? ""),
+        a.tier ?? "filtered",
+        a.reason,
+        a.result.kind,
+        String(a.stages.class),
+        String(a.stages.wildcard),
+        String(a.stages.level),
+        String(a.stages.name),
+        String(a.stages.fee),
+        csvEscape(
+          a.topStudentId === null
+            ? ""
+            : (studentNamesById.get(a.topStudentId) ?? String(a.topStudentId)),
+        ),
+        String(a.allocationCount),
+      ].join(","),
+    );
+  });
+  writeFileSync(resolve(process.cwd(), CSV_PATH), csv.join("\n"), "utf-8");
+
+  console.log(`Report written to ${REPORT_PATH}`);
+  console.log(`CSV written to ${CSV_PATH}`);
+  console.log(
+    JSON.stringify(
+      {
+        incoming: incoming.length,
+        confident: confident.length,
+        attention: attention.length,
+        filtered,
+      },
+      null,
+      2,
+    ),
+  );
 }
 
 main().catch((e) => {

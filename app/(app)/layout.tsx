@@ -30,6 +30,7 @@ export default async function AppLayout({
             <NavLink href="/students">{strings.nav.tracking}</NavLink>
             <NavLink href="/imports">{strings.nav.imports}</NavLink>
             <NavLink href="/transactions">{strings.nav.transactions}</NavLink>
+            <NavLink href="/history">{strings.nav.history}</NavLink>
           </nav>
           <div className="ml-auto flex items-center">
             <SignOutButton>{strings.auth.signOut}</SignOutButton>

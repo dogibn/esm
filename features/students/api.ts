@@ -415,10 +415,26 @@ async function paidForCharge(chargeId: number): Promise<number> {
   return Number(row?.paid ?? 0);
 }
 
-// Add an ad-hoc fee (registration, bus, a club, etc.) as a charge — annual
-// (year-scoped) or attached to a specific term.
-export async function createCharge(
-  _user: User,
+/**
+ * A drizzle transaction handle (or the base client) — see features/history.
+ * `insertCharge` takes one so the import flow can create a charge inside the
+ * same transaction that records the payment against it.
+ */
+type DbClient =
+  | typeof db
+  | Parameters<Parameters<(typeof db)["transaction"]>[0]>[0];
+
+/**
+ * Insert one ad-hoc fee charge, with every rule that governs charge creation:
+ * tuition is off-limits (it belongs to the tuition breakdown), the term must
+ * belong to the current year, and a fee may exist only once per period.
+ *
+ * The single writer for new charges. `createCharge` is the student-page entry
+ * point; `confirmAllocation` in features/imports calls this directly so a bank
+ * payment can create the charge it pays for atomically.
+ */
+export async function insertCharge(
+  client: DbClient,
   studentId: number,
   input: ChargeCreateInput,
 ): Promise<{ chargeId: number }> {
@@ -427,14 +443,14 @@ export async function createCharge(
     throw new HttpError(400, "Tuition is managed from the tuition breakdown.");
   }
 
-  const [year] = await db
+  const [year] = await client
     .select({ id: academicYears.id })
     .from(academicYears)
     .where(eq(academicYears.isCurrent, true))
     .limit(1);
   if (!year) throw new HttpError(500, "No current academic year is set");
 
-  const [student] = await db
+  const [student] = await client
     .select({ id: students.id })
     .from(students)
     .where(eq(students.id, studentId))
@@ -447,7 +463,7 @@ export async function createCharge(
       : { academicYearId: null, academicTermId: input.academicTermId! };
 
   if (input.scope === "term") {
-    const [term] = await db
+    const [term] = await client
       .select({ id: academicTerms.id })
       .from(academicTerms)
       .where(
@@ -466,7 +482,7 @@ export async function createCharge(
     input.scope === "annual"
       ? eq(charges.academicYearId, year.id)
       : eq(charges.academicTermId, input.academicTermId!);
-  const [dupe] = await db
+  const [dupe] = await client
     .select({ id: charges.id })
     .from(charges)
     .where(and(eq(charges.studentId, studentId), eq(charges.feeName, feeName), dupeScope))
@@ -475,7 +491,7 @@ export async function createCharge(
     throw new HttpError(409, "This student already has that fee for the chosen period.");
   }
 
-  const [created] = await db
+  const [created] = await client
     .insert(charges)
     .values({
       studentId,
@@ -488,6 +504,16 @@ export async function createCharge(
     .returning({ id: charges.id });
 
   return { chargeId: created!.id };
+}
+
+// Add an ad-hoc fee (registration, bus, a club, etc.) as a charge — annual
+// (year-scoped) or attached to a specific term.
+export async function createCharge(
+  _user: User,
+  studentId: number,
+  input: ChargeCreateInput,
+): Promise<{ chargeId: number }> {
+  return insertCharge(db, studentId, input);
 }
 
 async function loadOwnedCharge(studentId: number, chargeId: number) {

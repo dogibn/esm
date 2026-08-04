@@ -1,5 +1,7 @@
 import { ZodError } from 'zod';
 
+import { captureException } from './observability';
+
 export class HttpError extends Error {
   status: number;
 
@@ -25,8 +27,27 @@ export function withErrorHandler(handler: RouteHandler): RouteHandler {
           .join('; ');
         return Response.json({ error: `Invalid request: ${detail}` }, { status: 400 });
       }
-      console.error(err);
-      return Response.json({ error: 'Internal server error' }, { status: 500 });
+
+      // Unexpected error → 500. Attach an id so the accountant can quote it and
+      // we can find the matching server log / Sentry event. Log with request
+      // context (method + path) instead of a bare stack, then forward to Sentry
+      // if it's configured (no-op otherwise).
+      const errorId = crypto.randomUUID();
+      const method = req.method;
+      const path = (() => {
+        try {
+          return new URL(req.url).pathname;
+        } catch {
+          return req.url;
+        }
+      })();
+      console.error(`[500] errorId=${errorId} ${method} ${path}`, err);
+      await captureException(err, { errorId, method, path });
+
+      return Response.json(
+        { error: 'Internal server error', errorId },
+        { status: 500 },
+      );
     }
   };
 }

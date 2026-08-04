@@ -29,6 +29,14 @@ import type { TransactionListResponseWire, TransactionRowWire } from "../types";
 const ALL = "__all__";
 const DEBOUNCE_MS = 300;
 
+function statusBadgeVariant(
+  status: TxStatusValue,
+): "success" | "destructive" | "secondary" {
+  if (status === "matched") return "success";
+  if (status === "discarded") return "secondary";
+  return "destructive";
+}
+
 const numberFormatter = new Intl.NumberFormat("en-US");
 function fmtAmount(n: number): string {
   return numberFormatter.format(n);
@@ -76,6 +84,8 @@ export function TransactionsView({ initialData }: Props) {
   const [data, setData] = useState<TransactionListResponseWire>(initialData);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [undoingId, setUndoingId] = useState<number | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const skipInitialFilterEffect = useRef(true);
@@ -113,6 +123,24 @@ export function TransactionsView({ initialData }: Props) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
+
+  const onUndo = async (operationId: number) => {
+    setUndoingId(operationId);
+    setActionError(null);
+    try {
+      const res = await fetch(`/api/imports/operations/${operationId}/undo`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      // Refresh the current page so the row's status/action updates.
+      await fetchData(filters, data.page);
+    } catch {
+      setActionError(strings.actions.error);
+    } finally {
+      setUndoingId(null);
+    }
+  };
 
   const totalPages = Math.max(1, Math.ceil(data.total / data.pageSize));
   const hasFilters = filters.search.trim().length > 0 || filters.status !== null;
@@ -189,12 +217,13 @@ export function TransactionsView({ initialData }: Props) {
             <TableHead className="text-right">{strings.columns.amount}</TableHead>
             <TableHead>{strings.columns.status}</TableHead>
             <TableHead>{strings.columns.paidFor}</TableHead>
+            <TableHead className="text-right">{strings.columns.actions}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {data.rows.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="text-center text-muted-foreground">
+              <TableCell colSpan={7} className="text-center text-muted-foreground">
                 {loading
                   ? strings.loading
                   : hasFilters
@@ -203,11 +232,21 @@ export function TransactionsView({ initialData }: Props) {
               </TableCell>
             </TableRow>
           ) : (
-            data.rows.map((row) => <TransactionRowView key={row.id} row={row} />)
+            data.rows.map((row) => (
+              <TransactionRowView
+                key={row.id}
+                row={row}
+                onUndo={onUndo}
+                undoing={undoingId === row.undoOperationId}
+              />
+            ))
           )}
         </TableBody>
       </Table>
       </div>
+      {actionError ? (
+        <div className="text-sm text-destructive">{actionError}</div>
+      ) : null}
 
       <div className="flex items-center justify-between gap-3 text-sm text-muted-foreground">
         <span>{strings.pagination.rowCount(data.rows.length, data.total)}</span>
@@ -236,7 +275,15 @@ export function TransactionsView({ initialData }: Props) {
   );
 }
 
-function TransactionRowView({ row }: { row: TransactionRowWire }) {
+function TransactionRowView({
+  row,
+  onUndo,
+  undoing,
+}: {
+  row: TransactionRowWire;
+  onUndo: (operationId: number) => void;
+  undoing: boolean;
+}) {
   return (
     <TableRow>
       <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
@@ -259,7 +306,7 @@ function TransactionRowView({ row }: { row: TransactionRowWire }) {
         {fmtAmount(row.amount)}
       </TableCell>
       <TableCell>
-        <Badge variant={row.status === "matched" ? "success" : "destructive"}>
+        <Badge variant={statusBadgeVariant(row.status)}>
           <span aria-hidden className="size-1.5 rounded-full bg-current" />
           {strings.status[row.status]}
         </Badge>
@@ -280,6 +327,22 @@ function TransactionRowView({ row }: { row: TransactionRowWire }) {
             ))}
           </ul>
         )}
+      </TableCell>
+      <TableCell className="text-right">
+        {row.undoOperationId !== null ? (
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={undoing}
+            onClick={() => onUndo(row.undoOperationId!)}
+          >
+            {undoing
+              ? strings.actions.pending
+              : row.status === "discarded"
+                ? strings.actions.restore
+                : strings.actions.undo}
+          </Button>
+        ) : null}
       </TableCell>
     </TableRow>
   );

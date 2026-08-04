@@ -1,4 +1,5 @@
 import { categoryOfFeeName } from './vocabulary';
+import { NEW_CHARGE_PLACEHOLDER_ID } from './types';
 import type {
   AllocationFlag,
   ChargeWithBalance,
@@ -6,6 +7,7 @@ import type {
   FeeTag,
   MatchProposal,
   MatchingContext,
+  ProposedCharge,
   SignalKind,
   StudentCandidate,
 } from './types';
@@ -24,6 +26,27 @@ export function feeTagMatches(feeName: string, hints: FeeTag[]): boolean {
     }
   }
   return false;
+}
+
+/**
+ * The fee to propose creating for this payment, or null.
+ *
+ * Deliberately narrow: the amount must equal the school's rate exactly. A
+ * parent paying two terms of bus in one transfer, or one transfer covering two
+ * siblings, is a decision about how many charges to create and for whom — that
+ * belongs to a human, not to a rule that would guess.
+ */
+function proposableFor(
+  hintedFees: FeeTag[],
+  amount: bigint,
+  context: MatchingContext,
+): ProposedCharge | null {
+  for (const hint of hintedFees) {
+    if (typeof hint !== 'string') continue; // clubs are never auto-proposed
+    const fee = context.proposableFees.get(hint);
+    if (fee && fee.amount === amount) return fee;
+  }
+  return null;
 }
 
 function sumBalances(charges: ChargeWithBalance[]): bigint {
@@ -78,23 +101,42 @@ export function allocateCharges(
     proposalSignals.add('fee_hint_from_amount');
   }
 
+  const hintedFees: FeeTag[] = [...signals.feeHints.explicit];
+  if (signals.feeHints.fromAmount) hintedFees.push(signals.feeHints.fromAmount);
+
+  const proposeMissingCharge = (): MatchProposal | null => {
+    const fee = hintedFees.length > 0 ? proposableFor(hintedFees, amount, context) : null;
+    if (!fee) return null;
+    return {
+      studentId: candidate.studentId,
+      score: candidate.score,
+      allocations: [{ chargeId: NEW_CHARGE_PLACEHOLDER_ID, amount }],
+      signals: proposalSignals,
+      flags,
+      proposedCharge: fee,
+    };
+  };
+
   if (charges.length === 0) {
+    // Owing nothing is no reason to give up: a student with a clean ledger who
+    // pays the bus fee still needs the bus charge created.
+    const proposed = proposeMissingCharge();
+    if (proposed) return proposed;
     flags.add('no_open_charges');
     return {
       studentId: candidate.studentId,
+      score: candidate.score,
       allocations: [],
       signals: proposalSignals,
       flags,
     };
   }
 
-  const hintedFees: FeeTag[] = [...signals.feeHints.explicit];
-  if (signals.feeHints.fromAmount) hintedFees.push(signals.feeHints.fromAmount);
-
   // Case A: single open charge whose balance equals amount.
   if (charges.length === 1 && charges[0]!.outstandingBalance === amount) {
     return {
       studentId: candidate.studentId,
+      score: candidate.score,
       allocations: [{ chargeId: charges[0]!.id, amount }],
       signals: proposalSignals,
       flags,
@@ -112,6 +154,7 @@ export function allocateCharges(
     if (sum === amount && matchingCharges.length > 0) {
       return {
         studentId: candidate.studentId,
+        score: candidate.score,
         allocations: matchingCharges.map((c) => ({
           chargeId: c.id,
           amount: c.outstandingBalance,
@@ -120,19 +163,44 @@ export function allocateCharges(
         flags,
       };
     }
-    // B2: exactly one hinted charge and a short payment → partial payment of it.
-    if (
-      matchingCharges.length === 1 &&
-      amount > BigInt('0') &&
-      amount < matchingCharges[0]!.outstandingBalance
-    ) {
-      flags.add('partial_payment');
+    // B2: exactly one charge of the named fee, and the amount doesn't equal its
+    // balance. The target is not in doubt — the parent said which fee — so the
+    // payment lands on it either way, flagged for what it is.
+    //
+    // Over-payment is not an anomaly here: club charges priced Per Session
+    // (homework club, see domain_model.md) accrue with attendance while parents
+    // pay the standard term rate, so paid > balance is routine. Bailing out to
+    // manual_review on those was the single largest source of "right student,
+    // no allocation" rows.
+    if (matchingCharges.length === 1 && amount > BigInt('0')) {
+      const target = matchingCharges[0]!;
+      flags.add(
+        amount < target.outstandingBalance ? 'partial_payment' : 'overpayment',
+      );
       return {
         studentId: candidate.studentId,
-        allocations: [{ chargeId: matchingCharges[0]!.id, amount }],
+        score: candidate.score,
+        allocations: [{ chargeId: target.id, amount }],
         signals: proposalSignals,
         flags,
       };
+    }
+    // B3: several charges of the named fee — look for a subset of *those* that
+    // fits, before falling through to the search over everything the student owes.
+    if (matchingCharges.length > 1) {
+      const hintedCombos = findCombosSummingTo(matchingCharges, amount);
+      if (hintedCombos.length === 1) {
+        return {
+          studentId: candidate.studentId,
+          score: candidate.score,
+          allocations: hintedCombos[0]!.map((c) => ({
+            chargeId: c.id,
+            amount: c.outstandingBalance,
+          })),
+          signals: proposalSignals,
+          flags,
+        };
+      }
     }
   }
 
@@ -142,6 +210,7 @@ export function allocateCharges(
     const pick = combos[0]!;
     return {
       studentId: candidate.studentId,
+      score: candidate.score,
       allocations: pick.map((c) => ({ chargeId: c.id, amount: c.outstandingBalance })),
       signals: proposalSignals,
       flags,
@@ -159,10 +228,24 @@ export function allocateCharges(
     const pick = ranked[0]!;
     return {
       studentId: candidate.studentId,
+      score: candidate.score,
       allocations: pick.map((c) => ({ chargeId: c.id, amount: c.outstandingBalance })),
       signals: proposalSignals,
       flags,
     };
+  }
+
+  // Case C2: the memo names a fee the student has no charge for, and the
+  // transfer is exactly the school's rate for it. Nothing on the ledger explains
+  // the money (cases A–C all failed), so the missing charge is the explanation:
+  // propose creating it, and confirming will do both in one operation.
+  //
+  // This is what unblocks bus. The school has a bus rate but bus opt-in is not
+  // imported (docs/notes.md), so no bus Charge exists for anyone and every bus
+  // payment used to dead-end in manual_review.
+  {
+    const proposed = proposeMissingCharge();
+    if (proposed) return proposed;
   }
 
   // Case D: overpayment.
@@ -171,6 +254,7 @@ export function allocateCharges(
     flags.add('overpayment');
     return {
       studentId: candidate.studentId,
+      score: candidate.score,
       allocations: charges
         .filter((c) => c.outstandingBalance > BigInt('0'))
         .map((c) => ({ chargeId: c.id, amount: c.outstandingBalance })),
@@ -189,6 +273,7 @@ export function allocateCharges(
       if (amount < t.outstandingBalance) flags.add('partial_payment');
       return {
         studentId: candidate.studentId,
+      score: candidate.score,
         allocations: [{ chargeId: t.id, amount }],
         signals: proposalSignals,
         flags,
@@ -199,6 +284,7 @@ export function allocateCharges(
       flags.add('manual_review');
       return {
         studentId: candidate.studentId,
+      score: candidate.score,
         allocations: [],
         signals: proposalSignals,
         flags,
@@ -210,6 +296,7 @@ export function allocateCharges(
   flags.add('manual_review');
   return {
     studentId: candidate.studentId,
+    score: candidate.score,
     allocations: [],
     signals: proposalSignals,
     flags,

@@ -138,6 +138,51 @@ export function phoneticFold(input: string): string {
   return input.replace(/kh/g, 'h').replace(/o/g, 'u');
 }
 
+// Cyrillic letters that *look* like a Latin letter but transliterate to a
+// different one. A parent typing on a Cyrillic keyboard writes the class "8B" as
+// "8В" — visually identical, but our (phonetic) table maps В→v, so the memo
+// normalizes to "8v" while the class in the DB normalizes to "8b" and they never
+// meet. The map is keyed by the *Latin* letter as it appears in a class name and
+// yields the phonetic form the lookalike Cyrillic letter produces.
+//
+// Deliberately limited to class codes (see classVariants in build-index.ts).
+// Applying it to names would fold genuinely different names together — "bat" and
+// "vat" are not the same name, whereas class "8B" and "8В" are the same class.
+const VISUAL_CONFUSABLES: Record<string, string> = {
+  b: 'v', // В
+  c: 's', // С
+  e: 'ye', // Е
+  h: 'n', // Н
+  n: 'h', // Н read the other way
+  p: 'r', // Р
+  x: 'h', // Х
+  y: 'u', // У
+};
+
+/**
+ * Every spelling of `token` reachable by reading one or more of its letters as
+ * the Cyrillic lookalike instead. Includes the input itself. Combinatorial, so
+ * it is capped — class codes are 1–3 letters, and anything longer is not worth
+ * the ambiguity it would introduce.
+ */
+export function visualVariants(token: string): string[] {
+  const digits = token.match(/^\d+/)?.[0] ?? '';
+  const letters = token.slice(digits.length);
+  if (letters.length === 0 || letters.length > 3) return [token];
+
+  let forms = [''];
+  for (const ch of letters) {
+    const alt = VISUAL_CONFUSABLES[ch];
+    const next: string[] = [];
+    for (const f of forms) {
+      next.push(f + ch);
+      if (alt) next.push(f + alt);
+    }
+    forms = next;
+  }
+  return [...new Set(forms.map((f) => digits + f))];
+}
+
 function isWordChar(ch: string): boolean {
   return /[a-z0-9~+\-]/.test(ch);
 }

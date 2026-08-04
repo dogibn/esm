@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { shouldAttemptMatch } from './filter';
+import { looksNonStudent, shouldAttemptMatch } from './filter';
 import type { BankTransactionInput } from './types';
 
 function tx(overrides: Partial<BankTransactionInput> = {}): BankTransactionInput {
@@ -59,5 +59,32 @@ describe('shouldAttemptMatch', () => {
         tx({ memo: 'Б.БААТАР 8Д САГСАН БӨМБӨГ', senderAccount: '5678' }),
       ),
     ).toBe(true);
+  });
+});
+
+describe('looksNonStudent', () => {
+  const tx = (memo: string, senderAccountName = ''): BankTransactionInput => ({
+    memo,
+    amount: BigInt('120000'),
+    senderAccount: 'MN01',
+    senderAccountName,
+    isOutgoing: false,
+  });
+
+  it('recognises another school settling a tournament invoice', () => {
+    expect(looksNonStudent(tx('EB -Acd. 5395348, UBAC HS girls Basketball Playoffs, ESM'))).toBe(true);
+    expect(looksNonStudent(tx('EB -Жэт сургууль, UBAC тэмцээний төлбөр'))).toBe(true);
+  });
+
+  it('recognises utility bills, refunds and the cash register', () => {
+    expect(looksNonStudent(tx('EB -цахилгааны төлбөрт'))).toBe(true);
+    expect(looksNonStudent(tx('кассаас'))).toBe(true);
+    expect(looksNonStudent(tx('TAETSEG BUTSAALT'))).toBe(true);
+  });
+
+  it('leaves ordinary fee payments alone', () => {
+    expect(looksNonStudent(tx('Б.БААТАР 8Д САГСАН БӨМБӨГ'))).toBe(false);
+    expect(looksNonStudent(tx('BUS 11A KHERLEN'))).toBe(false);
+    expect(looksNonStudent(tx('EB -B.Margad 11B bus fee term3'))).toBe(false);
   });
 });

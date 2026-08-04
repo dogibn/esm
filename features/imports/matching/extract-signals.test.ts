@@ -232,3 +232,81 @@ describe('peelGluedGrade', () => {
     });
   });
 });
+
+// Regression cases for the extraction fixes — each one is a memo shape that
+// produced no usable signal at all before (see docs/import_matching_plan.md § 2).
+describe('extractSignals — grade shapes that used to be missed', () => {
+  const gradeCtx = ctx({
+    students: [
+      { id: 1, firstName: 'Anujin', lastName: 'Sarantsetseg' },
+      { id: 2, firstName: 'Temuulen', lastName: 'Enkhbat' },
+      { id: 3, firstName: 'Nomin-Erdene', lastName: 'Bold' },
+      { id: 4, firstName: 'Khongorzul', lastName: 'Altaibayar' },
+      { id: 5, firstName: 'Elberel', lastName: 'Batbayar' },
+    ],
+    enrollments: [
+      { studentId: 1, gradeName: '5MA', gradeLevelCode: '5' },
+      { studentId: 2, gradeName: '12A', gradeLevelCode: '12' },
+      { studentId: 3, gradeName: '3LM', gradeLevelCode: '3' },
+      { studentId: 4, gradeName: '8B', gradeLevelCode: '8' },
+      { studentId: 5, gradeName: '3CL', gradeLevelCode: '3' },
+    ],
+  });
+
+  it("reads a bare 'angi' as a grade level — 'S.ANUJIN,5B ANGI'", () => {
+    const s = extractSignals('S.ANUJIN,5B ANGI 99706387', BigInt('2150000'), gradeCtx);
+    expect(s.gradeTokens.level).toContain('5');
+    expect(s.nameTokens).toContain('s.anujin');
+  });
+
+  it("reads the keyword-first form — 'GRADE 12 E.TEMUULEN'", () => {
+    const s = extractSignals('GRADE 12 E.TEMUULEN', BigInt('2500000'), gradeCtx);
+    expect(s.gradeTokens.level).toContain('12');
+    expect(s.nameTokens).toContain('e.temuulen');
+  });
+
+  it("maps a Cyrillic lookalike class letter — '8В' means class 8B", () => {
+    const s = extractSignals('ХОНГОРЗУЛ 8В ВОЛЛЕЙБОЛ', BigInt('210000'), gradeCtx);
+    expect(s.gradeTokens.class).toContain('8v');
+  });
+
+  it("re-joins a class split across a space — '3 LM'", () => {
+    const s = extractSignals('A.OYU-VJIN 3 LM', BigInt('2350000'), gradeCtx);
+    expect(s.gradeTokens.class).toContain('3lm');
+  });
+
+  it('does not invent a class when the join is not a real one', () => {
+    const s = extractSignals('L. Amir 5 V payment', BigInt('4350000'), gradeCtx);
+    expect(s.gradeTokens.class).toEqual([]);
+  });
+
+  it('reads a bare trailing digit as a grade level when a name is present', () => {
+    const s = extractSignals('Б. ЭЛБЭРЭЛ 3', BigInt('400000'), gradeCtx);
+    expect(s.gradeTokens.level).toContain('3');
+  });
+
+  it('ignores a bare digit when the memo carries no name at all', () => {
+    const s = extractSignals('3', BigInt('400000'), gradeCtx);
+    expect(s.gradeTokens.level).toEqual([]);
+  });
+
+  it("does not read the digit in 'CLUB1' as a grade level", () => {
+    const s = extractSignals('E.MISHEEL HOMEWORK CLUB1', BigInt('225000'), gradeCtx);
+    expect(s.gradeTokens.level).toEqual([]);
+  });
+
+  it('strips the EB- bank prefix instead of gluing it to the name', () => {
+    const s = extractSignals('EB-ANIR 1-R ANGI', BigInt('400000'), gradeCtx);
+    expect(s.nameTokens).toContain('anir');
+    expect(s.gradeTokens.level).toContain('1');
+  });
+
+  it('splits a hyphenated name into one group with several spellings', () => {
+    const s = extractSignals('BOLD NOMIN-ERDENE', BigInt('210000'), gradeCtx);
+    const group = s.nameGroups.find((g) => g.includes('numin-erdene'));
+    expect(group).toBeDefined();
+    expect(group).toEqual(expect.arrayContaining(['numin', 'erdene', 'numinerdene']));
+    // One written name stays one group, however many spellings it has.
+    expect(s.nameGroups.length).toBe(2);
+  });
+});

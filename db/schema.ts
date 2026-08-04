@@ -12,13 +12,19 @@ import {
   index,
   uniqueIndex,
   check,
+  type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
 export const users = pgTable(
   "users",
   {
-    id: uuid("id").primaryKey(),
+    // Internal PK, independent of the Supabase auth user id. Authorization
+    // matches on `email` (see lib/auth.ts) so the same allowlist row serves a
+    // password identity and a Google identity for the same address. Default
+    // lets the provisioning script seed the allowlist before any auth user
+    // (e.g. a Google-only account) exists.
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
     email: text("email").notNull().unique(),
     role: text("role").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -202,6 +208,9 @@ export const bankTransactions = pgTable(
     amount: bigint("amount", { mode: "number" }).notNull(),
     transactionAt: timestamp("transaction_at", { withTimezone: true }).notNull(),
     status: text("status").notNull(),
+    // Set when status = 'discarded' (a soft delete for non-student rows).
+    discardedAt: timestamp("discarded_at", { withTimezone: true }),
+    discardedByUserId: uuid("discarded_by_user_id").references(() => users.id),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
@@ -210,7 +219,10 @@ export const bankTransactions = pgTable(
       .on(t.status)
       .where(sql`${t.status} = 'unmatched'`),
     index("bank_transactions_transaction_at_idx").on(t.transactionAt),
-    check("bank_transactions_status_check", sql`${t.status} IN ('matched', 'unmatched')`),
+    check(
+      "bank_transactions_status_check",
+      sql`${t.status} IN ('matched', 'unmatched', 'discarded')`
+    ),
   ]
 );
 
@@ -236,6 +248,17 @@ export const charges = pgTable(
     index("charges_student_id_academic_year_id_idx").on(t.studentId, t.academicYearId),
     index("charges_student_id_academic_term_id_idx").on(t.studentId, t.academicTermId),
     index("charges_fee_name_idx").on(t.feeName),
+    // Prevent duplicate charges for the same student + scope + fee. Split into
+    // two partial unique indexes so the nullable scope column is never part of
+    // the comparison (matches charges_scope_check: exactly one of year/term is
+    // set). Guards against a re-run load script or UI action silently creating
+    // a second charge and doubling a student's computed balance.
+    uniqueIndex("charges_student_year_fee_unique")
+      .on(t.studentId, t.academicYearId, t.feeName)
+      .where(sql`${t.academicTermId} IS NULL`),
+    uniqueIndex("charges_student_term_fee_unique")
+      .on(t.studentId, t.academicTermId, t.feeName)
+      .where(sql`${t.academicYearId} IS NULL`),
   ]
 );
 
@@ -272,10 +295,57 @@ export const payments = pgTable(
       .notNull()
       .references(() => users.id),
     recordedAt: timestamp("recorded_at", { withTimezone: true }).notNull().defaultNow(),
+    // The confirm operation that created this payment (nullable: pre-dates the
+    // operations log). Undo voids exactly the payments carrying its id.
+    operationId: integer("operation_id").references(() => operations.id),
+    // A voided payment no longer counts toward paid totals or balances, but is
+    // kept for audit. Live iff voided_at IS NULL.
+    voidedAt: timestamp("voided_at", { withTimezone: true }),
+    voidedByUserId: uuid("voided_by_user_id").references(() => users.id),
   },
   (t) => [
     index("payments_charge_id_idx").on(t.chargeId),
     index("payments_bank_transaction_id_idx").on(t.bankTransactionId),
+    index("payments_operation_id_idx").on(t.operationId),
+  ]
+);
+
+// Append-only log of user-initiated actions, and the unit of undo. Each
+// mutation writes one row; undoable ones carry `undoable_until`. See
+// docs/history_and_reversibility.md.
+export const operations = pgTable(
+  "operations",
+  {
+    id: serial("id").primaryKey(),
+    actorUserId: uuid("actor_user_id")
+      .notNull()
+      .references(() => users.id),
+    kind: text("kind").notNull(),
+    // The bank transaction this operation concerns (all Phase 1-2 kinds do).
+    bankTransactionId: integer("bank_transaction_id").references(
+      () => bankTransactions.id
+    ),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    // Undo deadline, stored at write time. NULL = not undoable (e.g. an `undo`).
+    undoableUntil: timestamp("undoable_until", { withTimezone: true }),
+    undoneAt: timestamp("undone_at", { withTimezone: true }),
+    undoneByUserId: uuid("undone_by_user_id").references(() => users.id),
+    // The `undo` operation that reversed this one (self-reference).
+    undoOperationId: integer("undo_operation_id").references(
+      (): AnyPgColumn => operations.id
+    ),
+    summary: text("summary").notNull(),
+    details: jsonb("details"),
+  },
+  (t) => [
+    check(
+      "operations_kind_check",
+      sql`${t.kind} IN ('confirm_match', 'discard_transaction', 'restore_transaction', 'create_enrollment', 'add_discount', 'undo')`
+    ),
+    index("operations_actor_user_id_idx").on(t.actorUserId),
+    index("operations_bank_transaction_id_idx").on(t.bankTransactionId),
+    index("operations_kind_idx").on(t.kind),
+    index("operations_created_at_idx").on(t.createdAt),
   ]
 );
 
@@ -318,3 +388,6 @@ export type NewDiscount = typeof discounts.$inferInsert;
 
 export type Payment = typeof payments.$inferSelect;
 export type NewPayment = typeof payments.$inferInsert;
+
+export type Operation = typeof operations.$inferSelect;
+export type NewOperation = typeof operations.$inferInsert;

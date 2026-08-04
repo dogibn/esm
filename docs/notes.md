@@ -8,7 +8,7 @@ Private working file. Not part of AI context. When a decision is made, it migrat
 
 - **`tuition_contract_id` source** — esmlh? manual at year-start? Affects scraping_esmlh + year-start lifecycle in domain_model.
 - **`student_category` source (new vs old)** — diff vs prior year roster? esmlh flag? Same scope.
-- **Bus opt-in source (term-start)** — esmlh? manual list? carried from previous term? Affects scraping_esmlh + term-start lifecycle.
+- **Bus opt-in source (term-start)** — esmlh? manual list? carried from previous term? Affects scraping_esmlh + term-start lifecycle. *Partly worked around, not resolved:* a bank payment at the term bus rate now proposes creating the bus Charge, so the payment itself acts as the opt-in signal for families who pay (see `domain_model.md` § Bank transaction → Payment). Families who opted in but haven't paid are still invisible — the unpaid-bus question in `user_flows.md` cannot be answered until the real source is settled.
 - **`student_directory` pagination at ~1000 students** — confirm whether it server-paginates. Affects scraper.
 - **`teacher_phone` column on `grades`?** — staff directory scrape captures phone, but `grades` has no column for it; phone currently sits unused in `teachers.json`. Add column or drop from scrape. Affects schema.grades + scraping_esmlh load step.
 - **Parent phone shape** — multiple space-separated values; keep raw or split into array? Affects schema.students + scraping rule.

@@ -1,5 +1,6 @@
 export {
   createCharge,
+  insertCharge,
   deleteCharge,
   listFilterOptions,
   listStudents,

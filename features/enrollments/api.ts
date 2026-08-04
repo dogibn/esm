@@ -1,4 +1,4 @@
-import { and, asc, eq, isNull } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 
 import { db } from "@/db/index";
 import {
@@ -9,10 +9,15 @@ import {
   feeStructures,
   gradeLevels,
   grades,
+  payments,
   students,
+  type Operation,
   type User,
 } from "@/db/schema";
 import { HttpError } from "@/lib/errors";
+import { recordOperation, undoableUntil } from "@/features/history";
+
+import { parseCreateEnrollmentDetails } from "./undo-details";
 
 import type { CreateEnrollmentInput } from "./schemas";
 import { strings } from "./strings";
@@ -153,7 +158,11 @@ export async function createEnrollment(
   return db.transaction(async (tx) => {
     // 1. The class must belong to the current year (enrollment invariant).
     const [grade] = await tx
-      .select({ id: grades.id, academicYearId: grades.academicYearId })
+      .select({
+        id: grades.id,
+        academicYearId: grades.academicYearId,
+        name: grades.name,
+      })
       .from(grades)
       .where(eq(grades.id, input.gradeId))
       .limit(1);
@@ -162,7 +171,10 @@ export async function createEnrollment(
     }
 
     // 2. Resolve the Student row — insert a new one or update the reused one.
+    // `studentCreated` is recorded on the operation so undo only removes a
+    // student this contract brought into existence, never a reused one.
     let studentDbId: number;
+    let studentCreated = false;
     if (input.mode === "existing") {
       if (input.existingStudentId === undefined) {
         throw new HttpError(400, strings.errors.studentNotFound);
@@ -207,6 +219,7 @@ export async function createEnrollment(
         })
         .returning({ id: students.id });
       studentDbId = inserted!.id;
+      studentCreated = true;
     }
 
     // 3. One enrollment per student per year (unique constraint).
@@ -280,6 +293,26 @@ export async function createEnrollment(
       );
     }
 
+    // 7. Record the whole contract as one undoable operation. Undo reverses it
+    // by the ids captured here (docs/history_and_reversibility.md Phase 4.2);
+    // there is no bank transaction involved, so bankTransactionId stays null.
+    const chargeIds = [tuitionChargeId];
+    if (registrationChargeId !== null) chargeIds.push(registrationChargeId);
+    const studentName = `${input.lastName} ${input.firstName}`.trim();
+    await recordOperation(tx, {
+      actorUserId: user.id,
+      kind: "create_enrollment",
+      undoableUntil: undoableUntil(new Date()),
+      summary: `New contract · ${studentName} · ${grade.name}`,
+      details: {
+        studentId: studentDbId,
+        studentCreated,
+        enrollmentId,
+        chargeIds,
+        discountCount: input.discounts.length,
+      },
+    });
+
     return {
       studentDbId,
       enrollmentId,
@@ -288,4 +321,71 @@ export async function createEnrollment(
       discountCount: input.discounts.length,
     };
   });
+}
+
+/**
+ * Reverse a create_enrollment operation. Runs inside the caller's undo
+ * transaction. Because the contract is brand-new, this DELETES the rows the
+ * operation created (mirroring how a confirm undo deletes charges it created) —
+ * the operations log retains the audit trail. Guarded: if any created charge
+ * has since taken a live payment, the contract is no longer purely new and undo
+ * is refused with 409. A reused student is never deleted; a student this
+ * contract created is deleted only once nothing else references it.
+ */
+export async function undoCreateEnrollment(
+  tx: Parameters<Parameters<(typeof db)["transaction"]>[0]>[0],
+  op: Operation,
+): Promise<void> {
+  const details = parseCreateEnrollmentDetails(op.details);
+  if (!details) {
+    throw new HttpError(500, "Enrollment operation is missing its details");
+  }
+
+  // Guard: a live payment on any created charge means real money attached to
+  // this contract; undoing it would strand that payment. Refuse.
+  if (details.chargeIds.length > 0) {
+    const paid = await tx
+      .select({ id: payments.id })
+      .from(payments)
+      .where(
+        and(
+          inArray(payments.chargeId, details.chargeIds),
+          isNull(payments.voidedAt),
+        ),
+      )
+      .limit(1);
+    if (paid.length > 0) {
+      throw new HttpError(
+        409,
+        "This contract already has a payment and can no longer be undone",
+      );
+    }
+  }
+
+  // Delete children before parents to satisfy FKs: discounts → charges →
+  // enrollment → (optionally) the newly-created student.
+  await tx.delete(discounts).where(eq(discounts.enrollmentId, details.enrollmentId));
+  if (details.chargeIds.length > 0) {
+    await tx.delete(charges).where(inArray(charges.id, details.chargeIds));
+  }
+  await tx.delete(enrollments).where(eq(enrollments.id, details.enrollmentId));
+
+  if (details.studentCreated) {
+    // Only remove the student if this undo leaves them with nothing — no other
+    // enrollment and no remaining charge. Anything else means they were used
+    // beyond this contract; keep the row.
+    const [otherEnrollment] = await tx
+      .select({ id: enrollments.id })
+      .from(enrollments)
+      .where(eq(enrollments.studentId, details.studentId))
+      .limit(1);
+    const [otherCharge] = await tx
+      .select({ id: charges.id })
+      .from(charges)
+      .where(eq(charges.studentId, details.studentId))
+      .limit(1);
+    if (!otherEnrollment && !otherCharge) {
+      await tx.delete(students).where(eq(students.id, details.studentId));
+    }
+  }
 }
