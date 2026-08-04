@@ -130,7 +130,15 @@ const enrollmentIdByStudentText = new Map(
 );
 
 let validationErrors = 0;
-const rows: (typeof discounts.$inferInsert)[] = [];
+// Historical import records discounts as flat MNT amounts (unit='mnt',
+// value === amount). Position is assigned per enrollment below, after dedup.
+type CandidateRow = {
+  enrollmentId: number;
+  name: string;
+  amount: number;
+  createdBy: string;
+};
+const rows: CandidateRow[] = [];
 
 for (const p of pairs) {
   const studentIdText = String(p.student_id);
@@ -171,11 +179,37 @@ if (validationErrors > 0) {
 console.log(`Built ${rows.length} candidate discount row(s) from ${pairs.length} pair(s).`);
 
 const existing = await db
-  .select({ enrollmentId: discounts.enrollmentId, name: discounts.name })
+  .select({
+    enrollmentId: discounts.enrollmentId,
+    name: discounts.name,
+    position: discounts.position,
+  })
   .from(discounts);
 const existingSet = new Set(existing.map((r) => `${r.enrollmentId}:${r.name}`));
 
-const newRows = rows.filter((r) => !existingSet.has(`${r.enrollmentId}:${r.name}`));
+// Next free position per enrollment, so appended rows never collide with the
+// UNIQUE (enrollment_id, position) index.
+const nextPosByEnrollment = new Map<number, number>();
+for (const r of existing) {
+  const next = Math.max(nextPosByEnrollment.get(r.enrollmentId) ?? 0, r.position + 1);
+  nextPosByEnrollment.set(r.enrollmentId, next);
+}
+
+const newRows: (typeof discounts.$inferInsert)[] = rows
+  .filter((r) => !existingSet.has(`${r.enrollmentId}:${r.name}`))
+  .map((r) => {
+    const position = nextPosByEnrollment.get(r.enrollmentId) ?? 0;
+    nextPosByEnrollment.set(r.enrollmentId, position + 1);
+    return {
+      enrollmentId: r.enrollmentId,
+      name: r.name,
+      unit: "mnt" as const,
+      value: r.amount,
+      position,
+      amount: r.amount,
+      createdBy: r.createdBy,
+    };
+  });
 const skipped = rows.length - newRows.length;
 
 if (newRows.length === 0) {

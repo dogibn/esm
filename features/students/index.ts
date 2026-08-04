@@ -25,6 +25,7 @@ export type {
   DiscountLine,
   FeeLine,
   PaymentHistoryRow,
+  SiblingOption,
   StudentDetail,
   StudentDetailHeader,
   TermCell,

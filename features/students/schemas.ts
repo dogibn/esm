@@ -1,5 +1,9 @@
 import { z } from "zod";
 
+// From the pure calc module (not the barrel) so this schema — imported by client
+// components — never transitively bundles server-only code.
+import { DISCOUNT_UNITS } from "@/features/discounts/calc";
+
 export const STATUS_FILTER_VALUES = ["unpaid", "partial", "paid"] as const;
 export type StatusFilterValue = (typeof STATUS_FILTER_VALUES)[number];
 
@@ -44,23 +48,39 @@ export type StudentUpdateInput = z.infer<typeof studentUpdateSchema>;
 // stored. Money is integer MNT. The "net ≥ already paid" floor is enforced
 // server-side (it needs the payment total), the "discounts ≤ base" invariant
 // here.
-export const tuitionUpdateSchema = z
-  .object({
-    baseAmount: z.coerce.number().int().nonnegative(),
-    discounts: z
-      .array(
-        z.object({
-          name: z.string().trim().min(1, "Discount name is required").max(100),
-          amount: z.coerce.number().int().nonnegative(),
-        }),
-      )
-      .max(20)
-      .default([]),
-  })
-  .refine(
-    (d) => d.discounts.reduce((s, x) => s + x.amount, 0) <= d.baseAmount,
-    { message: "Discounts can't exceed the base tuition.", path: ["discounts"] },
-  );
+// Tuition breakdown edit: the base (gross) amount plus the ordered set of
+// applied discounts. Each references a catalog entry; discounts compound onto
+// the base in array order. Unit/name/resolved MNT are derived server-side from
+// the catalog, so the client only sends the type, an optional custom value, and
+// an optional sibling link. Net = compound(base, discounts) is computed, never
+// stored; the "net ≥ already paid" floor is enforced server-side.
+export const tuitionUpdateSchema = z.object({
+  baseAmount: z.coerce.number().int().nonnegative(),
+  discounts: z
+    .array(
+      z
+        .object({
+          // A catalog entry, or null for a legacy/manual passthrough row that
+          // carries its own name/unit/value (preserves pre-catalog discounts).
+          discountTypeId: z.coerce.number().int().positive().nullable(),
+          name: z.string().trim().max(100).nullish(),
+          unit: z.enum(DISCOUNT_UNITS).nullish(),
+          value: z.coerce.number().nonnegative().nullish(),
+          siblingStudentId: z.coerce.number().int().positive().nullish(),
+        })
+        .refine(
+          (d) =>
+            d.discountTypeId !== null ||
+            (!!d.name && !!d.unit && d.value !== null && d.value !== undefined),
+          {
+            message: "A manual discount needs a name, unit, and value.",
+            path: ["discountTypeId"],
+          },
+        ),
+    )
+    .max(20)
+    .default([]),
+});
 
 export type TuitionUpdateInput = z.infer<typeof tuitionUpdateSchema>;
 

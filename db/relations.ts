@@ -11,6 +11,7 @@ import {
   clubEnrollments,
   bankTransactions,
   charges,
+  discountTypes,
   discounts,
   payments,
   operations,
@@ -20,6 +21,7 @@ export const studentsRelations = relations(students, ({ many }) => ({
   enrollments: many(enrollments),
   charges: many(charges),
   clubEnrollments: many(clubEnrollments),
+  siblingDiscounts: many(discounts),
 }));
 
 export const enrollmentsRelations = relations(enrollments, ({ one, many }) => ({
@@ -101,10 +103,26 @@ export const chargesRelations = relations(charges, ({ one, many }) => ({
   payments: many(payments),
 }));
 
+export const discountTypesRelations = relations(discountTypes, ({ one, many }) => ({
+  createdByUser: one(users, {
+    fields: [discountTypes.createdBy],
+    references: [users.id],
+  }),
+  discounts: many(discounts),
+}));
+
 export const discountsRelations = relations(discounts, ({ one }) => ({
   enrollment: one(enrollments, {
     fields: [discounts.enrollmentId],
     references: [enrollments.id],
+  }),
+  discountType: one(discountTypes, {
+    fields: [discounts.discountTypeId],
+    references: [discountTypes.id],
+  }),
+  sibling: one(students, {
+    fields: [discounts.siblingStudentId],
+    references: [students.id],
   }),
   createdByUser: one(users, {
     fields: [discounts.createdBy],
@@ -129,6 +147,7 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
 
 export const usersRelations = relations(users, ({ many }) => ({
   discounts: many(discounts),
+  discountTypes: many(discountTypes),
   payments: many(payments),
   operations: many(operations),
 }));

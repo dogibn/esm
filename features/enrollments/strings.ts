@@ -56,14 +56,29 @@ export const strings = {
   },
   discounts: {
     title: "Discounts",
-    description: "Tuition discounts only (sibling, scholarship, …).",
-    name: "Reason",
-    namePlaceholder: "e.g. sibling",
-    amount: "Amount (MNT)",
+    description:
+      "Tuition discounts from the catalog. They apply top to bottom, each onto the running total.",
+    choose: "Choose a discount",
+    customValueMnt: "Amount (₮)",
+    customValuePercent: "Percent (%)",
     notes: "Note",
     add: "Add discount",
     remove: "Remove",
+    moveUp: "Move up",
+    moveDown: "Move down",
     empty: "No discounts.",
+    noCatalog: "No discounts in the catalog yet. An admin can add them.",
+    sibling: "Sibling",
+    siblingPlaceholder: "Link the sibling student",
+    siblingSearch: "Search by name or ID…",
+    siblingNoMatch: "No students match.",
+    siblingClear: "No sibling linked",
+    siblingHint: "Who the discount pairs this student with.",
+    // How a discount reads: "10%" or "300,000₮".
+    expressed: (unit: "mnt" | "percent", value: number): string =>
+      unit === "percent"
+        ? `${value}%`
+        : `${value.toLocaleString("en-US")}₮`,
   },
   summary: {
     title: "Summary",

@@ -14,6 +14,7 @@ import {
   type User,
 } from "@/db/schema";
 import { HttpError } from "@/lib/errors";
+import { computeTuition, resolveDiscountApplications } from "@/features/discounts";
 
 import { loadStudentChargeDetails, type StudentChargeDetail } from "./balance";
 import type {
@@ -373,12 +374,16 @@ export async function updateTuition(
     .where(eq(payments.chargeId, tuitionCharge.id));
   const paid = Number(paidRow?.paid ?? 0);
 
-  const discountTotal = input.discounts.reduce((s, d) => s + d.amount, 0);
-  const net = input.baseAmount - discountTotal;
-  if (net < paid) {
+  // Resolve against the catalog (order preserved) and compound onto the base.
+  const resolved = await resolveDiscountApplications(input.discounts);
+  const computed = computeTuition(
+    input.baseAmount,
+    resolved.map((r) => ({ unit: r.unit, value: r.value })),
+  );
+  if (computed.net < paid) {
     throw new HttpError(
       400,
-      `Net tuition (${net.toLocaleString("en-US")}₮) can't be below the ${paid.toLocaleString("en-US")}₮ already paid.`,
+      `Net tuition (${computed.net.toLocaleString("en-US")}₮) can't be below the ${paid.toLocaleString("en-US")}₮ already paid.`,
     );
   }
 
@@ -388,12 +393,21 @@ export async function updateTuition(
       .set({ amount: input.baseAmount })
       .where(eq(charges.id, tuitionCharge.id));
     await tx.delete(discounts).where(eq(discounts.enrollmentId, enrollment.id));
-    if (input.discounts.length > 0) {
+    if (resolved.length > 0) {
       await tx.insert(discounts).values(
-        input.discounts.map((d) => ({
+        resolved.map((r, index) => ({
           enrollmentId: enrollment.id,
-          name: d.name,
-          amount: d.amount,
+          discountTypeId: r.discountTypeId,
+          name: r.name,
+          unit: r.unit,
+          value: r.value,
+          position: index,
+          amount: computed.lines[index]!.amount,
+          // Keep a sibling link only when it points at another student.
+          siblingStudentId:
+            r.siblingStudentId && r.siblingStudentId !== studentId
+              ? r.siblingStudentId
+              : null,
           createdBy: user.id,
         })),
       );

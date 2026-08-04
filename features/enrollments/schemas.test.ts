@@ -22,14 +22,22 @@ describe("createEnrollmentSchema", () => {
     expect(parsed.tuitionAmount).toBe(2_000_000);
   });
 
-  it("accepts a registration fee and tuition discounts", () => {
+  it("accepts a registration fee and a catalog discount", () => {
     const parsed = createEnrollmentSchema.parse({
       ...base,
       registrationAmount: 450_000,
-      discounts: [{ name: "sibling", amount: 300_000 }],
+      discounts: [{ discountTypeId: 5 }],
     });
     expect(parsed.registrationAmount).toBe(450_000);
-    expect(parsed.discounts[0]).toMatchObject({ name: "sibling", amount: 300_000 });
+    expect(parsed.discounts[0]).toMatchObject({ discountTypeId: 5 });
+  });
+
+  it("accepts a custom value on a discount", () => {
+    const parsed = createEnrollmentSchema.parse({
+      ...base,
+      discounts: [{ discountTypeId: 5, value: 250_000 }],
+    });
+    expect(parsed.discounts[0]).toMatchObject({ discountTypeId: 5, value: 250_000 });
   });
 
   it("requires an existing student id when mode is 'existing'", () => {
@@ -65,11 +73,30 @@ describe("createEnrollmentSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("rejects a non-positive discount amount", () => {
+  it("rejects a discount with no chosen catalog entry", () => {
     const result = createEnrollmentSchema.safeParse({
       ...base,
-      discounts: [{ name: "sibling", amount: 0 }],
+      discounts: [{ discountTypeId: 0 }],
     });
     expect(result.success).toBe(false);
+  });
+
+  it("accepts a sibling discount linked to a sibling student", () => {
+    const parsed = createEnrollmentSchema.parse({
+      ...base,
+      discounts: [{ discountTypeId: 5, siblingStudentId: 77 }],
+    });
+    expect(parsed.discounts[0]).toMatchObject({
+      discountTypeId: 5,
+      siblingStudentId: 77,
+    });
+  });
+
+  it("leaves siblingStudentId optional for non-sibling discounts", () => {
+    const parsed = createEnrollmentSchema.parse({
+      ...base,
+      discounts: [{ discountTypeId: 6 }],
+    });
+    expect(parsed.discounts[0]?.siblingStudentId ?? null).toBeNull();
   });
 });

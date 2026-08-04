@@ -109,14 +109,29 @@ A tuition Charge is implicitly linked to an Enrollment via the `(student_id, aca
 
 **Status (unpaid / partial / paid) is derived**, not stored. See "Computing balance" in `schema.md`.
 
+### DiscountType
+A reusable discount definition in a catalog (`"Early-bird"`, `"Sibling"`, `"Scholarship"`). Admins curate the catalog; every accountant reads it (mirrors the FeeStructure admin/read split, but this one has a UI). Applying a discount to a student means picking a DiscountType, not typing a free-text name.
+
+- `unit` is `percent` (the value is a percentage of the running tuition) or `mnt` (a flat amount).
+- `value` is the fixed percent/amount, or **NULL = "custom"** — the amount is entered each time the type is applied (e.g. a per-family Scholarship). Percent values are 0–100.
+- `is_active` retires a type without deleting it; retired types stay referenced by discounts already applied but are no longer offered when applying new ones.
+
 ### Discount
 A reduction applied to an Enrollment's tuition. **Tuition only in v1.**
 
 Modeled as `Discount → Enrollment` (rather than `Discount → Charge`) because (a) every tuition Charge maps 1:1 to an Enrollment for that year, and (b) attaching the discount to the Enrollment makes the "tuition only" rule structural — there is no Charge column to mis-target.
 
-A *recorded outcome*, not a computed rule: v1 stores the amount that was applied without committing to *how* it was calculated. Multiple Discounts can attach to one Enrollment (e.g. sibling + scholarship).
+A Discount references the **DiscountType** it was applied from (`discount_type_id`) and snapshots how it was expressed at apply time: `unit`, `value`, and `name`. Snapshotting keeps the row self-describing and immune to later catalog edits. Multiple Discounts attach to one Enrollment (e.g. sibling + scholarship).
 
-> **v2 evolution.** When discount rules become clear, add columns like `kind` (flat / percentage / override) and `rate`, plus a `DiscountType` reference table to constrain `name`. Existing rows remain valid with those new columns NULL. If non-tuition discounts emerge, re-link to Charge with a constraint that the linked Charge's `fee_name` is in the discountable set.
+**Compounding.** Discounts apply in `position` order (top to bottom): each one reduces the *running* tuition left by the ones above it, not the base. A 10% discount below a flat one is taken off the already-reduced amount, so **order matters**. The resolved MNT reduction each discount contributes in sequence is stored in `amount` (rounded to whole MNT, clamped so tuition never goes negative). Because `amount` is the resolved reduction, the balance formula stays a simple `SUM(amount)` — the compounding order is already baked in. The single source of truth for the fold is `features/discounts/calc.ts` (`computeTuition`); the write paths compute it and snapshot the result, so percents don't silently drift when the base changes (base and discounts are always edited together).
+
+> **Recorded outcome + rule.** v1 originally stored only the applied amount. It now stores the rule (type + unit + value + order) *and* the resolved amount snapshot, so both the "how" and the audited "how much" are recoverable.
+
+A Discount may carry an optional **`sibling_student_id`** — a soft pointer to the Student the discount pairs this enrollee with. It is populated only for sibling discounts (recognised by the type's `name`) and NULL for everything else. It references the Student rather than their Enrollment, so the link is stable across years and "is the sibling enrolled *this* year?" is answered at read time (join the current year's enrollments). This records *who* the sibling is and lets the UI show whether they are currently enrolled — the condition a sibling discount depends on. `ON DELETE SET NULL`, so removing a student clears the reference without invalidating the discount.
+
+> **Legacy discounts.** Discounts loaded before the catalog existed have `discount_type_id = NULL` and unit `mnt`. They remain valid and are preserved unchanged through tuition edits (a passthrough path carries their snapshot); they just aren't tied to a catalog entry.
+
+> **v2 evolution.** If non-tuition discounts emerge, re-link to Charge with a constraint that the linked Charge's `fee_name` is in the discountable set.
 
 ### BankTransaction
 One row from an uploaded bank file. Non-student rows (bank fees, refunds, unrelated transfers) are filtered at upload; those the accountant identifies during review are **soft-discarded**, not removed (see below).
@@ -136,7 +151,7 @@ Carries the proposed student, proposed allocation (list of `(charge_id, amount)`
 ### User
 Someone who signs in to the app. Five total in v1: one admin, four regular accountants. Mirrors a row in Supabase Auth. `role` is `accountant` or `admin`.
 
-Permission model is minimal: regular accountants do everything except manage `FeeStructure` (admin only — and even that is via year/term-start import, not a UI).
+Permission model is minimal: regular accountants do everything except manage `FeeStructure` (admin only, via year/term-start import — not a UI) and curate the `DiscountType` catalog (admin only — this one *does* have a UI; all accountants can view it and apply discounts, only admins add/edit types).
 
 ---
 
@@ -144,7 +159,8 @@ Permission model is minimal: regular accountants do everything except manage `Fe
 
 - Student has many Enrollments (one per year attended).
 - Enrollment links one Student × one AcademicYear × one Grade.
-- Enrollment has many Discounts (zero or more, applied to tuition).
+- Enrollment has many Discounts (zero or more, applied to tuition, ordered by `position`).
+- DiscountType has many Discounts; a Discount references one DiscountType (nullable for legacy rows).
 - GradeLevel has many Grades (one per academic year × class section).
 - Grade belongs to one GradeLevel and one AcademicYear.
 - Student has many ClubEnrollments (one per club per term).
@@ -227,9 +243,8 @@ These won't be modeled in v1. Each is listed because the AI would otherwise re-d
 - **Year/term-end roll-over UI.** New years and terms are added by script.
 - **CRUD UI for FeeStructure / Student / Enrollment / Grade.**
 - **Per-student detail page.**
-- **Discount rules.** v1 stores recorded amounts only, not the formulas behind them.
 - **Discounts on non-tuition fees.** Would require restructuring Discount back to → Charge.
-- **Family / siblings entity.** Sibling discounts are recorded as flat per-Enrollment Discount rows.
+- **Family / siblings entity.** No Family relationship is modeled. Sibling discounts remain flat per-Enrollment Discount rows; a Discount's optional `sibling_student_id` is only a soft pointer to one sibling Student (see the Discount entity), not a family graph.
 - **Teacher entity.** Teacher info is denormalized on Grade.
 - **ImportBatch entity and original-file storage.** `BankTransaction.transaction_id` UNIQUE is the dedup mechanism.
 - **Refunds.** Money flowing the other direction.
