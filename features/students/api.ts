@@ -389,10 +389,15 @@ export async function updateTuition(
       .where(eq(charges.id, tuitionCharge.id));
     await tx.delete(discounts).where(eq(discounts.enrollmentId, enrollment.id));
     if (input.discounts.length > 0) {
+      // Flat-MNT bridge (see enrollments/api.ts) until the catalog/compounding
+      // rework threads unit/value/type through this path.
       await tx.insert(discounts).values(
-        input.discounts.map((d) => ({
+        input.discounts.map((d, index) => ({
           enrollmentId: enrollment.id,
           name: d.name,
+          unit: "mnt" as const,
+          value: d.amount,
+          position: index,
           amount: d.amount,
           // Keep a sibling link only when it points at another student.
           siblingStudentId:

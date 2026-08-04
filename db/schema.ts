@@ -7,6 +7,7 @@ import {
   bigint,
   jsonb,
   date,
+  numeric,
   timestamp,
   uuid,
   index,
@@ -239,6 +240,39 @@ export const charges = pgTable(
   ]
 );
 
+// Catalog of reusable tuition discount definitions ("early-bird", "sibling",
+// "scholarship"). Admins curate these; every accountant reads them. A row is a
+// template — `value` NULL means the amount/percent is entered when applied
+// ("custom"). See domain_model.md § DiscountType.
+export const discountTypes = pgTable(
+  "discount_types",
+  {
+    id: serial("id").primaryKey(),
+    name: text("name").notNull().unique(),
+    // 'percent' → `value` is a percentage (0–100); 'mnt' → `value` is a flat
+    // MNT amount.
+    unit: text("unit").notNull(),
+    // Default value for the discount, or NULL for "custom" (supplied at apply
+    // time). Numeric so percents can carry a fraction; MNT values stay whole.
+    value: numeric("value", { precision: 12, scale: 4, mode: "number" }),
+    note: text("note"),
+    // Retire a type without deleting it (applied discounts still reference it).
+    isActive: boolean("is_active").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: uuid("created_by")
+      .notNull()
+      .references(() => users.id),
+  },
+  (t) => [
+    check("discount_types_unit_check", sql`${t.unit} IN ('percent', 'mnt')`),
+    check(
+      "discount_types_value_check",
+      sql`${t.value} IS NULL OR (${t.value} >= 0 AND (${t.unit} <> 'percent' OR ${t.value} <= 100))`
+    ),
+  ]
+);
+
 export const discounts = pgTable(
   "discounts",
   {
@@ -246,7 +280,22 @@ export const discounts = pgTable(
     enrollmentId: integer("enrollment_id")
       .notNull()
       .references(() => enrollments.id),
+    // The catalog entry this discount was applied from. Nullable so legacy
+    // free-text discounts (pre-catalog) remain valid. RESTRICT: retire a type
+    // via is_active instead of deleting one that's in use.
+    discountTypeId: integer("discount_type_id").references(() => discountTypes.id),
     name: text("name").notNull(),
+    // Snapshot of how this discount was expressed, captured at apply time so
+    // the row is self-describing and survives edits to the catalog entry.
+    // 'percent' | 'mnt'.
+    unit: text("unit").notNull(),
+    // The percent (0–100) or MNT amount that was applied.
+    value: numeric("value", { precision: 12, scale: 4, mode: "number" }).notNull(),
+    // Application order within the enrollment (0-based). Discounts compound in
+    // this order onto the running tuition (domain_model.md § Discount).
+    position: integer("position").notNull(),
+    // Resolved MNT reduction this line contributed, in sequence. The balance
+    // formula sums this, so order is already baked in and reads stay a SUM.
     amount: bigint("amount", { mode: "number" }).notNull(),
     notes: text("notes"),
     // Optional soft pointer to the sibling Student a sibling discount is tied
@@ -266,6 +315,12 @@ export const discounts = pgTable(
   (t) => [
     index("discounts_enrollment_id_idx").on(t.enrollmentId),
     index("discounts_sibling_student_id_idx").on(t.siblingStudentId),
+    index("discounts_discount_type_id_idx").on(t.discountTypeId),
+    uniqueIndex("discounts_enrollment_id_position_unique").on(
+      t.enrollmentId,
+      t.position
+    ),
+    check("discounts_unit_check", sql`${t.unit} IN ('percent', 'mnt')`),
   ]
 );
 
@@ -324,6 +379,9 @@ export type NewBankTransaction = typeof bankTransactions.$inferInsert;
 
 export type Charge = typeof charges.$inferSelect;
 export type NewCharge = typeof charges.$inferInsert;
+
+export type DiscountType = typeof discountTypes.$inferSelect;
+export type NewDiscountType = typeof discountTypes.$inferInsert;
 
 export type Discount = typeof discounts.$inferSelect;
 export type NewDiscount = typeof discounts.$inferInsert;

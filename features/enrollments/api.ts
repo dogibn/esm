@@ -270,10 +270,15 @@ export async function createEnrollment(
     // 6. Tuition discounts, linked to the enrollment. A sibling link is kept
     // only when it points at a different student (never the enrollee itself).
     if (input.discounts.length > 0) {
+      // Flat-MNT bridge: this form still records discounts as recorded MNT
+      // amounts. The catalog/compounding rework threads unit/value/type here.
       await tx.insert(discounts).values(
-        input.discounts.map((d) => ({
+        input.discounts.map((d, index) => ({
           enrollmentId,
           name: d.name,
+          unit: "mnt" as const,
+          value: d.amount,
+          position: index,
           amount: d.amount,
           notes: nullify(d.notes),
           siblingStudentId:
