@@ -14,6 +14,7 @@ import { HttpError } from "@/lib/errors";
 import { isUndoable, recordOperation, undoableUntil } from "@/features/history";
 
 import { insertCharge } from "@/features/students";
+import { undoCreateEnrollment } from "@/features/enrollments";
 
 import { buildMatchingContext, match, NEW_CHARGE_PLACEHOLDER_ID } from "./matching";
 import { loadMatchingContextInput } from "./matching/load-context";
@@ -540,6 +541,10 @@ export async function undoOperation(
             eq(bankTransactions.status, "discarded"),
           ),
         );
+    } else if (op.kind === "create_enrollment") {
+      // Reverse a New Contract. The enrollments feature owns the void set
+      // (student/enrollment/charges/discounts) and the live-payment guard.
+      await undoCreateEnrollment(dbTx, op);
     } else {
       throw new HttpError(400, "This kind of action cannot be undone");
     }

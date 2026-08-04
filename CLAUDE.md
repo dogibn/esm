@@ -9,5 +9,8 @@ Read in this order:
 - `tech_stack.md` — code conventions.
 - `scraping_esmlh.md` — esmlh.edu.mn data import.
 - `user_flows.md` — UI workflows.
+- `history_and_reversibility.md` — activity log, undo window, History view, roles.
+- `import_matching_plan.md` — bank-import matching pipeline.
+- `deployment.md` — deploy & operations runbook.
 
 One owner per fact. Cross-reference, don't duplicate. If docs disagree, the listed doc wins.

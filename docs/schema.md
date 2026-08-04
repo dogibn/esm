@@ -184,6 +184,10 @@ For *what* the entities mean and *why* the schema looks like this, see `domain_m
 - INDEX `(student_id, academic_year_id)`
 - INDEX `(student_id, academic_term_id)`
 - INDEX `(fee_name)`
+- UNIQUE INDEX `charges_student_year_fee_unique (student_id, academic_year_id, fee_name)` WHERE `academic_term_id IS NULL`
+- UNIQUE INDEX `charges_student_term_fee_unique (student_id, academic_term_id, fee_name)` WHERE `academic_year_id IS NULL`
+- At most one Charge per (student, scope, fee), now enforced by the two partial
+  unique indexes above (migration `0004`).
 
 ### `discounts`
 
@@ -298,4 +302,6 @@ Constraints enforced in code, not by the database. Each is a deliberate trade-of
 
 - **`charges.fee_name` → `fee_structures.fee_name`** has no FK because `fee_name` is not unique in `fee_structures` (same name across terms and validity ranges). A code-level helper exposes valid `fee_name` values.
 - **`Enrollment.grade_id` and `Enrollment.academic_year_id` consistency.** An enrollment's grade must belong to the same year.
-- **At most one Charge per (student, scope, fee).** Not a unique constraint; the year/term-start import is responsible for not creating duplicates.
+
+(**At most one Charge per (student, scope, fee)** moved to the DB — it is now
+enforced by the partial unique indexes on `charges`, see above.)

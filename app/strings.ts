@@ -11,6 +11,7 @@ export const strings = {
     tracking: "Students",
     imports: "Imports",
     transactions: "Transactions",
+    history: "History",
   },
   auth: {
     signOut: "Sign out",

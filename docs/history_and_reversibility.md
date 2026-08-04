@@ -11,6 +11,36 @@ When this doc and those disagree, update them together — one owner per fact.
 
 ---
 
+## Status
+
+| Phase | State |
+|---|---|
+| 1 — Reversible confirm | **Done.** |
+| 2 — Soft-discard | **Done.** |
+| 3 — Activity log + History view | **Done.** `GET /api/history` (role-scoped read) + a `/history` page with per-row Undo. Nav link between Transactions and the sign-out button. |
+| 4.2 — Reversible enrollment creation | **Done.** The New Contract flow records a `create_enrollment` operation; undo deletes the enrollment, its charges and discounts, and a student it created, guarded by a live-payment check. |
+| 4.1 — Reversible discount add | **Deferred.** See note below. |
+| 5 — Retention & purge | **Not started** (explicitly optional/later). |
+
+**Why 4.1 is deferred.** The doc's model assumes a discrete "add one discount"
+action. In the shipped app discounts are edited as a *bulk replace* inside
+`updateTuition` (`features/students/api.ts`): it deletes the enrollment's
+discount rows and re-inserts the new set. There is no single-discount add to
+attach a reversible `add_discount` operation to. Making tuition-discount edits
+reversible therefore means recording the before/after set on an `edit_discounts`
+operation and restoring it on undo — a small reshape of `updateTuition`, not the
+`voided_at`-on-discounts approach sketched below. Left for a follow-up so it can
+be designed against the real flow rather than the assumed one.
+
+Note that undo of a `create_enrollment` (4.2) follows the same **delete, don't
+void** precedent already set by confirm-undo, which hard-deletes charges it
+created (§ Phase 4 of `import_matching_plan.md`): the contract is brand-new, the
+operations log preserves the audit trail, and a live-payment guard blocks undo
+once real money has attached. So 4.2 needed **no** new `voided_at` columns on
+enrollments/charges/students.
+
+---
+
 ## Why now
 
 Most start-of-year transfers are single, tuition-only, exact-amount payments —
@@ -113,8 +143,10 @@ Grouped by the phase that introduces them. Full column specs land in
 - `status` CHECK gains `'discarded'`: `('matched','unmatched','discarded')`.
 - add `discarded_at` timestamptz NULL, `discarded_by_user_id` uuid NULL.
 
-**`discounts`** (Phase 4) — add `operation_id`, `voided_at`,
-`voided_by_user_id` (mirrors payments).
+**`discounts`** (Phase 4.1) — would add `operation_id`, `voided_at`,
+`voided_by_user_id` (mirrors payments). **Not added:** 4.1 is deferred (see
+§ Status), and 4.2's enrollment undo deletes brand-new discount rows rather than
+voiding them, so it needs no discount columns.
 
 ---
 
@@ -201,7 +233,7 @@ verified by migration review + a smoke check.
 | 2.2 | Replace the hard delete in `DELETE /api/imports/:id` with a soft discard + `discard_transaction` operation. Update `domain_model.md`. | Unit: discard sets status, does not remove the row. e2e: re-upload does not resurrect a discarded row. |
 | 2.3 | Restore: `POST /api/imports/operations/:id/undo` for a discard → status back to `unmatched` (within window). Add a "Discarded" filter to Transaction history. | e2e: discard → restore → row unmatched. Unit: past-window restore → 400. |
 
-### Phase 3 — Activity log + History view
+### Phase 3 — Activity log + History view — **done**
 
 | Step | Change | How it's tested |
 |---|---|---|
@@ -209,12 +241,33 @@ verified by migration review + a smoke check.
 | 3.2 | Read API `GET /api/history` with filters (entity, kind, date range) + pagination. Non-admins are scoped server-side to their own operations; admins see all. | Unit: filter/pagination logic on a fixture list; accountant request excludes others' operations; admin request includes them. |
 | 3.3 | History page under `(app)/history` — table of operations, filterable, with an Undo action shown only where still in window **and** the viewer is authorized (owner or admin). | e2e: page renders, filter narrows, Undo works from the row; accountant sees no Undo on another user's op. |
 
+**As built (Phase 3):** `features/history/` gained `api.ts` (`listHistory`, the
+role-scoped read — accountants are filtered to `actor_user_id = user.id`
+server-side, admins see all), `schemas.ts` (`GET /api/history` params: `kind`,
+`from`/`to`, pagination), `types.ts`, `strings.ts`, and
+`components/HistoryView.tsx`. Route `app/api/history/route.ts`; page
+`app/(app)/history/page.tsx`; nav link in `app/(app)/layout.tsx`. Each row
+exposes `undoOperationId` only when the viewer may undo it (owner-or-admin **and**
+in window) — the same gate the Transactions view already uses — and Undo posts to
+the existing `/api/imports/operations/:id/undo`.
+
 ### Phase 4 — Extend reversibility
 
 | Step | Change | How it's tested |
 |---|---|---|
 | 4.1 | Reversible discount add: `add_discount` operation; `voided_at` on discounts; undo voids it. | Unit: voided discount drops out of the tuition discount total. |
 | 4.2 | Reversible enrollment creation (the New Contract flow): `create_enrollment` operation; undo voids the enrollment + its charges + any newly created student. **Blocked** if any of those charges already has a live payment. | Unit: undo path assembles the right void set; guard rejects when a payment exists. e2e: create contract → undo → gone. |
+
+**As built (Phase 4.2):** `createEnrollment` records a `create_enrollment`
+operation (with `undoable_until`) inside its existing transaction, capturing
+`{ studentId, studentCreated, enrollmentId, chargeIds, discountCount }` in
+`details`. `undoCreateEnrollment` (in `features/enrollments/api.ts`, dispatched
+from `undoOperation`) reads those ids back through the pure, unit-tested
+`parseCreateEnrollmentDetails` (`undo-details.ts`), refuses with 409 if any
+charge has a live payment, then deletes discounts → charges → enrollment, and the
+student **only if** this contract created it and nothing else now references it.
+Deletes rather than voids (see § Status); no new columns. The New Contract action
+appears in History and is undoable there like any other operation.
 
 ### Phase 5 — Retention & purge (optional, later)
 

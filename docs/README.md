@@ -31,6 +31,8 @@ Five accountants at ESM. One admin manages fee structures; the other four record
 - `tech_stack.md` — frameworks, conventions, folder structure
 - `scraping_esmlh.md` — esmlh.edu.mn data import
 - `user_flows.md` — UI workflows
+- `history_and_reversibility.md` — activity log, undo window, History view, roles
+- `import_matching_plan.md` — bank-import matching pipeline: what changed and why
 - `deployment.md` — deploy & operations runbook (env, migrations, backups, users)
 - `CLAUDE.md` — AI entry point
 
