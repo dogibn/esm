@@ -8,9 +8,11 @@ import type { StudentListSummary } from "../types";
 
 export function StudentSummaryCards({ summary }: { summary: StudentListSummary }) {
   const s = strings.summary;
+  // Both cards are scoped to the selected fee, so the rate answers "of what is
+  // due for this fee, how much has come in".
   const rate =
-    summary.totalCharged > 0
-      ? ((summary.totalCollected / summary.totalCharged) * 100).toFixed(1)
+    summary.totalDue > 0
+      ? ((summary.totalCollected / summary.totalDue) * 100).toFixed(1)
       : "0.0";
 
   return (
@@ -19,7 +21,7 @@ export function StudentSummaryCards({ summary }: { summary: StudentListSummary }
         accent="primary"
         icon={<Banknote />}
         label={s.totalDue}
-        value={formatMnt(summary.totalDue)}
+        value={formatMnt(summary.totalOutstanding)}
         sub={s.students(summary.students)}
       />
       <StatCard

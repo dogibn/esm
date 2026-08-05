@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 import {
   createColumnHelper,
   flexRender,
@@ -10,6 +11,7 @@ import {
 } from "@tanstack/react-table";
 
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import {
   Table,
   TableBody,
@@ -19,127 +21,117 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { formatAmount } from "../format";
+import { formatDate, formatMnt } from "../format";
+import type { FeeScopeValue } from "../schemas";
 import { strings } from "../strings";
-import type {
-  ClubsFeeCell,
-  FeeCell,
-  StudentListResponse,
-  StudentRow,
-} from "../types";
+import type { StudentListResponse, StudentRow } from "../types";
 import { StatusBadge } from "./StatusBadge";
 
 type Props = {
   data: StudentListResponse;
+  fee: FeeScopeValue;
   loading: boolean;
   error: string | null;
   emptyMessage: string;
   onPageChange: (page: number) => void;
 };
 
-function FeeCellView({ cell }: { cell: FeeCell }) {
-  if (!cell.hasCharge) {
-    return <span className="text-muted-foreground">{strings.status.none}</span>;
-  }
+// Paid, with a hairline bar showing how far it covers what's due. Full → the
+// success tone, part-way → warning, nothing paid → the bare track.
+function PaidCell({ row }: { row: StudentRow }) {
+  const tone =
+    row.paid <= 0 ? "primary" : row.balance <= 0 ? "success" : "warning";
   return (
-    <div className="flex flex-col gap-0.5">
-      <span className="font-medium tabular-nums">{formatAmount(cell.balance)}</span>
-      <StatusBadge status={cell.status} />
-    </div>
-  );
-}
-
-function ClubsCellView({ cell }: { cell: ClubsFeeCell }) {
-  if (!cell.hasCharge) {
-    return <span className="text-muted-foreground">{strings.status.none}</span>;
-  }
-  const tooltip = cell.items
-    .map((it) => `${it.feeName}: ${formatAmount(it.balance)}`)
-    .join("\n");
-  const names = cell.items.map((it) => it.feeName).join(", ");
-  return (
-    <div className="flex flex-col gap-0.5" title={tooltip}>
-      <span className="font-medium tabular-nums">{formatAmount(cell.balance)}</span>
-      <StatusBadge status={cell.status} />
-      <span className="max-w-[16rem] truncate text-xs text-muted-foreground">
-        {names}
-      </span>
+    <div className="flex min-w-24 flex-col gap-1.5">
+      <span className="font-medium tabular-nums">{formatMnt(row.paid)}</span>
+      <Progress
+        size="xs"
+        tone={tone}
+        value={row.paid}
+        max={row.due}
+        aria-label={strings.paidProgress(formatMnt(row.paid), formatMnt(row.due))}
+      />
     </div>
   );
 }
 
 const columnHelper = createColumnHelper<StudentRow>();
 
-const columns = [
-  columnHelper.accessor("studentCode", {
-    id: "id",
-    header: strings.columns.id,
-    cell: (info) => (
-      <span className="font-mono text-xs text-muted-foreground">
-        {info.getValue()}
-      </span>
-    ),
-  }),
-  columnHelper.accessor("lastName", {
-    id: "student",
-    header: strings.columns.student,
-    cell: (info) => {
-      const row = info.row.original;
-      // Surname-first per Mongolian convention: surname lighter, given name
-      // emphasized. The whole row is the click target (see TableRow below);
-      // this stays a real link so keyboard and screen-reader users have one too.
-      return (
-        <Link
-          href={`/students/${row.studentId}`}
-          className="rounded-sm underline-offset-4 outline-none group-hover:underline focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          <span className="text-muted-foreground">{row.lastName}</span>{" "}
-          <span className="font-semibold text-foreground group-hover:text-primary">
-            {row.firstName}
-          </span>
-        </Link>
-      );
-    },
-  }),
-  columnHelper.accessor("gradeName", {
-    id: "class",
-    header: strings.columns.class,
-    cell: (info) => <span>{info.getValue()}</span>,
-  }),
-  columnHelper.accessor("tuition", {
-    header: strings.columns.tuition,
-    cell: (info) => <FeeCellView cell={info.getValue()} />,
-  }),
-  columnHelper.accessor("bus", {
-    header: strings.columns.bus,
-    cell: (info) => <FeeCellView cell={info.getValue()} />,
-  }),
-  columnHelper.accessor("registration", {
-    header: strings.columns.registration,
-    cell: (info) => <FeeCellView cell={info.getValue()} />,
-  }),
-  columnHelper.accessor("clubs", {
-    header: strings.columns.clubs,
-    cell: (info) => <ClubsCellView cell={info.getValue()} />,
-  }),
-  columnHelper.accessor("totalBalance", {
-    header: strings.columns.total,
-    cell: (info) => {
-      const row = info.row.original;
-      return (
-        <div className="flex flex-col gap-0.5">
-          <span className="font-semibold tabular-nums">
-            {formatAmount(row.totalBalance)}
-          </span>
-          <StatusBadge status={row.overallStatus} />
-        </div>
-      );
-    },
-  }),
-];
+// Headers differ between the per-fee scopes and the all-fees rollup; the shape
+// of the table does not.
+function buildColumns(fee: FeeScopeValue) {
+  const isRollup = fee === "all";
+  return [
+    columnHelper.accessor("studentCode", {
+      id: "id",
+      header: strings.columns.id,
+      cell: (info) => (
+        <span className="font-mono text-xs text-muted-foreground">
+          {info.getValue()}
+        </span>
+      ),
+    }),
+    columnHelper.accessor("lastName", {
+      id: "student",
+      header: strings.columns.student,
+      cell: (info) => {
+        const row = info.row.original;
+        // Surname-first per Mongolian convention: surname lighter, given name
+        // emphasized. The whole row is the click target (see TableRow below);
+        // this stays a real link so keyboard and screen-reader users have one too.
+        return (
+          <Link
+            href={`/students/${row.studentId}`}
+            className="rounded-sm underline-offset-4 outline-none group-hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <span className="text-muted-foreground">{row.lastName}</span>{" "}
+            <span className="font-semibold text-foreground group-hover:text-primary">
+              {row.firstName}
+            </span>
+          </Link>
+        );
+      },
+    }),
+    columnHelper.accessor("gradeName", {
+      id: "class",
+      header: strings.columns.class,
+      cell: (info) => <span>{info.getValue()}</span>,
+    }),
+    columnHelper.accessor("due", {
+      id: "due",
+      header: isRollup ? strings.columns.totalDue : strings.columns.due,
+      cell: (info) => (
+        <span className="font-semibold tabular-nums">{formatMnt(info.getValue())}</span>
+      ),
+    }),
+    columnHelper.accessor("paid", {
+      id: "paid",
+      header: isRollup ? strings.columns.totalPaid : strings.columns.paid,
+      cell: (info) => <PaidCell row={info.row.original} />,
+    }),
+    columnHelper.accessor("status", {
+      id: "status",
+      header: strings.columns.status,
+      cell: (info) => <StatusBadge status={info.getValue()} />,
+    }),
+    columnHelper.accessor("lastPaymentAt", {
+      id: "lastPayment",
+      header: strings.columns.lastPayment,
+      cell: (info) => {
+        const at = info.getValue();
+        return at === null ? (
+          <span className="text-muted-foreground">{strings.noPayment}</span>
+        ) : (
+          <span className="tabular-nums">{formatDate(at)}</span>
+        );
+      },
+    }),
+  ];
+}
 
 export function StudentTable({
   data,
+  fee,
   loading,
   error,
   emptyMessage,
@@ -147,6 +139,7 @@ export function StudentTable({
 }: Props) {
   const router = useRouter();
   const totalPages = Math.max(1, Math.ceil(data.total / data.pageSize));
+  const columns = useMemo(() => buildColumns(fee), [fee]);
 
   const table = useReactTable({
     data: data.rows,

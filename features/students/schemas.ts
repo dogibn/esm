@@ -7,6 +7,28 @@ import { DISCOUNT_UNITS } from "@/features/discounts/calc";
 export const STATUS_FILTER_VALUES = ["unpaid", "partial", "paid"] as const;
 export type StatusFilterValue = (typeof STATUS_FILTER_VALUES)[number];
 
+// Which fee the tracking table is scoped to. Everything but `all` narrows the
+// result set to students who hold a charge for that fee. Tuition is the
+// default because it is the fee every enrolled student carries.
+export const FEE_SCOPE_VALUES = [
+  "all",
+  "tuition",
+  "bus",
+  "registration",
+  "clubs",
+] as const;
+export type FeeScopeValue = (typeof FEE_SCOPE_VALUES)[number];
+
+export const DEFAULT_FEE_SCOPE: FeeScopeValue = "tuition";
+
+// Shared by the route handler and the UI, so `?fee=` means the same thing on
+// both sides. An unknown value falls back to the default rather than 400-ing —
+// a stale bookmark should still open the tracker.
+export const feeScopeSchema = z
+  .enum(FEE_SCOPE_VALUES)
+  .catch(DEFAULT_FEE_SCOPE)
+  .default(DEFAULT_FEE_SCOPE);
+
 export const studentListParamsSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(200).default(50),
@@ -14,6 +36,7 @@ export const studentListParamsSchema = z.object({
   gradeLevelId: z.coerce.number().int().positive().optional(),
   gradeId: z.coerce.number().int().positive().optional(),
   status: z.enum(STATUS_FILTER_VALUES).optional(),
+  fee: feeScopeSchema,
 });
 
 export type StudentListParams = z.infer<typeof studentListParamsSchema>;

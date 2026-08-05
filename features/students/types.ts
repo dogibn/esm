@@ -4,31 +4,13 @@ export type {
   ChargeScope,
   ChargeWithBalanceForStudent,
 } from "./balance";
+import type { FeeScopeValue } from "./schemas";
 
 export type FeeStatus = "paid" | "partial" | "unpaid" | "none";
 
-export type FeeCell = {
-  hasCharge: boolean;
-  charged: number;
-  discount: number;
-  paid: number;
-  balance: number;
-  status: FeeStatus;
-};
-
-export type ClubFeeItem = {
-  feeName: string;
-  charged: number;
-  paid: number;
-  balance: number;
-  status: FeeStatus;
-};
-
-export type ClubsFeeCell = FeeCell & {
-  chargeCount: number;
-  items: ClubFeeItem[];
-};
-
+// One student in the tracking table, resolved for the selected fee scope. One
+// row per student always — a student holding several club charges is folded
+// into a single row (see balance.ts § foldChargeTotals).
 export type StudentRow = {
   studentId: number;
   studentCode: string;
@@ -36,24 +18,29 @@ export type StudentRow = {
   lastName: string;
   gradeName: string;
   gradeLevelCode: string;
-  tuition: FeeCell;
-  bus: FeeCell;
-  registration: FeeCell;
-  clubs: ClubsFeeCell;
-  totalCharged: number;
-  totalDiscount: number;
-  totalPaid: number;
-  totalBalance: number;
-  overallStatus: FeeStatus;
+  /** Gross charged minus applicable discounts, summed over the scoped charges. */
+  due: number;
+  paid: number;
+  /** `due − paid`. Signed: an overpayment is negative. */
+  balance: number;
+  /** Derived, never stored. `none` only in the all-fees rollup, for a student
+   *  who holds no charges at all. */
+  status: FeeStatus;
+  /** ISO date of the most recent payment against the scoped charges — dated by
+   *  when the money moved (`bank_transactions.transaction_at`). */
+  lastPaymentAt: string | null;
 };
 
-// Aggregates over every student matching the current filters (all pages),
-// shown in the summary cards above the tracking table.
+// Aggregates over every student matching the current filters and fee scope
+// (all pages), shown in the summary cards above the tracking table.
 export type StudentListSummary = {
   students: number;
-  totalCharged: number;
-  totalCollected: number;
+  /** Σ due — the scoped charges net of discounts. */
   totalDue: number;
+  /** Σ paid. */
+  totalCollected: number;
+  /** Σ balance — what is still outstanding within the scope. */
+  totalOutstanding: number;
 };
 
 export type StudentListResponse = {
@@ -61,6 +48,7 @@ export type StudentListResponse = {
   page: number;
   pageSize: number;
   total: number;
+  fee: FeeScopeValue;
   summary: StudentListSummary;
 };
 
