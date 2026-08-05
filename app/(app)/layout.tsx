@@ -32,6 +32,8 @@ export default async function AppLayout({
             <NavLink href="/transactions">{strings.nav.transactions}</NavLink>
             <NavLink href="/discounts">{strings.nav.discounts}</NavLink>
             <NavLink href="/calendar">{strings.nav.calendar}</NavLink>
+            <NavLink href="/classes">{strings.nav.classes}</NavLink>
+            <NavLink href="/fees">{strings.nav.fees}</NavLink>
           </nav>
           <div className="ml-auto flex items-center">
             <UserMenu

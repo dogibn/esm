@@ -23,6 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useToast } from "@/components/ui/toast";
 
 import { pickCurrentTerm } from "../current";
@@ -33,7 +34,6 @@ import {
   CalendarEntryDialog,
   type CalendarEntryTarget,
 } from "./CalendarEntryDialog";
-import { ConfirmDialog } from "./ConfirmDialog";
 
 const s = strings;
 

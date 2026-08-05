@@ -151,7 +151,7 @@ Carries the proposed student, proposed allocation (list of `(charge_id, amount)`
 ### User
 Someone who signs in to the app. Five total in v1: one admin, four regular accountants. Mirrors a row in Supabase Auth. `role` is `accountant` or `admin`.
 
-Permission model is minimal: regular accountants do everything except manage `FeeStructure` (admin only, via year/term-start import — not a UI) and curate the `DiscountType` catalog (admin only — this one *does* have a UI; all accountants can view it and apply discounts, only admins add/edit types).
+Permission model is minimal: regular accountants do everything except the admin-only config surfaces — `FeeStructure` rates, `GradeLevel`/`Grade`, the academic calendar, and the `DiscountType` catalog. Every one of those *is* readable by all accountants; only admins get the write controls, enforced server-side by `requireAdmin`. Fee rates now have a UI too (`user_flows.md` § Fee rates): school-wide rates are published from the app by supersede-and-insert, while club fees and the year/term-start data load stay with the import scripts.
 
 ---
 
@@ -241,7 +241,7 @@ confirms every one.
 These won't be modeled in v1. Each is listed because the AI would otherwise re-derive it.
 
 - **Year/term-end roll-over UI.** Rolling the *data* over — enrolments, charges, club sign-ups — is a script. Superseded in part: the AcademicYear and AcademicTerm rows, and which of them is current, are now added and edited in-app (`user_flows.md` § Academic calendar).
-- **CRUD UI for FeeStructure / Student / Enrollment / Grade.**
+- **CRUD UI for Student / Enrollment.** Still script-and-import territory (the student detail page edits a profile, it does not create one). Superseded for the other two: `Grade`/`GradeLevel` are managed in `user_flows.md` § Classes & levels, and `FeeStructure` rates in § Fee rates — the latter publish-only, never edited or deleted in place.
 - **Per-student detail page.**
 - **Discounts on non-tuition fees.** Would require restructuring Discount back to → Charge.
 - **Family / siblings entity.** No Family relationship is modeled. Sibling discounts remain flat per-Enrollment Discount rows; a Discount's optional `sibling_student_id` is only a soft pointer to one sibling Student (see the Discount entity), not a family graph.

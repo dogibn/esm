@@ -27,9 +27,9 @@ type Props = {
   onConfirm: () => Promise<void>;
 };
 
-// Both consequential calendar actions — changing what "current" means, and
-// deleting a row — pause on the same shape of question, so the shape lives here
-// once rather than twice.
+// A yes/no pause in front of a consequential action. The admin-config pages all
+// need the same shape — a question, an optional consequence, an async confirm
+// that reports its own error — so it lives here rather than in each feature.
 export function ConfirmDialog({
   open,
   title,

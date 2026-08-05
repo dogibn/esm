@@ -124,3 +124,49 @@ The school's years and terms are the scope every other view is read through. An 
 - **Deletes are guarded, not cascading.** Every FK is `ON DELETE RESTRICT`; the service counts references first so the refusal can say what is in the way instead of surfacing a constraint error.
 - **This is a config surface, not a data one.** Nothing here creates or edits students, enrolments, or charges — the year/term-start imports still do that (`domain_model.md` § Lifecycle).
 - **Not yet in the activity log.** Calendar changes do not write `operations` rows, so they don't appear in History and can't be undone — the same as the discount catalog today. Adding them needs new `operations.kind` values (a migration).
+
+---
+
+## 6. Classes & levels
+
+**Purpose**
+
+The year-start import creates grade levels and classes from esmlh.edu.mn, and it gets things wrong or leaves them blank — classes with no teacher, a section filed under the wrong level. An admin needs to correct those without a script, and to set up a class the import didn't create.
+
+**Flow**
+
+1. Any accountant opens "Classes" in the main navigation. Only admins see the controls (the API enforces `requireAdmin` regardless).
+2. **Grade levels** (school-wide, stable across years) list their code, display order, whether tuition prices them, and what uses them.
+3. **Classes** are shown for one academic year, picked from a dropdown that defaults to the current year. Each row carries its level, teacher, teacher contact, and student count.
+4. Adding or editing a class sets its name, level, and teacher details. Deleting is offered only for a class nobody is enrolled in.
+
+**Notes**
+- **A grade level's `code` can never be renamed.** Tuition is priced per level code inside `fee_structures.data.by_grade` (`domain_model.md` § FeeStructure) — a JSONB key, not an FK — so renaming it would silently detach every class at that level from its rate. The code is set at creation; only the display order stays editable.
+- **Display order is what makes 2 sort before 10.** It's `grade_levels.sort_order`, used by the tracker and every class list.
+- **A class's grade level is fixed once anyone is enrolled.** The level decides which tuition rate a student is charged, and moving it here recomputes nothing — what was charged would simply disagree with what the class claims. Teacher details and the class name stay editable at all times, since those are display data.
+- **A class can't be moved to another year.** Enrolments are scoped by (student, year); the year is fixed at creation.
+- **Renaming a class can confuse the next import**, which matches classes by name and may create a second one. The dialog says so.
+- **Deletes are guarded, not cascading.** A level with classes, or whose code tuition still prices, is refused — the second is a JSONB reference no FK protects, so the service checks it explicitly.
+
+---
+
+## 7. Fee rates
+
+**Purpose**
+
+What the school charges — tuition per grade level, registration, bus — lived only in the seed scripts. An admin needs to see the rate in force, see what it replaced, and publish a new one when the school changes its prices.
+
+**Flow**
+
+1. Any accountant opens "Fees" in the main navigation and sees each school-wide fee: the rate in force, the date it applies from, and its earlier rates behind a toggle. Club fees follow, grouped by term.
+2. An admin publishes a new rate for a fee: a date it applies from, plus one amount (flat fees) or an amount per grade level (tuition), pre-filled from the rate in force.
+3. Publishing marks the old rate replaced and inserts the new one, in one transaction.
+
+**Notes**
+- **Rates are never edited or deleted — only superseded.** `superseded_at` on the old row plus a new row with its own `effective_from` (`domain_model.md` § FeeStructure) is the model, so the validity chain stays the record of what the school charged and when. There is no PUT and no DELETE on this feature.
+- **A new rate changes no existing charge.** A Charge stores the resolved gross amount at creation (`domain_model.md` § Charge), so a new rate reaches only charges created after it. The dialog says this before publishing.
+- **A published rate applies immediately**, because the app reads "the rate in force" as the row with `superseded_at IS NULL` and never consults `effective_from`. A future-dated rate would therefore apply today while claiming otherwise, so future dates are refused: publish a rate on the day it starts applying. *(Revisit if scheduling rates ahead becomes worth teaching the readers about `effective_from`.)*
+- **A fee keeps its shape.** Tuition stays per-grade, a flat fee stays flat — every reader expects one or the other.
+- **A per-grade rate must price every grade level, and nothing else.** A level with no amount silently yields no tuition when a contract is created; a stray code is a typo nothing will ever look up.
+- **New fee names aren't invented here.** Rates are published for fees the school already has; a new fee arrives with the year/term-start import.
+- **Club fees are read-only.** They're per-term and loaded from esmlh.edu.mn each term, so an edit here would be overwritten by the next import.
