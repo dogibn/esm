@@ -20,7 +20,7 @@ import {
   type DiscountUnit,
 } from "@/features/discounts";
 
-import { computeChargeBalance } from "./balance";
+import { computeChargeBalance, deriveFeeStatus } from "./balance";
 import type { FeeStatus } from "./types";
 
 // ─── DTO shapes (all fields serializable so the server component can hand the
@@ -137,12 +137,6 @@ export type StudentDetail = {
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function deriveFeeStatus(balance: number, paid: number): FeeStatus {
-  if (balance <= 0) return "paid";
-  if (paid > 0) return "partial";
-  return "unpaid";
-}
 
 // Stable ordering so the ledger reads the same for every student. Known fees
 // first; anything else (club names) sorts alphabetically after.
@@ -335,7 +329,7 @@ export async function getStudentDetail(studentDbId: number): Promise<StudentDeta
       net: e.amount - e.appliedDiscount,
       paid: e.paid,
       balance: e.balance,
-      status: deriveFeeStatus(e.balance, e.paid),
+      status: deriveFeeStatus({ balance: e.balance, paid: e.paid }),
       notes: e.notes,
     }))
     .sort((a, b) => byFeeOrder(a.feeName, b.feeName));
@@ -364,7 +358,10 @@ export async function getStudentDetail(studentDbId: number): Promise<StudentDeta
         net: tuitionCharge.amount - discountTotal,
         paid: tuitionCharge.paid,
         balance: tuitionCharge.balance,
-        status: deriveFeeStatus(tuitionCharge.balance, tuitionCharge.paid),
+        status: deriveFeeStatus({
+          balance: tuitionCharge.balance,
+          paid: tuitionCharge.paid,
+        }),
       }
     : null;
 
@@ -388,7 +385,7 @@ export async function getStudentDetail(studentDbId: number): Promise<StudentDeta
           charged: ch.amount,
           paid: ch.paid,
           balance: ch.balance,
-          status: deriveFeeStatus(ch.balance, ch.paid),
+          status: deriveFeeStatus({ balance: ch.balance, paid: ch.paid }),
           notes: ch.notes,
         };
       });

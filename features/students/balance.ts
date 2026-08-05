@@ -1,6 +1,9 @@
 import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 
-import { charges, discounts, enrollments, payments } from "@/db/schema";
+import { bankTransactions, charges, discounts, enrollments, payments } from "@/db/schema";
+
+import type { FeeScopeValue } from "./schemas";
+import type { FeeStatus } from "./types";
 
 export type ChargeScope =
   | { kind: "year"; academicYearId: number }
@@ -32,6 +35,78 @@ export function computeChargeBalance(input: {
 }): number {
   const discount = input.feeName === "tuition" ? input.studentDiscountTotal : 0;
   return input.amount - discount - input.paidTotal;
+}
+
+// Fee names that are school-wide. Anything else on a charge is a club — clubs
+// are stored under their own display name ("Chess Club", "Cheerleading GR3"),
+// so they are recognised by exclusion, not by a list.
+const FEE_NAMES_BY_SCOPE: Record<
+  Exclude<FeeScopeValue, "all" | "clubs">,
+  readonly string[]
+> = {
+  tuition: ["tuition"],
+  // Both spellings exist in imported data.
+  bus: ["bus_fee", "bus"],
+  registration: ["registration"],
+};
+
+const SCHOOL_WIDE_FEE_NAMES = new Set(
+  Object.values(FEE_NAMES_BY_SCOPE).flat(),
+);
+
+/** Which fee tab a charge belongs to. Every charge maps to exactly one. */
+export function classifyFeeScope(feeName: string): Exclude<FeeScopeValue, "all"> {
+  for (const [scope, names] of Object.entries(FEE_NAMES_BY_SCOPE)) {
+    if (names.includes(feeName)) {
+      return scope as Exclude<FeeScopeValue, "all" | "clubs">;
+    }
+  }
+  return "clubs";
+}
+
+/** True when the charge belongs in the selected fee scope. */
+export function chargeMatchesScope(feeName: string, scope: FeeScopeValue): boolean {
+  if (scope === "all") return true;
+  if (scope === "clubs") return !SCHOOL_WIDE_FEE_NAMES.has(feeName);
+  return classifyFeeScope(feeName) === scope;
+}
+
+export type ChargeTotals = {
+  /** Gross charged minus applicable discounts — what the student owes. */
+  due: number;
+  paid: number;
+  /** `due − paid`. Signed: an overpayment is negative. */
+  balance: number;
+};
+
+/**
+ * Sum a student's charges into one row's worth of money. Clubs are the case
+ * that needs it — a student can hold several club charges in a term and the
+ * tracker still shows one row per student.
+ */
+export function foldChargeTotals(rows: StudentChargeDetail[]): ChargeTotals {
+  let due = 0;
+  let paid = 0;
+  let balance = 0;
+  for (const r of rows) {
+    due += Number(r.grossAmount) - r.discountTotal;
+    paid += r.paidTotal;
+    balance += Number(r.outstandingBalance);
+  }
+  return { due, paid, balance };
+}
+
+/**
+ * The derived payment status — never stored (domain_model.md § Charge). The one
+ * mapping, shared by the tracking table and the student detail page.
+ */
+export function deriveFeeStatus(totals: {
+  balance: number;
+  paid: number;
+}): Exclude<FeeStatus, "none"> {
+  if (totals.balance <= 0) return "paid";
+  if (totals.paid > 0) return "partial";
+  return "unpaid";
 }
 
 /**
@@ -102,8 +177,8 @@ export async function loadStudentChargeDetails(opts: {
       paidTotal,
     });
     // Discount is only APPLIED to tuition charges, even if the student has a
-    // discount record. Non-tuition rows expose discountTotal=0 so the FeeCell
-    // never double-counts the discount across multiple fees.
+    // discount record. Non-tuition rows expose discountTotal=0 so a fold across
+    // several charges never double-counts the discount.
     const discountTotal = c.feeName === "tuition" ? studentDiscountTotal : 0;
 
     const scope: ChargeScope =
@@ -121,6 +196,41 @@ export async function loadStudentChargeDetails(opts: {
       paidTotal,
       discountTotal,
     });
+  }
+  return out;
+}
+
+/**
+ * Most recent payment date per charge, as ISO strings.
+ *
+ * Dated by `bank_transactions.transaction_at` — when the money moved — not by
+ * `payments.recorded_at`, which is when an accountant keyed it in. Voided
+ * payments are excluded, same as everywhere else.
+ *
+ * One grouped query for the whole page; charges with no live payment are
+ * simply absent from the map.
+ */
+export async function loadLastPaymentDates(
+  chargeIds: number[],
+): Promise<Map<number, string>> {
+  const out = new Map<number, string>();
+  if (chargeIds.length === 0) return out;
+
+  const { db } = await import("@/db/index");
+
+  const rows = await db
+    .select({
+      chargeId: payments.chargeId,
+      lastPaidAt: sql<Date>`MAX(${bankTransactions.transactionAt})`.as("last_paid_at"),
+    })
+    .from(payments)
+    .innerJoin(bankTransactions, eq(bankTransactions.id, payments.bankTransactionId))
+    .where(and(inArray(payments.chargeId, chargeIds), isNull(payments.voidedAt)))
+    .groupBy(payments.chargeId);
+
+  for (const r of rows) {
+    if (r.lastPaidAt === null) continue;
+    out.set(r.chargeId, new Date(r.lastPaidAt).toISOString());
   }
   return out;
 }

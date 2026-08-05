@@ -18,11 +18,18 @@ The accountant comes here to answer questions about who has paid what:
 **Flow**
 
 1. Accountant signs in with email and password.
-2. The system shows all students with their current balances and payment status across fee types. The list is paginated.
-3. The accountant searches by student name, ID, or contact info, and/or filters by grade level, class, and payment status, until the question is answered.
+2. The view is **scoped to one fee at a time** — a tab row across the top: *All fees | Tuition | Bus | Registration | Clubs*, defaulting to Tuition. The scope lives in the URL (`?fee=bus`), so a view is linkable and survives a refresh.
+3. The system shows one row per student — ID, student, class, due, paid, status, last payment — ordered by class, then surname, so a class-filtered view reads like the accountant's spreadsheet. The list is paginated.
+4. The accountant searches by student name, ID, or contact info, and/or filters by grade level, class, and payment status, until the question is answered.
+5. Clicking a row opens that student's detail page, where the per-fee breakdown lives.
 
 **Notes**
 - Read-only view. No data is created or modified here.
+- **Fee-scoped, not a matrix.** In a per-fee scope the result set is only the students who hold a charge for that fee — bus, registration, and clubs apply to a minority, so those students are absent rather than shown as blank cells. *All fees* is a rollup (one total per student), not a per-fee column set; the breakdown belongs on the detail page.
+- **Due** is the gross charge net of applicable discounts (tuition only — `schema.md` § Computing balance). **Status** (paid / partial / unpaid) is derived, never stored. **Last payment** is dated by `bank_transactions.transaction_at` — when the money moved — not by when an accountant keyed it in.
+- Clubs is the one fee where a student may hold several charges in a term; those are summed into the student's single row.
+- The *All fees* total adds year-scoped tuition/registration to term-scoped bus/club charges. Different scopes, so the column names both ("year + current term") and must not be read as a single amount owed right now.
+- The summary cards (outstanding balance, collected + collection rate) recompute for the selected fee scope, not the whole school.
 - The bank-transaction side of things lives in **Transaction history** (flow 3), kept deliberately separate.
 
 ---

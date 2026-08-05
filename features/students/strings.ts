@@ -1,8 +1,18 @@
 export const strings = {
   title: "Student Payment Tracker",
   subtitle: "Balances by fee for the current academic year and term.",
+  fee: {
+    label: "Fee",
+    tabs: {
+      all: "All fees",
+      tuition: "Tuition",
+      bus: "Bus",
+      registration: "Registration",
+      clubs: "Clubs",
+    },
+  },
   summary: {
-    totalDue: "Total amount due",
+    totalDue: "Outstanding balance",
     totalCollected: "Total collected",
     students: (n: number) => (n === 1 ? "1 student" : `${n} students`),
     collectionRate: (pct: string) => `${pct}% collection rate`,
@@ -27,11 +37,15 @@ export const strings = {
     id: "ID",
     student: "Student",
     class: "Class",
-    tuition: "Tuition",
-    bus: "Bus",
-    registration: "Registration",
-    clubs: "Clubs",
-    total: "Total",
+    due: "Due",
+    paid: "Paid",
+    // The all-fees rollup adds year-scoped tuition/registration to the current
+    // term's bus/club charges. Different scopes, so the header names them
+    // rather than implying one amount owed right now.
+    totalDue: "Total due (year + current term)",
+    totalPaid: "Total paid",
+    status: "Status",
+    lastPayment: "Last payment",
   },
   status: {
     paid: "Paid",
@@ -39,8 +53,12 @@ export const strings = {
     unpaid: "Unpaid",
     none: "—",
   },
+  // Progress of paid against due, for screen readers.
+  paidProgress: (paid: string, due: string) => `${paid} paid of ${due}`,
+  noPayment: "—",
   empty: "No students.",
   emptyFiltered: "No students match the current filters.",
+  emptyFee: "No students hold a charge for this fee.",
   loading: "Loading…",
   error: "Failed to load students.",
   pagination: {

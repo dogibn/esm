@@ -16,7 +16,14 @@ import {
 import { HttpError } from "@/lib/errors";
 import { computeTuition, resolveDiscountApplications } from "@/features/discounts";
 
-import { loadStudentChargeDetails, type StudentChargeDetail } from "./balance";
+import {
+  chargeMatchesScope,
+  deriveFeeStatus,
+  foldChargeTotals,
+  loadLastPaymentDates,
+  loadStudentChargeDetails,
+  type StudentChargeDetail,
+} from "./balance";
 import type {
   ChargeCreateInput,
   ChargeUpdateInput,
@@ -25,152 +32,58 @@ import type {
   TuitionUpdateInput,
 } from "./schemas";
 import type {
-  ClubFeeItem,
-  ClubsFeeCell,
-  FeeCell,
-  FeeStatus,
   FilterOptions,
   StudentListResponse,
   StudentRow,
 } from "./types";
 
-const NON_CLUB_FEE_NAMES = new Set(["tuition", "bus_fee", "bus", "registration"]);
+type StudentBase = {
+  studentId: number;
+  studentCode: string;
+  firstName: string;
+  lastName: string;
+  gradeName: string;
+  gradeLevelCode: string;
+};
 
-function deriveStatus(opts: {
-  hasCharge: boolean;
-  balance: number;
-  paid: number;
-}): FeeStatus {
-  if (!opts.hasCharge) return "none";
-  if (opts.balance <= 0) return "paid";
-  if (opts.paid > 0) return "partial";
-  return "unpaid";
-}
-
-function emptyFeeCell(): FeeCell {
-  return {
-    hasCharge: false,
-    charged: 0,
-    discount: 0,
-    paid: 0,
-    balance: 0,
-    status: "none",
-  };
-}
-
-function foldFeeCell(rows: StudentChargeDetail[]): FeeCell {
-  if (rows.length === 0) return emptyFeeCell();
-  let charged = 0;
-  let discount = 0;
-  let paid = 0;
-  let balance = 0;
-  for (const r of rows) {
-    charged += Number(r.grossAmount);
-    discount += r.discountTotal;
-    paid += r.paidTotal;
-    balance += Number(r.outstandingBalance);
-  }
-  return {
-    hasCharge: true,
-    charged,
-    discount,
-    paid,
-    balance,
-    status: deriveStatus({ hasCharge: true, balance, paid }),
-  };
-}
-
-function deriveOverallStatus(row: {
-  hasAnyCharge: boolean;
-  totalBalance: number;
-  totalPaid: number;
-}): FeeStatus {
-  return deriveStatus({
-    hasCharge: row.hasAnyCharge,
-    balance: row.totalBalance,
-    paid: row.totalPaid,
-  });
-}
-
+// Fold a student's scoped charges into their single tracking row. Money math
+// lives in balance.ts; this only assembles the DTO.
 function buildStudentRow(
-  base: {
-    studentId: number;
-    studentCode: string;
-    firstName: string;
-    lastName: string;
-    gradeName: string;
-    gradeLevelCode: string;
-  },
-  studentCharges: StudentChargeDetail[],
+  base: StudentBase,
+  scopedCharges: StudentChargeDetail[],
+  lastPaymentByCharge: Map<number, string>,
 ): StudentRow {
-  const tuitionCharges = studentCharges.filter((c) => c.feeName === "tuition");
-  const busCharges = studentCharges.filter(
-    (c) => c.feeName === "bus_fee" || c.feeName === "bus",
-  );
-  const registrationCharges = studentCharges.filter(
-    (c) => c.feeName === "registration",
-  );
-  const clubCharges = studentCharges.filter(
-    (c) => !NON_CLUB_FEE_NAMES.has(c.feeName),
-  );
+  const totals = foldChargeTotals(scopedCharges);
 
-  const tuition = foldFeeCell(tuitionCharges);
-  const bus = foldFeeCell(busCharges);
-  const registration = foldFeeCell(registrationCharges);
-  const clubsBase = foldFeeCell(clubCharges);
-  const clubItems: ClubFeeItem[] = clubCharges.map((c) => {
-    const charged = Number(c.grossAmount);
-    const balance = Number(c.outstandingBalance);
-    return {
-      feeName: c.feeName,
-      charged,
-      paid: c.paidTotal,
-      balance,
-      status: deriveStatus({ hasCharge: true, balance, paid: c.paidTotal }),
-    };
-  });
-  const clubs: ClubsFeeCell = {
-    ...clubsBase,
-    chargeCount: clubCharges.length,
-    items: clubItems,
-  };
-
-  const totalCharged = tuition.charged + bus.charged + registration.charged + clubs.charged;
-  const totalDiscount = tuition.discount + bus.discount + registration.discount + clubs.discount;
-  const totalPaid = tuition.paid + bus.paid + registration.paid + clubs.paid;
-  const totalBalance = tuition.balance + bus.balance + registration.balance + clubs.balance;
+  let lastPaymentAt: string | null = null;
+  for (const c of scopedCharges) {
+    const at = lastPaymentByCharge.get(c.id);
+    if (at !== undefined && (lastPaymentAt === null || at > lastPaymentAt)) {
+      lastPaymentAt = at;
+    }
+  }
 
   return {
-    studentId: base.studentId,
-    studentCode: base.studentCode,
-    firstName: base.firstName,
-    lastName: base.lastName,
-    gradeName: base.gradeName,
-    gradeLevelCode: base.gradeLevelCode,
-    tuition,
-    bus,
-    registration,
-    clubs,
-    totalCharged,
-    totalDiscount,
-    totalPaid,
-    totalBalance,
-    overallStatus: deriveOverallStatus({
-      hasAnyCharge: studentCharges.length > 0,
-      totalBalance,
-      totalPaid,
-    }),
+    ...base,
+    due: totals.due,
+    paid: totals.paid,
+    balance: totals.balance,
+    // A student with no charge at all only occurs in the all-fees rollup; the
+    // per-fee scopes drop them from the result set entirely.
+    status: scopedCharges.length === 0 ? "none" : deriveFeeStatus(totals),
+    lastPaymentAt,
   };
 }
 
 // `user` accepted for future per-user scoping; not used yet.
 //
-// Why this is in-memory paginated: the status filter is derived from the
-// schema.md balance formula (computed by balance.ts), not stored. To filter on
-// it we must fold per-student rows first, then apply the status predicate.
-// Pagination has to follow that filter — so we resolve everything for the
-// current academic year/term in one pass, then slice the page. Scale here is
-// ~1.4k enrollments + ~5-10k charges per query; trivial to hold in memory.
+// Why this is in-memory paginated: both the fee scope and the status filter are
+// derived from the schema.md balance formula (computed by balance.ts), not
+// stored. To filter on them we must fold per-student rows first, then apply the
+// predicates. Pagination has to follow that filter — so we resolve everything
+// for the current academic year/term in a fixed number of queries (no per-row
+// lookups), then slice the page. Scale here is ~1.4k enrollments + ~5-10k
+// charges per query; trivial to hold in memory.
 export async function listStudents(
   _user: User,
   params: StudentListParams,
@@ -227,10 +140,16 @@ export async function listStudents(
       .innerJoin(grades, eq(grades.id, enrollments.gradeId))
       .innerJoin(gradeLevels, eq(gradeLevels.id, grades.gradeLevelId))
       .where(where)
+      // Class first, then surname: accountants work class by class, so a
+      // filtered view reads like their spreadsheet. Classes are ordered by
+      // grade level (sort_order knows "2" < "10") then section name.
+      //
       // '-' and '.' are the import's "surname unknown" markers; they sort
-      // before every letter and would otherwise fill page 1. Send them to
+      // before every letter and would otherwise lead each class. Send them to
       // the end.
       .orderBy(
+        asc(gradeLevels.sortOrder),
+        asc(grades.name),
         sql`CASE WHEN ${students.lastName} IN ('-', '.') THEN NULL ELSE ${students.lastName} END ASC NULLS LAST`,
         asc(students.firstName),
       ),
@@ -240,8 +159,19 @@ export async function listStudents(
     }),
   ]);
 
+  // Narrow to the selected fee before anything else — in a per-fee scope a
+  // student with no such charge drops out of the result set entirely, so the
+  // table never renders an empty cell.
+  const scopedCharges = chargeDetails.filter((c) =>
+    chargeMatchesScope(c.feeName, params.fee),
+  );
+
+  const lastPaymentByCharge = await loadLastPaymentDates(
+    scopedCharges.map((c) => c.id),
+  );
+
   const chargesByStudent = new Map<number, StudentChargeDetail[]>();
-  for (const c of chargeDetails) {
+  for (const c of scopedCharges) {
     let arr = chargesByStudent.get(c.studentId);
     if (!arr) {
       arr = [];
@@ -250,13 +180,18 @@ export async function listStudents(
     arr.push(c);
   }
 
-  let folded = allRows.map((r) =>
-    buildStudentRow(r, chargesByStudent.get(r.studentId) ?? []),
+  const applicable =
+    params.fee === "all"
+      ? allRows
+      : allRows.filter((r) => chargesByStudent.has(r.studentId));
+
+  let folded = applicable.map((r) =>
+    buildStudentRow(r, chargesByStudent.get(r.studentId) ?? [], lastPaymentByCharge),
   );
 
   if (params.status !== undefined) {
     const target = params.status;
-    folded = folded.filter((row) => row.overallStatus === target);
+    folded = folded.filter((row) => row.status === target);
   }
 
   const total = folded.length;
@@ -265,12 +200,12 @@ export async function listStudents(
 
   const summary = folded.reduce(
     (acc, row) => {
-      acc.totalCharged += row.totalCharged - row.totalDiscount;
-      acc.totalCollected += row.totalPaid;
-      acc.totalDue += row.totalBalance;
+      acc.totalDue += row.due;
+      acc.totalCollected += row.paid;
+      acc.totalOutstanding += row.balance;
       return acc;
     },
-    { students: total, totalCharged: 0, totalCollected: 0, totalDue: 0 },
+    { students: total, totalDue: 0, totalCollected: 0, totalOutstanding: 0 },
   );
 
   return {
@@ -278,6 +213,7 @@ export async function listStudents(
     page: params.page,
     pageSize: params.pageSize,
     total,
+    fee: params.fee,
     summary,
   };
 }

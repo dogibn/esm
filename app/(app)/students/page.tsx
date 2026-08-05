@@ -25,6 +25,7 @@ export default async function StudentsPage({
   const params = studentListParamsSchema.parse({
     page: raw.page,
     pageSize: raw.pageSize,
+    fee: raw.fee,
   });
   const [initialData, filterOptions] = await Promise.all([
     listStudents(user, params),
@@ -38,7 +39,11 @@ export default async function StudentsPage({
         description={strings.subtitle}
         actions={<NewContractButton />}
       />
-      <StudentsView options={filterOptions} initialData={initialData} />
+      <StudentsView
+        options={filterOptions}
+        initialData={initialData}
+        initialFee={params.fee}
+      />
     </PageContainer>
   );
 }
