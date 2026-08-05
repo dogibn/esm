@@ -65,6 +65,41 @@ export async function requireAdmin(req: Request): Promise<{ user: User; applyAut
  * handlers should keep using requireUser() above.
  */
 export async function requireUserForLayout(): Promise<User> {
+  return (await resolveLayoutSession()).user;
+}
+
+/**
+ * Like requireUserForLayout, but also carries the display bits that only the
+ * Supabase identity knows: the name and avatar Google hands back on OAuth
+ * sign-in. The `users` allowlist row has no name column (see db/schema.ts), so
+ * password-only accounts fall back to null here and the UI derives initials
+ * from the email.
+ */
+export type LayoutUserProfile = {
+  user: User;
+  displayName: string | null;
+  avatarUrl: string | null;
+};
+
+export async function requireUserProfileForLayout(): Promise<LayoutUserProfile> {
+  const { user, metadata } = await resolveLayoutSession();
+
+  const str = (key: string): string | null => {
+    const value = metadata[key];
+    return typeof value === 'string' && value.length > 0 ? value : null;
+  };
+
+  return {
+    user,
+    displayName: str('full_name') ?? str('name'),
+    avatarUrl: str('avatar_url') ?? str('picture'),
+  };
+}
+
+async function resolveLayoutSession(): Promise<{
+  user: User;
+  metadata: Record<string, unknown>;
+}> {
   const cookieStore = await cookies();
   const client = supabaseCreateServerClient(
     env.NEXT_PUBLIC_SUPABASE_URL,
@@ -106,5 +141,5 @@ export async function requireUserForLayout(): Promise<User> {
     redirect('/login?error=not_authorized');
   }
 
-  return rows[0]!;
+  return { user: rows[0]!, metadata: data.user.user_metadata ?? {} };
 }

@@ -1,0 +1,566 @@
+row,amount,memo,sender_account,tier,reason,result_kind,stage_class,stage_wildcard,stage_level,stage_name,stage_fee,top_student,allocations
+1,4250000,"EB -Munkhbadrakh Khongor-Uchral, preschool 5 , 3-r ulirliin tulbur (ХУДАЛДАА ХӨГЖЛИЙН БАНК ӨЛЗИЙ-АМГАЛАН НЯМААСҮРЭН)","MN730004000436028195",confident,confident,matched,false,false,true,true,false,"Khongor-uchral Munkhbadrakh",1
+2,210000,"Б.БААТАР 8Д САГСАН БӨМБӨГ (ХААН БАНК ГАНСҮХ ЭНХТАЙВАН)","MN560005005400550725",confident,confident,matched,true,false,false,true,true,"Baatar Boldtseren",1
+3,210000,"8вUjinlkham гар бөмбөг","MN680034370000000854",confident,confident,matched,true,false,false,true,true,"Ujinlkham Otgonbayar",1
+4,270000,"YI,ERGUI. 6B, VOLLEYBALL (ХААН БАНК XXX TENGHE)","MN300005005037634520",attention,flagged,matched,true,false,false,true,true,"Yi Ergui .",1
+5,225000,"E.MISHEEL 1JA HOMEWORK CLUB1 (ХААН БАНК ОГНООН АРИУНБОЛД)","MN180005005009461183",confident,confident,matched,true,false,false,true,true,"Misheel Erdenetsogt",1
+6,1500000,"RISHAB SAMUDRAJIT,10 B (ГОЛОМТ БАНК SAMUDRAJIT SAIKIA)","MN300015002205046519",confident,confident,matched,true,false,false,true,false,"Rishab Samudrajit",1
+7,750000,"4SA AGVAANNINJ BUS PAYMENT (ХААН БАНК БАТТУЛГА АЛТАНТУЯА)","MN670005005302056921",attention,unbalanced,matched,true,false,false,true,true,"Agvaanninj Tsogtgerel",0
+8,2000000,"Munkhbat Dulguun 2 OB","MN410034100900651543",attention,flagged,matched,true,false,false,true,false,"Dulguun Munkhbat",1
+9,0,"Бялуу авахад РД:9097392 (ГОЛОМТ БАНК СКАЙХАЙПЕРМАРКЕТ ХХК)","MN020015003635101339",filtered,filtered,unmatched,false,false,false,true,false,"",0
+10,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+11,7000000,"ENKHBAYAR ENEREL ULDEGDEL TOLBOR 12B 99556365 (ХААН БАНК БОЛД БАДАМ)","MN230005005169119407",attention,multiple_candidates,matched,true,false,false,true,false,"Enerel Enkhbayar",1
+12,4200000,"EB -1JK U.Ariun-Erdene tolboriin uldegdel (ХУДАЛДАА ХӨГЖЛИЙН БАНК БОЛОРМАА ГҮНДСАМБУУ)","MN230004000407255500",confident,confident,matched,true,false,false,true,false,"Ariun-Erdene Undrakhtamir",1
+13,400000,"TSENGEL TARA TSETSERLEG BURTGELIINHURAAMJ (ХААН БАНК ЭНХЦАГ ЦЭНГЭЛ)","MN220005005003993124",attention,low_confidence,low_confidence,false,false,false,true,true,"Byekbol Tsengel",1
+14,375000,"MM:8C Temuujin Misheel bus (ТӨРИЙН БАНК И ЭС ЭМ ОЛОН УЛСЫН ДУНД СУРГУУЛЬ БСБ) (АРД КРЕДИТ ББСБ БАДАМ БАТЦЭЦЭГ)","MN210052112700163720",attention,missing_charge,matched,true,false,false,true,true,"MIsheel Temuujin",1
+15,48775000,"Tushig 4grade Sergelen Saran 7 grade 2026-27 academic year","MN400034102300024195",attention,unbalanced,matched,false,false,true,true,false,"Saran Mariya Erdenetuul",1
+16,5425000,"4BA UILSTUGULDUR 88077955 (ХААН БАНК НАРАНГЭРЭЛ ЭНХДӨЛГӨӨН)","MN030005005041122447",confident,confident,matched,true,false,false,true,false,"Uilstuguldur Bilguunbold",1
+17,400000,"Бүртгэлийн хураамж Алтанхуяг Дармаагирди","MN290034103801880631",attention,missing_charge,matched,false,false,false,true,true,"Darmagirdi Altankhuyag",1
+18,0,"Өөрийн данс хооронд","MN250034385300029587",filtered,filtered,unmatched,false,false,false,true,false,"",0
+19,400000,"EB-ANIR 1-R ANGI 99102455 (ХААН БАНК ТӨМӨРБААТАР САРАНГЭРЭЛ)","MN420005005700409793",attention,low_confidence,low_confidence,false,false,true,true,true,"Anir Batsaikhan",1
+20,6500000,"8B TSELMUUN 88077955 (ХААН БАНК НАРАНГЭРЭЛ ЭНХДӨЛГӨӨН)","MN030005005041122447",attention,flagged,matched,true,false,false,true,false,"Tselmuun Bilguunbold",1
+21,5000000,"EB-L.ANIR 1-R ANGI 99102455 (ХААН БАНК ТӨМӨРБААТАР САРАНГЭРЭЛ)","MN420005005700409793",attention,low_confidence,low_confidence,false,false,true,true,false,"Anir-Erdene Munkhzaya",1
+22,0,"FINANCIAL LOAN AGREEMENT","3499102621090002",filtered,filtered,unmatched,false,false,false,true,false,"",0
+23,0,"SWIFT ХУРААМЖ:[30000.00MNT] /430801","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+24,0,"SWIFT  CHARGE OUR:[30.00USD] /262110","FEE",filtered,filtered,unmatched,false,false,true,true,false,"",0
+25,2350000,"A.OYU-VJIN 3 LM (ХААН БАНК ПҮРЭВ-УХНА АРИУНБАТ)","MN500005005700985053",attention,flagged,matched,true,false,false,true,false,"Oyu-Ujin Ariunbat",1
+26,1300000,"ATTILA DICKMANS - KOREAN TRIP (ХААН БАНК DICKMANS PIETER)","MN520005005179083307",confident,confident,matched,false,false,false,true,false,"Attila Dickmans",1
+27,400000,"О.EZLEN 1-Р АНГИ (ХААН БАНК ЧОЙЖИЛ МЯГМАРДОРЖ)","MN270005005309592310",attention,low_confidence,low_confidence,false,false,true,true,true,"Ezlen Enkhmanlai",1
+28,130000,"JAVKHLAN UJIN 2LB (ХААН БАНК СОДНОМДОРЖ ЖАВХЛАН)","MN670005005003855447",attention,unbalanced,matched,true,false,false,true,false,"Ujin Javkhlan",0
+29,345000,"2LB ZHAHEYA (ХААН БАНК XXX BUHEBILIGE)","MN260005005011851895",attention,unbalanced,matched,true,false,false,true,false,"Zhaheya -",0
+30,30000,"TEMDEGTIIN HURAAMJ, ARIUNKHUSLEN MUNKHKHUSLEN (ХААН БАНК ЦЭНГЭЛ ЦАЦРАЛ)","MN740005005062038152",attention,unbalanced,matched,false,false,false,true,true,"Ariunkhuslen Yondonpurev",0
+31,150000,"8B D. AMARJAVKHLAN VOLLEYBALL WEEKEND 99087953 (ХААН БАНК ГОМБО БОЛОРМАА)","MN790005005402351504",confident,confident,matched,true,false,false,true,true,"Amarjavkhlan Deleg",1
+32,20500000,"BOLOR NAIDAN 5MA (FOR 6TH CLASS), BOLOR NAIDAN 5MA (FOR 6TH CLASS) (M BANK ПҮРЭВДОРЖ НАЙДАН)","MN630039008000300510",attention,unbalanced,matched,true,false,true,true,false,"Bolor Naidan",2
+33,0,"Өөрийн данс хооронд","MN250034385300029587",filtered,filtered,unmatched,false,false,false,true,false,"",0
+34,2250000,"4BA Э,Амартүвшин  сургалтын төлбөр  99097804","MN020034340003852507",confident,confident,matched,true,false,false,true,true,"Amartuvshin Enkhbaatar",1
+35,9000000,"11 E.Amarbayasgalan 99097804 surgalt tulbur","MN020034340003852507",confident,confident,matched,false,false,true,true,true,"Amarbayasgalan Enkhbaatar",1
+36,0,"Акустик хавтан (ХААН БАНК МОДЕРН МОНГОЛИА МАРВЕЛС )","MN830005005009797088",filtered,filtered,unmatched,false,false,false,true,false,"",0
+37,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+38,0,"Аргилит хавтан авахад (ХААН БАНК БИ ЭС ЭЙЧ)","MN830005005027718129",filtered,filtered,unmatched,false,false,false,true,false,"",0
+39,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+40,135000,"ARURI ALTAN 7A FOOTBALL CLUB (ХААН БАНК XXX TUYA)","MN610005005131206564",confident,confident,matched,true,false,false,true,true,"Aruri Alatan",1
+41,30000,"E.BATMUNKH ESM (ХААН БАНК ДЭРЭМ АРИУНЖАРГАЛ)","MN780005005034916201",attention,low_confidence,low_confidence,false,false,false,true,false,"Batmunkh Gerelt-Od",0
+42,400000,"ХОСБАЯР ТЭМҮҮЛЭЛ 3? (ХААН БАНК ЭРДЭНЭСҮХ ХОСБАЯР)","MN520005005429402380",attention,missing_charge,matched,false,true,false,true,true,"Temuulel Nyamdorj",1
+43,375000,"BUS 11A KHERLEN (ХААН БАНК МЯГМАРСҮРЭН УЯНГАА)","MN290005005303080567",attention,missing_charge,matched,true,false,false,true,true,"Kherlen Tuvshintur",1
+44,0,"Зураг угаалгахад (ХААН БАНК ТҮМЭНБААТАР ЧИМЭДЦЭРЭН)","MN400005005019051856",filtered,filtered,unmatched,false,false,false,true,true,"",0
+45,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+46,0,"Принтер засварт (ХААН БАНК ЮУ БИ ТИ КЭЙ)","MN350005005030097045",filtered,filtered,unmatched,false,false,false,true,false,"",0
+47,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+48,240000,"EB -ASU UBAC basketball final (ХУДАЛДАА ХӨГЖЛИЙН БАНК УЛААНБААТАР ДАХЬ АМЕРИК ЕРӨНХИЙ БОЛ)","MN940004000404197752",attention,not_student,unmatched,false,false,false,true,true,"",0
+49,1700000,"ATTILA - TRIP KOREA (FULL PAYMENT IS DONE) (ХААН БАНК DICKMANS PIETER)","MN520005005179083307",attention,flagged,matched,false,false,false,true,false,"Attila Dickmans",1
+50,150000,"мөнхжигүүр хөлбөмбөг","MN370034103101866601",confident,confident,matched,false,false,false,true,true,"Munkhjiguur Otgonjargal",1
+51,414000,"KHULAN 10A, MATH (ХААН БАНК БАСАНЖАВ ГАНБАТ)","MN760005005653384066",attention,flagged,matched,true,false,false,true,true,"Khulan Ganbat",1
+52,1625000,"EB -Энх-Учрал 4А ; 99097953 (ХУДАЛДАА ХӨГЖЛИЙН БАНК ДЭЛХИЙЦЭЦЭГ ДЭЛЭГНЯМДОРЖ)","MN590004000411096925",attention,multiple_candidates,matched,false,false,false,true,false,"Enkh-Uchral Tuguldur",1
+53,0,"Зар сурталчилгааны төлбөрт (ГОЛОМТ БАНК СИЛВЭР СТЕРЛИНГ ХХК)","MN940015002015143520",filtered,filtered,unmatched,false,false,false,true,false,"",0
+54,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[400.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+55,18525000,"Sondor Naidan 5?c (for 1st class) (ХАС БАНК ХУЛАН ЭНХСАЙХАН)","MN530032005001259502",attention,unbalanced,matched,false,true,true,true,false,"Sondor Naidan",1
+56,3000000,"ЕРӨӨЛТИЙН ЭНҮҮН, 3? (ХААН БАНК ДОРЖ МӨНХТУЛГА)","MN100005005750312601",attention,flagged,matched,false,true,false,true,false,"Enuun Yuruult",1
+57,120000,"EB-UBAC САГС PLAY OFF ХУРААМЖ /АХЛАХ АНГИ/ (ХААН БАНК ТОМЁ СУРГУУЛЬ ЦЭЦЭРЛЭГИЙН ЦОГЦОЛБОР)","MN580005005111673146",attention,not_student,unmatched,false,false,false,true,true,"",0
+58,0,"Summer flight allowance  (ХУДАЛДАА ХӨГЖЛИЙН БАНК BRETT NICHOLAS ARENDSE)","MN070004000457197984",filtered,filtered,unmatched,false,false,false,true,false,"",0
+59,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[400.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+60,0,"Summer flight allowance  (ХУДАЛДАА ХӨГЖЛИЙН БАНК JEANETTE MARGARET ARENDSE)","MN890004000457197963",filtered,filtered,unmatched,false,false,false,true,false,"",0
+61,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[400.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+62,0,"Ma Willa Тизний төлбөр болон өдөр солиход (ХУДАЛДАА ХӨГЖЛИЙН БАНК ДИ ЭЙЧ ЭЛ ГЛОБАЛ ФОРВАРДИНГ МОНГОЛ ХХК)","MN940004000499437590",filtered,filtered,unmatched,false,false,false,true,false,"",0
+63,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+64,120000,"EB -8184372 уб элит сургууль UBAC19 girls (ХУДАЛДАА ХӨГЖЛИЙН БАНК ЕРӨНХИЙ БОЛОВСРОЛЫН УЛААНБААТАР ЭЛИ)","MN600004000463061747",attention,not_student,unmatched,false,false,true,true,false,"",0
+65,300000,"BASKETBALL 3CL GERELT JAVKHLANTUGS TERM 4 (ГОЛОМТ БАНК УЯНГА МАНДАЛ)","MN980015001109020664",confident,confident,matched,true,false,true,true,true,"Gerelt Javkhlantugs",1
+66,19500000,"NINJIN TENGIS 4RR 2026-2027 FEE (ГОЛОМТ БАНК ТЭНГИС ЭРДЭНЭБАТ)","MN280015001605115814",attention,unbalanced,matched,true,false,false,true,false,"Ninjin Tengis",1
+67,21500000,"ОЧ ОВОГТОЙ САЯН 9Д АНГИ ТӨЛБӨР ОЮУТОЛГОЙ (ХУДАЛДАА ХӨГЖЛИЙН БАНК ЭНХТУЯА ШИЛЭГ)","MN440004000499153601",attention,unbalanced,matched,true,false,true,true,false,"Sayan Och",1
+68,19500000,"EB -Bayarsaikhan-ii Anand 4SA angi tulbur (ХУДАЛДАА ХӨГЖЛИЙН БАНК БАЯРСАЙХАН БААТАРХҮҮ)","MN070004000499222652",attention,unbalanced,matched,true,false,true,true,false,"Anand Bayarsaikhan",1
+69,240000,"EB- ХҮМҮҮН СУРУУЛЬ UBAC BASKETBALLPLAY-OFFS (ХААН БАНК НИЙСЛЭЛИЙН ЕРӨНХИЙ БОЛОВСРОЛЫН ХҮМҮ)","MN880005005570070550",attention,not_student,unmatched,false,false,false,true,false,"",0
+70,0,"qpay 963155691744836 ID:6288655; (ТӨРИЙН САН ТӨРИЙН ҮЙЛЧИЛГЭЭНИЙ ЦАХИМ ТӨЛБӨР)","MN630090010090000000",filtered,filtered,unmatched,false,false,false,true,false,"",0
+71,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+72,0,"qpay 091068595041186 1000000","MN470034343100209164",filtered,filtered,unmatched,false,false,false,true,false,"",0
+73,0,"qpay 685987149087802 ID:6288519; (ТӨРИЙН САН ТӨРИЙН ҮЙЛЧИЛГЭЭНИЙ ЦАХИМ ТӨЛБӨР)","MN630090010090000000",filtered,filtered,unmatched,false,false,false,true,false,"",0
+74,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+75,0,"qpay 235753425429350 100000","MN470034343100209164",filtered,filtered,unmatched,false,false,false,true,false,"",0
+76,0,"Бараа авахад /гайхмаараа/ (ХААН БАНК ЭЛБЭГ ЭЛБЭРЭЛТ ЭРХЭМ)","MN220005005876205290",filtered,filtered,unmatched,false,false,false,true,false,"",0
+77,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+78,120000,"EB -Acd. 5395348, UBAC HS girls Basketball Playoffs, ESM (ХУДАЛДАА ХӨГЖЛИЙН БАНК НИЙСЛЭЛИЙН ЕРӨНХИЙ БОЛОВСРОЛЫН БРИТ)","MN680004000415015175",attention,not_student,unmatched,false,false,false,true,true,"",0
+79,0,"Нэмэлт гэрээний төлбөрт / №4/ (ХААН БАНК ХААНДААТГАЛ)","MN600005005007739356",filtered,filtered,unmatched,false,false,true,true,false,"",0
+80,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+81,0,"Бичиг хэргийн төлбөрт (ХААН БАНК НАМШИР ДЭНСМАА)","MN580005005087090339",filtered,filtered,unmatched,false,false,false,true,false,"",0
+82,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+83,120000,"EB -HS Girls Basketball ESM Invoice, РД6925707 (ХУДАЛДАА ХӨГЖЛИЙН БАНК НИЙСЛЭЛИЙН ЕРӨНХИЙ БОЛОВСРОЛЫН УЛАА)","MN850004000427051793",attention,not_student,unmatched,false,false,false,true,true,"",0
+84,0,"MANAGEMENT SERVICE","3499102621090002",filtered,filtered,unmatched,false,false,false,true,false,"",0
+85,0,"SWIFT ХУРААМЖ:[30000.00MNT] /430801","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+86,0,"SWIFT  CHARGE OUR:[30.00USD] /262110","FEE",filtered,filtered,unmatched,false,false,true,true,false,"",0
+87,526083,"РС74070108 (КАПИТРОН БАНК БЗД НДГ ТЭТГЭМЖ)","MN040030003022020007",attention,not_student,unmatched,false,false,false,true,false,"",0
+88,240000,"EB-ШИНЭ ҮЕ СУРГУУЛЬ САГСАН БӨМБӨГ ХУРААМЖ (ХААН БАНК ЕРӨНХИЙ БОЛОВСРОЛЫН ШИНЭ ҮЕ СУРГУУЛ)","MN680005005003966688",attention,unmatched,unmatched,false,false,false,true,true,"",0
+89,4900000,"O.ERHEMBAYAR (ХААН БАНК БААСАНГЭРЭЛ ОТГОНХУЯГ)","MN270005005664390180",attention,flagged,matched,false,false,false,true,false,"Erkhembayar Otgonkhuyag",1
+90,4800000,"O.ERHEMBAYAR (ХААН БАНК БААСАНГЭРЭЛ ОТГОНХУЯГ)","MN270005005664390180",attention,flagged,matched,false,false,false,true,false,"Erkhembayar Otgonkhuyag",1
+91,1300000,"O.ERHEMBAYAR (ХААН БАНК БААСАНГЭРЭЛ ОТГОНХУЯГ)","MN270005005664390180",attention,flagged,matched,false,false,false,true,false,"Erkhembayar Otgonkhuyag",1
+92,0,"Хулдаасан хэвлэлийн төлбөрт (ГОЛОМТ БАНК ТОД ГЭРЭЛТЭХ ӨНГӨ)","MN160015001405007455",filtered,filtered,unmatched,false,false,false,true,false,"",0
+93,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+94,400000,"ENHBAT TSEGTSHUR 1 (ХААН БАНК ЭРДЭНЭЦЭЦЭГ ШҮРЭНЧУЛУУ)","MN860005005024317255",attention,missing_charge,matched,false,false,true,true,true,"Turbat Enkhbat",1
+95,3000000,"EB-1 SUOTAI (ХААН БАНК БУЯН АРВИЖИХ БСА)","MN480005005219605323",attention,unmatched,unmatched,false,false,true,true,false,"",0
+96,5000000,"Lkhagvadorj Misheel 10A-angi (ХАС БАНК ЛХАГВАДОРЖ ЧУЛУУНБАТ)","MN550032005005734367",confident,confident,matched,true,false,false,true,false,"Misheel lkhagvadorj",1
+97,0,"Цэцэгний урьдчилгаа төлбөрт (ХААН БАНК НАРАНГЭРЭЛ ЦОГЗОЛМАА)","MN240005005030345466",filtered,filtered,unmatched,false,false,false,true,false,"",0
+98,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+99,60000,"TEMUULEN KHALIUN 2AB (ХААН БАНК МӨНХСАЙХАН ХАЛИУНАА)","MN740005005114456855",attention,unbalanced,matched,true,false,false,true,false,"Khaliun Temuulen",0
+100,120000,"EB -Жэт сургууль, UBAC тэмцээний төлбөр (ХУДАЛДАА ХӨГЖЛИЙН БАНК НИЙСЛЭЛИЙН ЕРӨНХИЙ БОЛОВСРОЛЫН ЖЭТ )","MN770004000404253542",attention,not_student,unmatched,false,false,false,true,false,"",0
+101,0,"Өөрийн данс хооронд","MN630034103101855075",filtered,filtered,unmatched,false,false,false,true,false,"",0
+102,500000,"TAETSEG BUTSAALT (ХААН БАНК НАРАНГЭРЭЛ ЦОГЗОЛМАА)","MN240005005030345466",attention,not_student,unmatched,false,false,false,true,false,"",0
+103,0,"Цэцэг авахад (ХУДАЛДАА ХӨГЖЛИЙН БАНК АЮУШ БАЯРЧУЛУУН)","MN760004000432062587",filtered,filtered,unmatched,false,false,false,true,false,"",0
+104,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+105,39975000,"УУГАНБАЯРЫН ЦОГЖАВХЛАН-7D УУГАНБАЯРЫН БАЯРЖАВХЛАН- 5TA  СУРГАЛТЫН ТӨЛБӨР (ГОЛОМТ БАНК АЛИМАА ЧУЛУУНБААТАР)","MN030015001605037597",attention,multiple_candidates,matched,true,false,false,true,true,"Tsogjavkhlan Uuganbayar",1
+106,0,"Сургалтын төлбөр буцаалт Ө.Нандинмишээл, Ө.Нандингэгээ (ГОЛОМТ БАНК НАРМАНДАХ ГАНБААТАР)","MN290015001205318365",filtered,filtered,unmatched,false,false,false,true,true,"",0
+107,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[400.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+108,0,"Сургалтын төлбөр буцаалт Зоригоо Сүлд (ХААН БАНК ЭРДЭНЭБИЛЭГ ӨЛЗИЙСАЙХАН)","MN400005005033132182",filtered,filtered,unmatched,false,false,false,true,true,"",0
+109,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[400.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+110,0,"Сургалтын төлбөр буцаалт Алтангэрэл Дөлгөөнболд","MN690034102200133073",filtered,filtered,unmatched,false,false,false,true,true,"",0
+111,0,"ДОТООД Б/БУС ШИЛЖҮҮЛЭГ ШИМТГЭЛ-EBANK:[100.00MNT] /431209","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+112,0,"Сургалтын төлбөр буцаалт Одбаяр Мишээл (ХААН БАНК ЭНХЧУЛУУН СЭЛЭНГЭ)","MN350005005059255536",filtered,filtered,unmatched,false,false,false,true,true,"",0
+113,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[400.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+114,1975000,"EB -IGCSE HURI 10A (ХУДАЛДАА ХӨГЖЛИЙН БАНК RISU NA)","MN450004000457176833",attention,unmatched,unmatched,true,false,false,true,false,"",0
+115,400000,"BAYANMUNKHIIN MUNKHZAYA 3? (ХААН БАНК БААТАР БАЯНМӨНХ)","MN460005005075803732",attention,low_confidence,low_confidence,false,true,false,true,true,"Munkhjin Bayanmunkh",1
+116,1000000,"EB -Ариунгоо Бодьхүү 1мл (ХУДАЛДАА ХӨГЖЛИЙН БАНК БОДЬХҮҮ ЗОРИГТ)","MN720004000419037014",confident,confident,matched,true,false,false,true,false,"Ariungoo Bodikhuu",1
+117,210000,"UNDRAH 8A VOLLEBALL SURGALT (ХААН БАНК САНДАГДОРЖ ЭНХБААТАР)","MN960005005720676971",confident,confident,matched,true,false,false,true,true,"Undrakh Enkhbaatar",1
+118,3000000,"AMUU MYAGMARULZII 3? TERM FEE (ХААН БАНК БОР АМАРЖАРГАЛ)","MN910005005300991720",confident,confident,matched,false,true,false,true,false,"Amuu Myagmar-Ulzii",1
+119,0,"Сургалтын төлбөр буцаалт Мөнхцолмон Мэнд-Орших (ХААН БАНК БАТСАЙХАН МӨНХЦОЛМОН)","MN930005005220036745",filtered,filtered,unmatched,false,false,false,true,true,"",0
+120,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[400.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+121,0,"Ном хэвлэлтийн төлбөрт (ГОЛОМТ БАНК МӨНХ ПАБЛИШИНГ)","MN690015001405168976",filtered,filtered,unmatched,false,false,false,true,false,"",0
+122,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[400.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+123,400000,"БАТБЭХ АНХИЛ-ҮЖИН 4 НАС АНГИ (ХААН БАНК БАДАМСҮРЭН ХУЛАН)","MN590005005111189777",attention,missing_charge,matched,false,false,true,true,true,"Ankhil Ider",1
+124,750000,"BUS FEE, BAT-ERDENE 8B, ANAR 6E (ХААН БАНК ХҮРЭЛБААТАР ДОРЖ)","MN620005005026442569",attention,multi_student,matched_multi,true,false,false,true,true,"Bat-Erdene Dorj",1
+125,690000,"1JB ВҮ ЭНЭРЭЛ HOMEWORK (ХААН БАНК SHI MALETE)","MN380005005307258583",attention,unmatched,unmatched,true,false,false,true,true,"",0
+126,255000,"Chamin-Erdene 5KO","MN180034102100083632",confident,confident,matched,true,false,false,true,false,"Chamin-Erdene Chinzorig",1
+127,324000,"Eric, Manduun math","MN050034108801109064",attention,low_confidence,low_confidence,false,false,false,true,true,"Manduukh Sanaa",0
+128,285000,"EB -ANONA Tsolmon, 1JA, Ballet (ХУДАЛДАА ХӨГЖЛИЙН БАНК ХУЛАН ДАВААДОРЖ)","MN880004000470036416",confident,confident,matched,true,false,false,true,true,"Anona Tsolmon",1
+129,255000,"KHARAEVA ANGIRA, 7D, VOLLEYBALL (ХААН БАНК KHARAEV ANGRA)","MN390005005035908437",confident,confident,matched,true,false,false,true,true,"Angira Kharaeva",1
+130,400000,"EB -ANONA Tsolmon, 1JA, Taekwondo (ХУДАЛДАА ХӨГЖЛИЙН БАНК ХУЛАН ДАВААДОРЖ)","MN880004000470036416",confident,confident,matched,true,false,false,true,true,"Anona Tsolmon",1
+131,12100000,"СУРГАЛТЫН ТӨЛБӨР. 7А ГАНСҮХИЙН ЭРДЭНЭ (ХААН БАНК АЛТАНХҮҮ АМГАЛАН)","MN980005005009355856",confident,confident,matched,true,false,false,true,true,"Erdene Gansukh",1
+132,690000,"BAYANMUNKH MUNKHBAYASGALAN.1JA.HOMEWORK (ХААН БАНК БААТАР БАЯНМӨНХ)","MN460005005075803732",attention,flagged,matched,true,false,false,true,true,"Munkhbayasgalan Bayanmunkh",1
+133,4500000,"Мөнгөнбаатарын Тэмүүлэн","MN420034102200236185",attention,flagged,matched,false,false,false,true,false,"Temuulen Mungunbaatar",1
+134,4000000,"GOOSAR UNURBAT PRESCHOOL 5?B (ХААН БАНК ТӨМӨРТОГОО НАРМАНДАХ)","MN320005005401113854",attention,multiple_candidates,matched,false,true,true,true,false,"Erkhembileg Unurbat",1
+135,600000,"3SE,БОДЬДАРЬ,4-Р УЛИРЛЫН БАЛЕТ БҮРТГЭЛ (ГОЛОМТ БАНК LUOJIE JIAXIANG)","MN240015001175109842",attention,unmatched,unmatched,true,false,false,true,true,"",0
+136,360000,"Solongo Enkhbaatar, 11A, Math club","MN480034340601737757",attention,flagged,matched,true,false,false,true,true,"Solongo Enkhbaatar",1
+137,120000,"#5754, ISU - UBAC PLAY-OFFS FINAL 8 GAMES (ГОЛОМТ БАНК УЛААНБААТАР ДАХЬ ОЛОН УЛСЫН ДУНД СУРГУУЛЬ ХОЛБОО НҮТББ)","MN750015008115103613",attention,not_student,unmatched,false,false,true,true,false,"",0
+138,15000000,"MUNGUNBAATAR TEMUULEN, 2OB (ХААН БАНК БАЯРАА ОЮУНТУЯА)","MN220005005306822565",confident,confident,matched,true,false,false,true,false,"Temuulen Mungunbaatar",1
+139,120000,"EB -Монтэ Роза Кибер (ХУДАЛДАА ХӨГЖЛИЙН БАНК МОНТЭ РОЗА КИБЕР ХХК)","MN620004000451145843",attention,unmatched,unmatched,false,false,false,true,false,"",0
+140,300000,"B.TEMUULEN 4MK (BASKETBALL-4 ULIRAL) 99090605 (ХААН БАНК АДЪЯАБАЗАР УРАНГОО)","MN020005005039067908",confident,confident,matched,true,false,false,true,true,"Temuulen Bayarsaikhan",1
+141,360000,"EB -7D Meng Tsu Taivanbat, Math club tue, thu Joel teacher (ХУДАЛДАА ХӨГЖЛИЙН БАНК БАЯРМАА БАТБАЯР)","MN560004000470001490",confident,confident,matched,true,false,false,true,true,"Taivanbat Meng-Tsu",1
+142,617500,"EB -3CL Bishrel Bayasgalan, soft tennis (ХУДАЛДАА ХӨГЖЛИЙН БАНК НОМИН БАТБААТАР)","MN940004000499430315",confident,confident,matched,true,false,false,true,true,"Bishrel Bayasgalan",1
+143,690000,"EB -Тараа Ай-Шуруу, 1JA, гэрийн даалгаварын анги (ХУДАЛДАА ХӨГЖЛИЙН БАНК БАЯРЖАРГАЛ ЖАДАМБА)","MN420004000426121755",attention,flagged,matched,true,false,false,true,true,"Ai-Shuruu Taraa",1
+144,300000,"EB -Тараа Ай-Шуруу, 1JA, Уран зураг (ХУДАЛДАА ХӨГЖЛИЙН БАНК БАЯРЖАРГАЛ ЖАДАМБА)","MN420004000426121755",confident,confident,matched,true,false,false,true,true,"Ai-Shuruu Taraa",1
+145,400000,"A NUOJIN(M.ANUJIN) 1JB, TAEKWONDO (ХААН БАНК CHAOGE MANDUHU)","MN770005005107139800",attention,multiple_candidates,matched,true,false,false,true,true,"Anuojin/Anujin -",1
+146,4900000,"TSETSENGOO TELMEN 4BA (ХААН БАНК ГАНСҮХ ТЭЛМЭН)","MN380005005076304299",confident,confident,matched,true,false,false,true,false,"Tsetsengoo Telmen",1
+147,4900000,"TSETSENGOO TELMEN 4BA (ХААН БАНК ГАНСҮХ ТЭЛМЭН)","MN380005005076304299",confident,confident,matched,true,false,false,true,false,"Tsetsengoo Telmen",1
+148,4900000,"TSETSENGOO TELMEN 4BA (ХААН БАНК ГАНСҮХ ТЭЛМЭН)","MN380005005076304299",confident,confident,matched,true,false,false,true,false,"Tsetsengoo Telmen",1
+149,4800000,"TSETSENGOO TELMEN 4BA (ХААН БАНК ГАНСҮХ ТЭЛМЭН)","MN380005005076304299",confident,confident,matched,true,false,false,true,false,"Tsetsengoo Telmen",1
+150,4900000,"OYUNGOO TELMEN 2AB (ХААН БАНК ГАНСҮХ ТЭЛМЭН)","MN380005005076304299",confident,confident,matched,true,false,false,true,false,"Oyungoo Telmen",1
+151,4900000,"OYUNGOO TELMEN 2AB (ХААН БАНК ГАНСҮХ ТЭЛМЭН)","MN380005005076304299",confident,confident,matched,true,false,false,true,false,"Oyungoo Telmen",1
+152,4900000,"OYUNGOO TELMEN 2AB (ХААН БАНК ГАНСҮХ ТЭЛМЭН)","MN380005005076304299",confident,confident,matched,true,false,false,true,false,"Oyungoo Telmen",1
+153,4800000,"OYUNGOO TELMEN 2AB (ХААН БАНК ГАНСҮХ ТЭЛМЭН)","MN380005005076304299",confident,confident,matched,true,false,false,true,false,"Oyungoo Telmen",1
+154,690000,"OYU MUNKHERDENE, 2AB, HOMEWORK CLUB (ХААН БАНК ЦОГТБАЯР МӨНХ-ЭРДЭНЭ)","MN840005005064779483",attention,multiple_candidates,matched,true,false,false,true,true,"Oyu Munkh-Erdene",1
+155,210000,"VOLLEYBALL SONDOR.E 8E (ГОЛОМТ БАНК ЭРХЭМБАЯР ДАВААСҮРЭН)","MN460015003455180776",attention,multiple_candidates,matched,true,false,false,true,true,"Sondor Sain-Od",0
+156,300000,"4MK KHANGAI SAGSAN BUMBUG (ХААН БАНК БАДАМСҮРЭН БАЯРМАА)","MN880005005176542811",confident,confident,matched,true,false,false,true,true,"Khangai lkhagvasuren",1
+157,300000,"4MK KHANGAI HUL BUMBUG (ХААН БАНК БАДАМСҮРЭН БАЯРМАА)","MN830005005062045750",confident,confident,matched,true,false,false,true,true,"Khangai lkhagvasuren",1
+158,255000,"EB -Tsengel TSELMUUN 6C Gar bumbug (ХУДАЛДАА ХӨГЖЛИЙН БАНК ЦЭНГЭЛ ЭНХЦАГ)","MN800004000421035555",confident,confident,matched,true,false,false,true,true,"Tselmuun Tsengel",1
+159,255000,"GWONEUNSEO,4MK,ART (ХААН БАНК AN YOUNG MI)","MN780005005219084669",attention,unmatched,unmatched,true,false,false,true,true,"",0
+160,120000,"TENUUN-OD LKHAGVASUREN 1ML ART (ХААН БАНК БАДРАХ БҮРЭНЗАЯА)","MN100005005003718636",confident,confident,matched,true,false,false,true,true,"Tenuun-Od Lkhagvasuren",1
+161,255000,"БАТБАЯРЫН МАНДУХАЙ 8D VOLLEYBALL (ХААН БАНК АЛТАНХУЯГ ЗУЛГЭРЭЛ)","MN130005005003624395",confident,confident,matched,true,false,false,true,true,"Mandukhai Batbayar",1
+162,2000000,"5? DAGVA UNUMUNKH 3-R ULIRAL TULBUR (ХААН БАНК НЭРГҮЙ МӨНХТУЯА)","MN970005005037689671",confident,confident,matched,false,true,false,true,false,"Unumunkh Dagva",1
+163,400000,"SETSENGUN.LKH 2AB TAEKWONDO (ГОЛОМТ БАНК НАРАНТУЯА ОЧИРХҮҮ)","MN310015002735100382",confident,confident,matched,true,false,false,true,true,"Setsengun Lkhagva-Ochir",1
+164,300000,"FOOTBALL CLUB’S FEE 5TA KH.MERGEN (ХААН БАНК ДОРЖНАМЖАА МОЖУЛ)","MN520005005076261561",confident,confident,matched,true,false,false,true,true,"Mergen Khashbold",1
+165,375000,"EB -B.Margad 11B bus fee term3 (ХУДАЛДАА ХӨГЖЛИЙН БАНК ГАНБОЛОР ГҮРРАГЧАА)","MN270004000410041947",attention,missing_charge,matched,true,false,false,true,true,"Margad Bayarsaikhan",1
+166,600000,"ENYA.BAO/3SE/BALLET (ГОЛОМТ БАНК XIAOMIN LIAN)","MN400015002725105243",confident,confident,matched,true,false,false,true,true,"En Ya Bao",1
+167,1000000,"2OB ANGI DAGVA AMIRLAN TULBUR 99066699 (ХААН БАНК НЭРГҮЙ МӨНХТУЯА)","MN970005005037689671",confident,confident,matched,true,false,true,true,false,"Amirlan Dagva",1
+168,400000,"EB -M.Oyu-Undrakh 1JB taewkonda (ХУДАЛДАА ХӨГЖЛИЙН БАНК САРУУЛТУЯА ОЮУНСАЙХАН)","MN710004000495057969",confident,confident,matched,true,false,false,true,true,"Oyu-Undrakh Mandakh",1
+169,400000,"LEE MINWOO KAAN 1ML TAEKWONDO (ХААН БАНК ЭНХЖАРГАЛ ИТГЭЛ)","MN030005005166377868",confident,confident,matched,true,false,false,true,true,"Kaan Lee Minwoo",1
+170,255000,"7A TUGSBILEG VOLLEYBALL (ХААН БАНК ЭНХТАЙВАН ШИЖИРТУЯА)","MN740005005622178038",confident,confident,matched,true,false,false,true,true,"Tugsbileg Yerenbaatar",1
+171,255000,"3LM KHANBILEG ART CLUB (ХААН БАНК ЭНХТАЙВАН ШИЖИРТУЯА)","MN740005005622178038",confident,confident,matched,true,false,false,true,true,"Khanbileg Yerenbaatar",1
+172,750000,"З.ОЮУДАРЬ 11A З.НОМИНДАРЬ 8D (ХААН БАНК БАЯРСАЙХАН УУГАНЦЭЦЭГ)","MN670005005070330905",attention,multiple_candidates,matched,true,false,false,true,false,"Nomindari Zolbayar",0
+173,690000,"EB -unumunkh geriin daalgavariim angi 3VO (ХУДАЛДАА ХӨГЖЛИЙН БАНК ЭНХБАТ БАТБАЯР)","MN090004000411034872",attention,unbalanced,matched,true,false,false,true,false,"Unumunkh Enkhbat",0
+174,10960000,"EB -No. 325, tution fee iro chitrakshi gautam (ХУДАЛДАА ХӨГЖЛИЙН БАНК EMBASSY OF INDIA)","MN320004000404001085",attention,unbalanced,matched,false,false,false,true,false,"Chitrakshi Gautam",0
+175,315000,"1JB Н.АРЛУНГОО HOMEWORK CLUB 83110069 (ХААН БАНК СҮХБААТАР НЯМЦЭРЭН)","MN970005005163048882",confident,confident,matched,true,false,false,true,true,"Arlungoo Nyamtseren",1
+176,0,"1 хаалгатай шүүгээ авахад (ГОЛОМТ БАНК ҮРЖИХ ТЭНГИС ХХК)","MN120015002145100261",filtered,filtered,unmatched,false,false,true,true,false,"",0
+177,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+178,0,"1260203595599  9097392  И Эс Эм олон улсын дунд сургууль 99081655 MN940034106000030702 И ЭС ЭМ ОЛОН УЛСЫН ДУНД СУРГУУЛЬ БСБ","MN120034106000063994",filtered,filtered,unmatched,false,false,false,true,false,"",0
+179,0,"ТАТВАР ТӨЛӨЛТ 300 /IBANK/:[300.00MNT] /430206","FEE",filtered,filtered,unmatched,false,false,true,true,false,"",0
+180,0,"qpay 200000696787103 P260309100111 online 9097392 (ХУДАЛДАА ХӨГЖЛИЙН БАНК ТАТВАР QPAY)","MN320004000495089517",filtered,filtered,unmatched,false,false,false,true,false,"",0
+181,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+182,2150000,"S.ANUJIN,5B ANGI 99706387 (ХААН БАНК ЛУВСАН-ОЧИР САРАНЦЭЦЭГ)","MN810005005062044428",attention,flagged,matched,false,false,true,true,false,"Anujin Sarantsetseg",1
+183,0,"qpay 200000696788422 P260309100137 online 9097392 (ХУДАЛДАА ХӨГЖЛИЙН БАНК ТАТВАР QPAY)","MN320004000495089517",filtered,filtered,unmatched,false,false,false,true,false,"",0
+184,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+185,0,"1260205696130  9097392  И Эс Эм олон улсын дунд сургууль 99081655 MN940034106000030702 И ЭС ЭМ ОЛОН УЛСЫН ДУНД СУРГУУЛЬ БСБ","MN120034106000063994",filtered,filtered,unmatched,false,false,false,true,false,"",0
+186,0,"ТАТВАР ТӨЛӨЛТ 300 /IBANK/:[300.00MNT] /430206","FEE",filtered,filtered,unmatched,false,false,true,true,false,"",0
+187,0,"qpay 682172653299970 ID:7020070; (ТӨРИЙН САН ТӨРИЙН ҮЙЛЧИЛГЭЭНИЙ ЦАХИМ ТӨЛБӨР)","MN630090010090000000",filtered,filtered,unmatched,false,false,false,true,false,"",0
+188,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[400.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+189,0,"qpay 865273116239971 15200320","MN470034343100209164",filtered,filtered,unmatched,false,false,false,true,false,"",0
+190,0,"qpay 917953098165664, AJ2603101520062 АЖД гэрээний төлбөр, CHARGE: 1240.20 ₮","MN100034104400639081",filtered,filtered,unmatched,false,false,false,true,false,"",0
+191,0,"qpay 849859819438297 MUNKHDAATGAL 124020 TRX: 1240.20 ₮","MN470034343100209164",filtered,filtered,unmatched,false,false,false,true,false,"",0
+192,0,"1260116401240  9097392 Т2400003808 И Эс Эм олон улсын дунд сургууль 99081655 MN940034106000030702 И ЭС ЭМ ОЛОН УЛСЫН ДУНД СУРГУУЛЬ БСБ","MN120034106000063994",filtered,filtered,unmatched,false,false,false,true,false,"",0
+193,0,"ТАТВАР ТӨЛӨЛТ 300 /IBANK/:[300.00MNT] /430206","FEE",filtered,filtered,unmatched,false,false,true,true,false,"",0
+194,360000,"6D-AnDai-Math&#39;s club (КАПИТРОН БАНК YING XIU)","MN460030008000001827",attention,unmatched,unmatched,true,false,false,true,true,"",0
+195,0,"qpay 582121097584345, AJ2603101520063 АЖД гэрээний төлбөр, CHARGE: 1283.04 ₮","MN100034104400639081",filtered,filtered,unmatched,false,false,true,true,false,"",0
+196,0,"qpay 762674967247100 MUNKHDAATGAL 128304 TRX: 1283.04 ₮","MN470034343100209164",filtered,filtered,unmatched,false,false,true,true,false,"",0
+197,0,"Данс хоорондын гүйлгээ (ГОЛОМТ БАНК И ЭС ЭМ ОЛОН УЛСЫН ДУНД СУРГУУЛЬ ХХК)","MN320015001205100740",filtered,filtered,unmatched,false,false,false,true,false,"",0
+198,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[400.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+199,300000,"EB -Altansukh munkhmandakh,4rr,football (ХУДАЛДАА ХӨГЖЛИЙН БАНК САРАНГУА БАТДОРЖ)","MN460004000437011582",attention,unbalanced,matched,true,false,false,true,true,"Munkhmandakh Altansukh",0
+200,800000,"S Saran S Tushig admission fee","MN400034102300024195",attention,unbalanced,matched,false,false,false,true,false,"Saran Mariya Erdenetuul",0
+201,400000,"3? АНГИ БАТБОЛД СЭЦЭН 88110576 (ХААН БАНК ЖАРГАЛСАЙХАН БАТБОЛД)","MN380005005167317944",attention,missing_charge,matched,false,true,false,true,true,"Setsen Enkh-Orshikh",1
+202,1625000,"BATBOLD SETSEN 26-27 (ХААН БАНК ЖАРГАЛСАЙХАН БАТБОЛД)","MN380005005167317944",attention,flagged,matched,false,false,false,true,false,"Setsen Enkh-Orshikh",1
+203,400000,"G.MANDAKHNAR TAEKWONDO (ГОЛОМТ БАНК ГАНТӨМӨР АЛТАНЦЭЦЭГ)","MN710015001175147699",confident,confident,matched,false,false,false,true,true,"Mandakhnar Gantumur",1
+204,285000,"G.MISHEEL BALLET (ГОЛОМТ БАНК ГАНТӨМӨР АЛТАНЦЭЦЭГ)","MN710015001175147699",confident,confident,matched,false,false,false,true,true,"Misheel Gantumur",1
+205,0,"Данс хоорондын гүйлгээ (ХУДАЛДАА ХӨГЖЛИЙН БАНК И ЭС ЭМ ОЛОН УЛСЫН ДУНД СУРГУУЛЬ)","MN680004000457112981",filtered,filtered,unmatched,false,false,false,true,false,"",0
+206,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[400.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+207,4000000,"11C, L.ZOLBAYAR (ГОЛОМТ БАНК ЭНХБАЯР ПҮРЭВЖАВ)","MN520015001105246155",confident,confident,matched,true,false,false,true,false,"Zolbayar luvsanjav",1
+208,1030000,"ДАРИНЧУЛУУН ЭМҮЖИН 10С (ХААН БАНК РАВДАН БАЯСГАЛАН)","MN900005005029222958",attention,flagged,matched,true,false,false,true,false,"Emujin Tengis",1
+209,400000,"O.ERDEM/UT20291175/ BURTGELIN HURAAMJ (ХААН БАНК ДАМДИНСҮРЭН ЭНХБОЛД)","MN670005005006484535",attention,low_confidence,low_confidence,false,false,false,true,true,"Erdem Shinebayar",1
+210,750000,"I KHUSLEN I KHULAN AVTOBUS (ХААН БАНК ЛХАГВАСҮРЭН ТУЯА)","MN260005005014349063",attention,low_confidence,low_confidence,false,false,false,true,true,"Khuslen Amarjargal",0
+211,375000,"Erdembileg.B, 3CL. Bus (ХАС БАНК ЗЭМҮҮЛХАМ БАДАРЧ)","MN290032005000881343",attention,missing_charge,matched,true,false,false,true,true,"Erdembileg Batmunkh",1
+212,375000,"Tsetsenbileg.B, 4BA. Bus (ХАС БАНК ЗЭМҮҮЛХАМ БАДАРЧ)","MN290032005000881343",attention,missing_charge,matched,true,false,false,true,true,"Tsetsenbileg Batmunkh",1
+213,400000,"TELMEN GEGEEN ?3 (ХААН БАНК ЦЭНД-ОЧИР ЦЭДЭВСҮРЭН)","MN070005005057357459",attention,multiple_candidates,matched,false,false,false,true,true,"Oyungoo Telmen",1
+214,300000,"ENKHDOLGOR LKHAGVASUREN, 1WL, ART (ХААН БАНК БАЛДОРЖ ЛХАГВАСҮРЭН)","MN710005005130021141",confident,confident,matched,false,false,true,true,true,"Enkhdolgor Lkhagvasuren",1
+215,255000,"EB -Molor-Erdene Enkhjargal, 6E, basketball club (ХУДАЛДАА ХӨГЖЛИЙН БАНК ХАЛИУН МӨНХБАЯР)","MN210004000495020457",confident,confident,matched,true,false,false,true,true,"Molor-Erdene Enkhjargal",1
+216,255000,"EB -Oyu-Erdene Enkhjargal, 4MK, Art club (ХУДАЛДАА ХӨГЖЛИЙН БАНК ХАЛИУН МӨНХБАЯР)","MN210004000495020457",confident,confident,matched,true,false,false,true,true,"Oyu-Erdene Enkhjargal",1
+217,400000,"Б. ЭЛБЭРЭЛ 3, БҮРТГЭЛИЙН ХУРААМЖ (ХААН БАНК БАТБАЯР БИЛЭГТ)","MN550005005077069808",attention,unmatched,unmatched,false,false,true,true,true,"",0
+218,255000,"KHUSLEN AMARJARGAL, 7C, VOLLEYBALL (ГОЛОМТ БАНК АМАРЖАРГАЛ РАГЧААСҮРЭН)","MN830015003005117182",confident,confident,matched,true,false,false,true,true,"Khuslen Amarjargal",1
+219,360000,"KHUSLEN AMARJARGAL, 7C, MATH’S CLUB (ГОЛОМТ БАНК АМАРЖАРГАЛ РАГЧААСҮРЭН)","MN830015003005117182",confident,confident,matched,true,false,false,true,true,"Khuslen Amarjargal",1
+220,0,"Summer flight allowance  (ХУДАЛДАА ХӨГЖЛИЙН БАНК CAROL LAU)","MN930004000457182468",filtered,filtered,unmatched,false,false,false,true,false,"",0
+221,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+222,0,"Түрээсийн төлбөр (ХААН БАНК ЧИМЭДДОРЖ АНУДАРЬ)","MN220005005007836167",filtered,filtered,unmatched,false,false,false,true,false,"",0
+223,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[400.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+224,0,"Түрээсийн төлбөрт","MN850034104400058641",filtered,filtered,unmatched,false,false,false,true,false,"",0
+225,0,"ДОТООД Б/БУС ШИЛЖҮҮЛЭГ ШИМТГЭЛ-EBANK:[100.00MNT] /431209","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+226,0,"Түрээсийн төлбөрт","MN230034104400286640",filtered,filtered,unmatched,false,false,false,true,false,"",0
+227,0,"ДОТООД Б/БУС ШИЛЖҮҮЛЭГ ШИМТГЭЛ-EBANK:[100.00MNT] /431209","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+228,0,"Түрээсийн төлбөр  (ХУДАЛДАА ХӨГЖЛИЙН БАНК ЭРДЭНЭЦЭЦЭГ САНДАГ)","MN750004000413003754",filtered,filtered,unmatched,false,false,false,true,false,"",0
+229,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+230,0,"Түрээсийн төлбөр  (ХУДАЛДАА ХӨГЖЛИЙН БАНК АЛТАНЦЭЦЭГ МӨНХЖАРГАЛ)","MN850004000475017614",filtered,filtered,unmatched,false,false,false,true,false,"",0
+231,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+232,0,"Түрээсийн төлбөр","MN230034104400286640",filtered,filtered,unmatched,false,false,false,true,false,"",0
+233,0,"ДОТООД Б/БУС ШИЛЖҮҮЛЭГ ШИМТГЭЛ-EBANK:[100.00MNT] /431209","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+234,0,"Түрээсийн төлбөрт (ХААН БАНК СҮХБААТАР ТЭЛМҮҮН)","MN270005005062046855",filtered,filtered,unmatched,false,false,false,true,false,"",0
+235,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+236,0,"Түрээсийн төлбөр Daniil Ilarianal (ХААН БАНК ДАМДИНСҮРЭН АМАРЗАЯА)","MN870005005114116636",filtered,filtered,unmatched,false,false,false,true,false,"",0
+237,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+238,0,"Түрээсийн төлбөрт (ХУДАЛДАА ХӨГЖЛИЙН БАНК УНДРАХ БААТАРЦОГТ)","MN690004000426096631",filtered,filtered,unmatched,false,false,false,true,false,"",0
+239,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+240,375000,"EB -caitlyn obrien 7b bus fee (ХУДАЛДАА ХӨГЖЛИЙН БАНК JEFFREY OBRIEN)","MN020004000441007610",attention,missing_charge,matched,true,false,false,true,true,"Caitlyn Az Ujin O'Brien",1
+241,0,"Гишгүүр авахад (ХААН БАНК ЧУЛУУНДАВАА ДАШЛХАГВА)","MN750005005003506879",filtered,filtered,unmatched,false,false,false,true,false,"",0
+242,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+243,0,"Зүлэг авахад (ХААН БАНК MA BAQUAN)","MN200005005157080888",filtered,filtered,unmatched,false,false,false,true,false,"",0
+244,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+245,0,"Нэрийн хуудас хэвлүүлэхэд (ГОЛОМТ БАНК ГАЛАКСИ ДИЗАЙН ХХК)","MN780015001415139541",filtered,filtered,unmatched,false,false,false,true,false,"",0
+246,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+247,0,"Микрофон түрээслэхэд (ГОЛОМТ БАНК ЖЕНИСИС ВИШН РЕКОРДИНГ ХХК)","MN490015002720001038",filtered,filtered,unmatched,false,false,false,true,false,"",0
+248,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+249,0,"Connor тизний төлбөрт (ХУДАЛДАА ХӨГЖЛИЙН БАНК ДИ ЭЙЧ ЭЛ ГЛОБАЛ ФОРВАРДИНГ МОНГОЛ ХХК)","MN940004000499437590",filtered,filtered,unmatched,false,false,false,true,false,"",0
+250,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+251,645000,"MATH TEST ODMANDAKH 12B (ГОЛОМТ БАНК ЭЛИТСЕРВИС ХХК)","MN730015002105016435",attention,multiple_candidates,matched,true,false,false,true,true,"Odmandakh Galsansar",0
+252,0,"00 цаас, гарын цаас авахад (ХУДАЛДАА ХӨГЖЛИЙН БАНК ХӨГЖИЛТРЕЙД ХХК)","MN040004000405004278",filtered,filtered,unmatched,false,false,false,true,false,"",0
+253,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+254,0,"Канон засварт  (ХААН БАНК ЮУ БИ ТИ КЭЙ)","MN350005005030097045",filtered,filtered,unmatched,false,false,false,true,false,"",0
+255,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+256,0,"3-р сарын цалингийн гүйлгээ","MN830034385300044839",filtered,filtered,unmatched,false,false,false,true,false,"",0
+257,0,"ДОТООД Б/БУС ШИЛЖҮҮЛЭГ ШИМТГЭЛ-EBANK:[100.00MNT] /431209","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+258,650000,"EB-INDRA.E 1JK TENNIS (ХААН БАНК ЧОЙЖИЛСҮРЭН МӨНХСАРУУЛ)","MN730005005101030036",confident,confident,matched,true,false,false,true,true,"Indra Enkhbaatar",1
+259,360000,"EB-ENEREL.E 8B MATH-JOEL (ХААН БАНК ЧОЙЖИЛСҮРЭН МӨНХСАРУУЛ)","MN730005005101030036",attention,multiple_candidates,matched,true,false,false,true,true,"Enerel Enkhbaatar",1
+260,342000,"ANKHILUUN 12C MATH-JAMSRAN (ХААН БАНК ЧОЙЖИЛСҮРЭН МӨНХСАРУУЛ)","MN730005005101030036",confident,confident,matched,true,false,false,true,true,"Ankhiluun Enkhbaatar",1
+261,285000,"INDRA.E 1JK BALLET (ХААН БАНК ЧОЙЖИЛСҮРЭН МӨНХСАРУУЛ)","MN730005005101030036",confident,confident,matched,true,false,false,true,true,"Indra Enkhbaatar",1
+262,255000,"ENEREL.E 8B VOLLEYBALL 13-15 (ХААН БАНК ЧОЙЖИЛСҮРЭН МӨНХСАРУУЛ)","MN730005005101030036",attention,multiple_candidates,matched,true,false,false,true,true,"Enerel Enkhbaatar",1
+263,5000000,"1PB GOOGERELT (ХААН БАНК ЭНХБАТ УНДРАА)","MN360005005003958340",confident,confident,matched,true,false,false,true,false,"Googerelt Ulsbold",1
+264,10000000,"М.БЭСҮДЭЙ 9Б ҮЛДЭГДЭЛ ТӨЛБӨР (ХААН БАНК ЦЭРЭНДОРЖ БОЛОР)","MN770005005312564945",confident,confident,matched,true,false,false,true,false,"Besudei Munkh-Ochir",1
+265,400000,"ДӨЛГӨӨН ЕГҮН 1ВО ТАЕКВОНДО (ХААН БАНК ГАНТӨМӨР БАТЦЭЦЭГ)","MN870005005720979385",attention,flagged,matched,false,false,true,true,true,"Yegun Dulguun",1
+266,400000,"EB -Хосбаярын Ананд, 1JK, Таеквондо (ХУДАЛДАА ХӨГЖЛИЙН БАНК ХОСБАЯР БААСАНДОРЖ)","MN340004000419017037",confident,confident,matched,true,false,false,true,true,"Anand Khosbayar",1
+267,0,"Шивэлтийн үнэ РД9097392 (ГОЛОМТ БАНК ДИ ЭЙЧ ЭЛ ГЕЙТВЭЙ ХХК)","MN730015001905020283",filtered,filtered,unmatched,false,false,false,true,false,"",0
+268,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+269,0,"12209103826I0088501/100900000504","MN350034106000050873",filtered,filtered,unmatched,false,false,false,true,false,"",0
+270,0,"12209103826I0088501/100900000505","MN120034106000050899",filtered,filtered,unmatched,false,false,false,true,false,"",0
+271,0,"12209103826I0088501/100900000502","MN670034106000033710",filtered,filtered,unmatched,false,false,false,true,false,"",0
+272,0,"12209103826I0088501/100900011003","MN550034106000033732",filtered,filtered,unmatched,false,false,false,true,false,"",0
+273,0,"ГЯЛС БАНК ГААЛЬ ЦЭСНИЙ ХУРААМЖ /100/","1060004312090006",filtered,filtered,unmatched,false,false,false,true,true,"",0
+274,255000,"EB -Anand Zorigt 8e basketball (ХУДАЛДАА ХӨГЖЛИЙН БАНК УНДАРЪЯА ТӨМӨРСҮХ)","MN440004000452540348",confident,confident,matched,true,false,false,true,true,"Anand Zorigt",1
+275,2025000,"EB -Өлзийбаяр Баттүшиг 3 (ХУДАЛДАА ХӨГЖЛИЙН БАНК ЗОЛБОО ДАМДИНСҮРЭН)","MN190004000463007389",attention,multiple_candidates,matched,false,false,true,true,false,"Sodmagnai Ulziibayar",1
+276,5000000,"Б.ЭЛБЭРЭЛ 3 , 2026.09САРД СУРГАЛЫНТӨЛБӨР (ХААН БАНК БАТБАЯР БИЛЭГТ)","MN550005005077069808",attention,unmatched,unmatched,false,false,true,true,false,"",0
+277,30000,"SANDAGSUREN LKHAMDEGD VOLLEYBALL CLUB 3TERM (ХААН БАНК ОЮУНБААТАР ЦЭНДЗЭСЭМ)","MN960005005131200696",confident,confident,matched,false,false,false,true,true,"Lkhamdegd Sandagsuren",1
+278,285000,"EB -ballet 1JK Misheel Enkhtuvshin (ХУДАЛДАА ХӨГЖЛИЙН БАНК УЯНГА ЭНХЖАРГАЛ)","MN840004000499176161",confident,confident,matched,true,false,false,true,true,"Misheel Enkhtuvshin",1
+279,0,"Цэцэрлэг цайны төлбөрт (ХААН БАНК  ТӨГРӨГ ТАМГАТ)","MN710005005263588880",filtered,filtered,unmatched,false,false,false,true,false,"",0
+280,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[400.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+281,0,"Afterschool meal (ХААН БАНК  ТӨГРӨГ ТАМГАТ)","MN710005005263588880",filtered,filtered,unmatched,false,false,false,true,false,"",0
+282,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[400.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+283,0,"Бага ангийн үдийн цайны төлбөрт (ХААН БАНК  ТӨГРӨГ ТАМГАТ)","MN710005005263588880",filtered,filtered,unmatched,false,false,false,true,false,"",0
+284,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[400.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+285,0,"Цэвэрлэгээний бараа авахад  (ГОЛОМТ БАНК КОСМО ТРЕЙД ХХК)","MN240015001102813123",filtered,filtered,unmatched,false,false,false,true,false,"",0
+286,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+287,0,"Цэвэрлэгээний хошуу бодис авахад (ХААН БАНК АЛМАЗ ЭНЕРЖИ )","MN450005005653135916",filtered,filtered,unmatched,false,false,false,true,false,"",0
+288,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+289,0,"Сургалтын төлбөр буцаалт М.Үжин (БОГД БАНК МӨНХ-ЭРДЭНЭ БАТСҮХ)","MN800038008140000721",filtered,filtered,unmatched,false,false,false,true,true,"",0
+290,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[400.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+291,400000,"EB -Ариунболдын Нандинбэлэг-1р анги (ХУДАЛДАА ХӨГЖЛИЙН БАНК БАЙГАЛХҮҮ БАТБОЛД)","MN580004000809012380",attention,missing_charge,matched,false,false,true,true,true,"Nandinbeleg Ariunbold",1
+292,2000000,"EB -Ариунболдын Нандинбэлэг-1angi tuition (ХУДАЛДАА ХӨГЖЛИЙН БАНК БАЙГАЛХҮҮ БАТБОЛД)","MN580004000809012380",attention,unbalanced,matched,false,false,true,true,true,"Nandinbeleg Ariunbold",0
+293,275000,"SORSARAANA 1JK VLDEGDEL (ГОЛОМТ БАНК УРАНЗОРИГТ ПҮРЭВ-ОЧИР)","MN770015005275100620",attention,unbalanced,matched,true,false,false,true,false,"Sorsaraanaa Uranzorigt",0
+294,0,"House тэмцээний медаль (ХАС БАНК МЭЖИККРОУН ХХК)","MN610032005000443685",filtered,filtered,unmatched,false,false,false,true,false,"",0
+295,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+296,285000,"1PM TSETSEN TS BALETIIN DUGUILANGIIN TULBURT (ХААН БАНК МИЖИД ИЧИНХОРЛОО)","MN230005005753764112",attention,multiple_candidates,matched,false,false,true,true,false,"Tsetsen Tselmeg",1
+297,650000,"EB -Enerel Munkh-Erdene 1ML tennis (ХУДАЛДАА ХӨГЖЛИЙН БАНК МӨНХ-ЭРДЭНЭ АМАРСАНАА)","MN180004000436001055",attention,multiple_candidates,matched,true,false,false,true,true,"Enerel Munkh-Erdene",1
+298,345000,"EB -Enerel Munkh-Erdene 1ML homework (ХУДАЛДАА ХӨГЖЛИЙН БАНК МӨНХ-ЭРДЭНЭ АМАРСАНАА)","MN180004000436001055",attention,multiple_candidates,matched,true,false,false,true,true,"Enerel Munkh-Erdene",1
+299,375000,"EB -caitlyn obrien 7b bus fee term 4 (ХУДАЛДАА ХӨГЖЛИЙН БАНК JEFFREY OBRIEN)","MN020004000441007610",attention,missing_charge,matched,true,false,true,true,true,"Caitlyn Az Ujin O'Brien",1
+300,510000,"ОЮУНБААТАР ХАДААН 1PB (ХААН БАНК РАДНАА БАЯРСАЙХАН)","MN280005005037210181",attention,unbalanced,matched,true,false,false,true,false,"Khadaan Oyunbaatar",0
+301,617500,"JAVKHLAN UJIN 2LB (ХААН БАНК СОДНОМДОРЖ ЖАВХЛАН)","MN670005005003855447",confident,confident,matched,true,false,false,true,false,"Ujin Javkhlan",1
+302,400000,"JAVKHLAN UJIN 2LB (ХААН БАНК СОДНОМДОРЖ ЖАВХЛАН)","MN670005005003855447",confident,confident,matched,true,false,false,true,true,"Ujin Javkhlan",1
+303,11450000,"EB -3SE ууганбямба Мишээл (ХУДАЛДАА ХӨГЖЛИЙН БАНК УЯНГА ЭНХБААТАР)","MN680004000427071111",confident,confident,matched,true,false,false,true,false,"Misheel Uuganbyamba",1
+304,0,"Түрээсийн төлбөрт (ХААН БАНК ГАЛСАНДОРЖ ДОРЖХАНД)","MN180005005029732049",filtered,filtered,unmatched,false,false,false,true,false,"",0
+305,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+306,9189688,"EB -цахилгааны төлбөрт (ХУДАЛДАА ХӨГЖЛИЙН БАНК БАДАЧИТРЕЙД ХХК)","MN730004000499020868",attention,not_student,unmatched,false,false,false,true,false,"",0
+307,0,"Турба авахад (ХУДАЛДАА ХӨГЖЛИЙН БАНК ТАЙШИРТӨМӨР ХХК)","MN620004000421008525",filtered,filtered,unmatched,false,false,false,true,false,"",0
+308,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+309,0,"Гадаа будаг авахад (ХААН БАНК ОРДКОНСТРАКШН)","MN700005005124062449",filtered,filtered,unmatched,false,false,false,true,false,"",0
+310,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+311,1000000,"EB -28 46 tootiin butsaalt (ХУДАЛДАА ХӨГЖЛИЙН БАНК ЦЭРЭНБАНЗАД НҮРЭНЗЭДГОМБО)","MN730004000800010995",attention,not_student,unmatched,false,false,false,true,false,"",0
+312,255000,"EB -6А Б.Мөнхбилгүүн сагс (ХУДАЛДАА ХӨГЖЛИЙН БАНК СУГАРСҮРЭН МООНОН)","MN760004000452545301",confident,confident,matched,true,false,false,true,true,"Munkhbilguun Batbileg",1
+313,4857142,"CHELE 5?B ТӨЛБӨР (ХААН БАНК HASI GAOWA)","MN560005005570123312",attention,unmatched,unmatched,false,true,false,true,false,"",0
+314,400000,"CHELE 5?B БҮРТГЭЛ (ХААН БАНК HASI GAOWA)","MN560005005570123312",attention,unmatched,unmatched,false,true,false,true,true,"",0
+315,40000000,"кассаас","10315674",attention,not_student,unmatched,false,false,false,true,false,"",0
+316,255000,"BOLOR NAIDAN 5MA ART (ГОЛОМТ БАНК ХУЛАН ЭНХСАЙХАН)","MN570015002109079374",confident,confident,matched,true,false,false,true,true,"Bolor Naidan",1
+317,1000000,"unurbayariin tsetsuun. 5-iin TA.surgaltiin tulbur","MN350034103300416422",confident,confident,matched,false,false,false,true,true,"Tsetsuun Unurbayar",1
+318,2652860,"4BA ERHEHONGGEER (ГОЛОМТ БАНК HEXIGEBAYAER  XXX)","MN150015001205257604",confident,confident,matched,true,false,false,true,false,"Erhehonggeer Hangen",1
+319,4500000,"BATTSAIZ  MARALGOO  5+B","34316208",confident,confident,matched,true,false,false,true,false,"Maralgoo Battsaiz",1
+320,360000,"12D МӨНХБАЯР МИШЭЭЛ (ХААН БАНК ПҮРЭВЖАВ МӨНХБАЯР)","MN230005005020937260",attention,unbalanced,matched,true,false,false,true,false,"Misheel Munkhbayar",0
+321,0,"Талх талхан бүтээгдэхүүн авахад (ХУДАЛДАА ХӨГЖЛИЙН БАНК ТАЛХ ЧИХЭР ХК)","MN460004000499011945",filtered,filtered,unmatched,false,false,false,true,false,"",0
+322,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[400.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+323,0,"Автобусны түрээсийн төлбөрт (ХУДАЛДАА ХӨГЖЛИЙН БАНК БАТ ИТГЭЛ ТРЭВЕЛ ХХК)","MN050004000416015021",filtered,filtered,unmatched,false,false,false,true,false,"",0
+324,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[400.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+325,0,"Автобусны түрээсийн төлбөрт (ХУДАЛДАА ХӨГЖЛИЙН БАНК БАТ ИТГЭЛ ТРЭВЕЛ ХХК)","MN050004000416015021",filtered,filtered,unmatched,false,false,false,true,false,"",0
+326,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+327,0,"Спорт өмсгөл авахад (ГОЛОМТ БАНК УРАН СЭНТИЙ ХХК)","MN310015001165017545",filtered,filtered,unmatched,false,false,false,true,false,"",0
+328,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+329,0,"Гиншүүнчлэлийн төлбөр /И Эс Эм олон улсын дунд сургууль/ (ХААН БАНК  МОНГОЛЫН ХУВИЙН СУРГУУЛИУДЫН ХОЛБОО)","MN170005005134324063",filtered,filtered,unmatched,false,false,false,true,false,"",0
+330,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+331,0,"Геодези хэмжилт хийлгэхэд  (ГОЛОМТ БАНК ЭРХЭМ ГАЗАР)","MN400015001205231449",filtered,filtered,unmatched,false,false,false,true,false,"",0
+332,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+333,0,"Энгэр зүүлт авахад (ХУДАЛДАА ХӨГЖЛИЙН БАНК НИМУСПЛАС ХХК)","MN410004000406106793",filtered,filtered,unmatched,false,false,false,true,false,"",0
+334,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+335,0,"Сургалтын төлбөр буцаалт KimSohee Kim Nayun  (ХААН БАНК ГӨРӨӨЧ ОЮУН-ЭРДЭНЭ)","MN140005005077501808",filtered,filtered,unmatched,false,false,false,true,true,"",0
+336,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+337,8025000,"EB -Батбаяр Хулан 5ia анги төлбөр (ХУДАЛДАА ХӨГЖЛИЙН БАНК БАТБАЯР ЦЭРЭНДАМБА)","MN480004000472052602",attention,flagged,matched,true,false,true,true,false,"Khulan Batbayar",1
+338,4900000,"EZLEN 1-Р АНГИ 88115699 (ХААН БАНК ЧОЙЖИЛ МЯГМАРДОРЖ)","MN270005005309592310",attention,flagged,matched,false,false,true,true,false,"Ezlen Enkhmanlai",1
+339,960000,"NARANMANDAKH.A-4BA,BALLET PAYMENT OF 2ND AND 3RD TERM (ХААН БАНК АМГАЛАН УРАНТӨГС)","MN800005005374371836",attention,flagged,matched,true,false,true,true,true,"Naranmandakh Altantugs",1
+340,210000,"Enuujin7 C volleyball","MN030034340702063921",confident,confident,matched,false,false,true,true,true,"Enuujin Chintulga",1
+341,375000,"TANAKA KANON 8E BUS (TERM4) (ХААН БАНК ЖАРГАЛСАЙХАН УЛАМБАЯР)","MN460005005014344532",attention,missing_charge,matched,true,false,false,true,true,"Kanon Tanaka",1
+342,0,"Сандал (ХААН БАНК MA BAQUAN)","MN200005005157080888",filtered,filtered,unmatched,false,false,false,true,false,"",0
+343,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+344,0,"Сандал (ХААН БАНК MA BAQUAN)","MN200005005157080888",filtered,filtered,unmatched,false,false,false,true,false,"",0
+345,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+346,0,"Сандал (ХААН БАНК MA BAQUAN)","MN200005005157080888",filtered,filtered,unmatched,false,false,false,true,false,"",0
+347,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+348,0,"Сандал (ХААН БАНК MA BAQUAN)","MN200005005157080888",filtered,filtered,unmatched,false,false,false,true,false,"",0
+349,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+350,400000,"SETSENGUNJ LKHAGVA-OCHIR 4BA TAEKWONDO (ГОЛОМТ БАНК НАРАНТУЯА ОЧИРХҮҮ)","MN310015002735100382",confident,confident,matched,true,false,false,true,true,"Setsengunj Lkhagva-Ochir",1
+351,210000,"ХОНГОРЗРЛ 8В ВОЛЛЕЙБОЛ (ГОЛОМТ БАНК БАТ-ОТГОН ЛХАГВАЖАВ)","MN780015002800000296",attention,unbalanced,matched,true,false,false,true,false,"Khongorzol Gan-Ochir",0
+352,3000000,"185C10 N.ENEREL 12A (ХААН БАНК ЖАМБАЖАВ БАДАМЦЭРЭН)","MN600005005064245736",confident,confident,matched,true,false,false,true,false,"Enerel Nasanjargal",1
+353,10000000,"М.АРИУНХҮСЛЭН М.МӨНХХҮСЛЭН (ХААН БАНК ЦЭНГЭЛ ЦАЦРАЛ)","MN740005005062038152",attention,low_confidence,low_confidence,false,false,false,true,false,"Ariunkhuslen Yondonpurev",1
+354,0,"Данс хоорондын гүйлгээ (ХУДАЛДАА ХӨГЖЛИЙН БАНК И ЭС ЭМ ОЛОН УЛСЫН ДУНД СУРГУУЛЬ)","MN940004000457217661",filtered,filtered,unmatched,false,false,false,true,false,"",0
+355,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[400.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+356,210000,"БОЛД НОМИН ЭРДЭНЭ (ХААН БАНК ДОРЖ БОЛД)","MN900005005006516422",attention,unbalanced,matched,false,false,false,true,false,"Nomin-Erdene Bold",0
+357,0,"Шилжүүлэг (АРИГ БАНК ТЭМҮҮЖИН ЭРДЭНЭБАТ)","MN450021002108000941",filtered,filtered,unmatched,false,false,false,false,false,"",0
+358,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[400.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+359,0,"Kargo (ХААН БАНК ГАЛМАНДАХ МӨНГӨНГЭРЭЛ)","MN700005005018549535",filtered,filtered,unmatched,false,false,false,true,false,"",0
+360,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+361,210000,"EB -8E - Enerel Voleyball payment (ХУДАЛДАА ХӨГЖЛИЙН БАНК ГАНБАТ ЧУЛУУНБААТАР)","MN720004000426000838",attention,multiple_candidates,matched,true,false,false,true,true,"Enerel Ganbat",1
+362,0,"Хэвлэлийн төлбөрт (ГОЛОМТ БАНК МАНЛАЙ ХАСАР ПРИНТ)","MN560015003455170023",filtered,filtered,unmatched,false,false,false,true,false,"",0
+363,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[400.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+364,0,"Calligraphy дугуйлан төлбөрт (ГОЛОМТ БАНК ЭЛ БИЗНЕС КОРНЕР ХХК)","MN180015002105220543",filtered,filtered,unmatched,false,false,false,true,false,"",0
+365,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+366,0,"Засварын мөтериал авахад (ХУДАЛДАА ХӨГЖЛИЙН БАНК ЭРЧИМХҮҮ ХХК)","MN860004000473051212",filtered,filtered,unmatched,false,false,false,true,false,"",0
+367,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+368,420866,"РС74070108 (КАПИТРОН БАНК БЗД НДГ ТЭТГЭМЖ)","MN040030003022020007",attention,not_student,unmatched,false,false,false,true,false,"",0
+369,573396,"ГП91042608 (КАПИТРОН БАНК БЗД НДГ ТЭТГЭМЖ)","MN040030003022020007",attention,not_student,unmatched,false,false,false,true,false,"",0
+370,0,"#941144 домайн нэр (ХУДАЛДАА ХӨГЖЛИЙН БАНК АЙТҮҮЛС ХК)","MN220004000499204437",filtered,filtered,unmatched,false,false,false,true,false,"",0
+371,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+372,0,"Веб хуудас байршуулах үйлчилгээний төлбөрт (ГОЛОМТ БАНК ХОББИСТНЕТВОРК ХХК)","MN290015002205047798",filtered,filtered,unmatched,false,false,false,true,false,"",0
+373,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+374,0,"5100580 Цахилгааны төлбөр","MN590034102100001220",filtered,filtered,unmatched,false,false,false,true,false,"",0
+375,0,"ДОТООД Б/БУС ШИЛЖҮҮЛЭГ ШИМТГЭЛ-EBANK:[100.00MNT] /431209","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+376,0,"Багцын төлбөрт # INV-113590 (ГОЛОМТ БАНК КОЛЛПРО ХХК)","MN520015001410016178",filtered,filtered,unmatched,false,false,false,true,false,"",0
+377,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+378,0,"10119126; 11451230 утасны төлбөрт","MN910034100000999990",filtered,filtered,unmatched,false,false,false,true,false,"",0
+379,0,"ДОТООД Б/БУС ШИЛЖҮҮЛЭГ ШИМТГЭЛ-EBANK:[100.00MNT] /431209","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+380,0,"24036800 усны төлбөр","MN140034102100001060",filtered,filtered,unmatched,false,false,false,true,false,"",0
+381,0,"ДОТООД Б/БУС ШИЛЖҮҮЛЭГ ШИМТГЭЛ-EBANK:[100.00MNT] /431209","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+382,0,"0107 халаалт халуун усны төлбөрт","MN690034241800119907",filtered,filtered,unmatched,false,false,false,true,false,"",0
+383,0,"ДОТООД Б/БУС ШИЛЖҮҮЛЭГ ШИМТГЭЛ-EBANK:[100.00MNT] /431209","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+384,0,"2260302016488  9097392  Элит стэри 99081655 MN940034106000030702 И ЭС ЭМ ОЛОН УЛСЫН ДУНД СУРГУУЛЬ БСБ","MN120034106000063994",filtered,filtered,unmatched,false,false,false,true,false,"",0
+385,0,"ТАТВАР ТӨЛӨЛТ 300 /IBANK/:[300.00MNT] /430206","FEE",filtered,filtered,unmatched,false,false,true,true,false,"",0
+386,26516250,"М.АРИУНХҮСЛЭН М.МӨНХХҮСЛЭН (ХААН БАНК ЦЭНГЭЛ ЦАЦРАЛ)","MN740005005062038152",attention,low_confidence,low_confidence,false,false,false,true,false,"Ariunkhuslen Yondonpurev",2
+387,384000,"EB -Egshiglen, Tselmeg.G ballet payment (ХУДАЛДАА ХӨГЖЛИЙН БАНК ГАНБАТ ЧУЛУУНБААТАР)","MN740004000426088490",attention,low_confidence,low_confidence,false,false,false,true,true,"Egshiglen Ganbat",1
+388,31500000,"HYEOKJAE JANG_11B (ХААН БАНК LEE WON KYUNG)","MN460005005920342089",attention,unbalanced,matched,true,false,false,true,false,"Hyeokjae Jang",1
+389,3000000,"3LM М.ЯВУУДАЙ ТӨЛБӨР (ХААН БАНК БААТАР АРИУНЦЭЦЭГ)","MN820005005700181608",attention,flagged,matched,true,false,false,true,false,"Yvuudai Myagmardorj",1
+390,3087500,"4?A М.ЧИНГҮДЭЙ ТӨЛБӨР (ХААН БАНК БААТАР АРИУНЦЭЦЭГ)","MN820005005700181608",attention,flagged,matched,false,true,false,true,false,"Chingudei Myagmardorj",1
+391,120000,"РОЯАЛЬ БДС-C САГСНЫ ХУРААМЖ (ХААН БАНК ГАНБОЛД БАЯРМАА)","MN220005005076134837",attention,unmatched,unmatched,false,false,false,true,true,"",0
+392,2000000,"Б.ДӨЛГӨӨН 12D СУРГАЛТЫН ТӨЛБӨР (ГОЛОМТ БАНК БАТЗОРИГ РЭГЗЭН)","MN370015002705100793",confident,confident,matched,true,false,false,true,true,"Dulguun Batzorig",1
+393,300000,"ХАНГАЙН EСҮЙЖИН 5IA ХӨЛБӨМБӨГ (ХААН БАНК РЭГДЭЛ ХАНГАЙ)","MN260005005037108949",confident,confident,matched,true,false,false,true,true,"Yesuijin Khangai",1
+394,4350000,"EB -Л. Амир, 5 В, 4-р улирал (ХУДАЛДАА ХӨГЖЛИЙН БАНК AMIR LAILA)","MN170004000423020242",attention,multiple_candidates,matched,false,false,true,true,false,"Amir Dilshad",1
+395,2500000,"ARUUKHAN 1BO TUITION (ХААН БАНК БАЛДАНГОМБО ОЮУНГЭРЭЛ)","MN170005005021334874",attention,multiple_candidates,matched,false,false,true,true,true,"Yi Bo / Tergel Gong",1
+396,400000,"БЭЛТГЭЛ П.ГЭГЭЭН (ХААН БАНК БАТ-ЭРДЭНЭ БҮЖИНЛХАМ)","MN660005005720864818",attention,missing_charge,matched,false,false,true,true,true,"Gegeen Purevsuren",1
+397,1250000,"БЭЛТГЭЛ СУР ТӨЛ П.ГЭГЭЭН (ХААН БАНК БАТ-ЭРДЭНЭ БҮЖИНЛХАМ)","MN660005005720864818",attention,unbalanced,matched,false,false,true,true,true,"Gegeen Purevsuren",0
+398,5000000,"Б.ЭНХ-ҮЖИН 4SA СУРГАЛТЫН ТӨЛБӨР 80777744 (ХААН БАНК ДОРЖПҮРЭВ АМИНДАВАА)","MN650005005022192848",confident,confident,matched,true,false,false,true,true,"Enkh-Ujin Batsukh",1
+399,1000000,"2OB DAGVA AMIRLAN TULBUR 99066699 (ХААН БАНК НЭРГҮЙ МӨНХТУЯА)","MN970005005037689671",confident,confident,matched,true,false,false,true,false,"Amirlan Dagva",1
+400,15000000,"Х.ЕСҮЙ, Х.ЕСҮХЭЙ ТӨЛБӨР (ГОЛОМТ БАНК БААСАНСҮРЭН БАТМӨНХ)","MN520015002105003621",attention,unbalanced,matched,false,false,false,true,false,"Yesui Kherlen",2
+401,0,"Түрээсийн төлбөр Samuel Soldan","MN040034103100425193",filtered,filtered,unmatched,false,false,false,true,false,"",0
+402,0,"ДОТООД Б/БУС ШИЛЖҮҮЛЭГ ШИМТГЭЛ-EBANK:[100.00MNT] /431209","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+403,0,"#941949 сервер түрээсийн төлбөрт Р:9097392 (ХУДАЛДАА ХӨГЖЛИЙН БАНК АЙТҮҮЛС ХК)","MN220004000499204437",filtered,filtered,unmatched,false,false,false,true,false,"",0
+404,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+405,0,"Аудитын төлбөрт (ГОЛОМТ БАНК ТЭД-АУДИТ ХХК)","MN830015001165124182",filtered,filtered,unmatched,false,false,false,true,false,"",0
+406,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[400.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+407,198000,"KHANGAIBAZAR NARANTUYA 11A MATH CLUB PAYMENT (ХААН БАНК БОЛДБААТАР НАРАНТУЯА)","MN430005005028367100",confident,confident,matched,true,false,false,true,true,"Khangaibazar Narantuya",1
+408,0,"MANAGEMENT SERVICE","3499102621090002",filtered,filtered,unmatched,false,false,false,true,false,"",0
+409,0,"SWIFT ХУРААМЖ:[30000.00MNT] /430801","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+410,0,"SWIFT  CHARGE OUR:[30.00USD] /262110","FEE",filtered,filtered,unmatched,false,false,true,true,false,"",0
+411,375000,"Э. ЭРХЭМБИЛЭГ 11D 99141591 АВТОБУСНЫ ТӨЛБӨР (ХААН БАНК ЯНЖАВ ЗОЛЗАЯА)","MN850005005589032649",attention,missing_charge,matched,true,false,false,true,true,"Erkhembileg Enkhbold",1
+412,200000,"Ц. ОЮУНБИЛГҮҮН ТӨЛБӨР ҮЛДЭГДЭЛ-8Д (ХААН БАНК БӨХХУЯГ ХИШИГЖАРГАЛ)","MN610005005058097373",attention,unbalanced,matched,true,false,false,true,false,"Oyunbilguun Tserenjamts",0
+413,375000,"EB -ABTOБУС - Молор-Эрдэнэ Тэмүгэ 7A (ХУДАЛДАА ХӨГЖЛИЙН БАНК САРУУЛ БАЯР)","MN720004000499156880",attention,missing_charge,matched,true,false,false,true,true,"Temuge Molor-Erdene",1
+414,5000000,"ITGELT TENGIS, 1PB (ГОЛОМТ БАНК ТЭНГИС ЭРДЭНЭБАТ)","MN280015001605115814",confident,confident,matched,true,false,false,true,false,"Itgelt Tengis",1
+415,10000000,"EB -Билэгтийн Ринчен 8c (ХУДАЛДАА ХӨГЖЛИЙН БАНК БИЛЭГТ БАТБОЛД)","MN790004000471028888",attention,flagged,matched,true,false,false,true,false,"Rinchen Bilegt",1
+416,3000000,"ANU UJIN LUCAS 3? (ХААН БАНК ЗОРИГТ АРИУНЖАРГАЛ)","MN360005005011253613",confident,confident,matched,false,true,false,true,false,"Lukas Anu-Ujin",1
+417,4500000,"B GOO UJIN 5? (ХААН БАНК ЗОРИГТ АРИУНЖАРГАЛ)","MN360005005011253613",attention,multiple_candidates,matched,false,true,false,true,false,"Goo-Ujin Boldbaatar",1
+418,3607142,"ПҮРЭВСҮРЭН ГЭГЭЭН. БЭЛТГЭЛ (ХААН БАНК БАТ-ЭРДЭНЭ БҮЖИНЛХАМ)","MN660005005720864818",attention,unbalanced,matched,false,false,true,true,false,"Gegeen Purevsuren",0
+419,0,"9360000035419","MN110034343100204768",filtered,filtered,unmatched,false,false,false,false,false,"",0
+420,0,"ДОТООД Б/БУС ШИЛЖҮҮЛЭГ ШИМТГЭЛ-EBANK:[100.00MNT] /431209","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+421,375000,"8D M.BUYANDARI BUS N9 (ХААН БАНК РАДНАА ЭНХЗАЯА)","MN370005005003751130",attention,missing_charge,matched,true,false,false,true,true,"Buyandari Megddorj",1
+422,2500000,"EB -Education conference (ХУДАЛДАА ХӨГЖЛИЙН БАНК УЛААНБААТАР ДАХЬ АМЕРИК ЕРӨНХИЙ БОЛ)","MN940004000404197752",attention,not_student,unmatched,false,false,false,true,false,"",0
+423,0,"Дохиололын төлбөр (ГОЛОМТ БАНК ОУЛ ЭМ ЭН ЖИ ХХК)","MN540015003155106961",filtered,filtered,unmatched,false,false,false,true,false,"",0
+424,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+425,0,"Данс хоорондын гүйлгээ (ХУДАЛДАА ХӨГЖЛИЙН БАНК И ЭС ЭМ ОЛОН УЛСЫН ДУНД СУРГУУЛЬ)","MN680004000457112981",filtered,filtered,unmatched,false,false,false,true,false,"",0
+426,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[400.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+427,0,"3-р сарын цалингийн гүйлгээ","MN830034385300044839",filtered,filtered,unmatched,false,false,false,true,false,"",0
+428,0,"ДОТООД Б/БУС ШИЛЖҮҮЛЭГ ШИМТГЭЛ-EBANK:[100.00MNT] /431209","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+429,0,"Kargo (ХААН БАНК MA BAQUAN)","MN200005005157080888",filtered,filtered,unmatched,false,false,false,true,false,"",0
+430,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+431,0,"3-р сарын цалингийн гүйлгээ","MN830034385300044839",filtered,filtered,unmatched,false,false,false,true,false,"",0
+432,0,"ДОТООД Б/БУС ШИЛЖҮҮЛЭГ ШИМТГЭЛ-EBANK:[100.00MNT] /431209","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+433,0,"Давс авахад","MN460034101400099700",filtered,filtered,unmatched,false,false,false,true,false,"",0
+434,0,"ДОТООД Б/БУС ШИЛЖҮҮЛЭГ ШИМТГЭЛ-EBANK:[100.00MNT] /431209","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+435,0,"Afterschool tennis (ХАС БАНК ГРАНД ТИГРЭ КЛУБ ХХК)","MN170032005005832730",filtered,filtered,unmatched,false,false,false,true,true,"",0
+436,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[400.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+437,0,"Хэвлэлийн төлбөр болон хүргэлт ESM","MN350034109090915327",filtered,filtered,unmatched,false,false,false,true,false,"",0
+438,0,"ДОТООД Б/БУС ШИЛЖҮҮЛЭГ ШИМТГЭЛ-EBANK:[100.00MNT] /431209","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+439,0,"Цэвэрлэгээний бараа авахад (ХААН БАНК ДЭМБЭРЭЛ БАТСҮХ)","MN220005005035199576",filtered,filtered,unmatched,false,false,false,true,false,"",0
+440,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+441,5000000,"ORGIL NEGUN PRESCHOOL5? /88786688/ (ХААН БАНК ОТГОНЖАРГАЛ ҮҮРЦАЙХ)","MN950005005304223494",attention,multiple_candidates,matched,false,false,true,true,false,"Negun Zorigtbaatar",1
+442,390000,"EB -UNURTUVSHIN ENHNOMIN 4 (ХУДАЛДАА ХӨГЖЛИЙН БАНК ӨНӨРТҮВШИН БАЛТ)","MN590004000457113919",attention,unbalanced,matched,false,false,true,true,false,"Enkhnomin Unurtuvshin",0
+443,1600000,"EB -А.Эрхэмбэлэг 9b-3 сар 2026 (ХУДАЛДАА ХӨГЖЛИЙН БАНК БАЙГАЛХҮҮ БАТБОЛД)","MN580004000809012380",confident,confident,matched,true,false,false,true,false,"Erkhembeleg Ariunbold",1
+444,700000,"EB -surgaltiin tulbur G.Maitsetseg (ХУДАЛДАА ХӨГЖЛИЙН БАНК ГЭРЭЛ ЖАРГАЛСАЙХАН)","MN480004000417022756",attention,unmatched,unmatched,false,false,false,true,true,"",0
+445,5000000,"12C Б.ТӨГСЦОГТ СУРГАЛТЫН ТӨЛБӨР (ХААН БАНК ГОНЧИГ ОЮУНЦЭЦЭГ)","MN360005005003294569",confident,confident,matched,true,false,false,true,true,"Tugstsogt Bat-orshikh",1
+446,4000000,"12C Б.ТӨГСЦОГТ СУРГАЛТЫН ТӨЛБӨР (ХААН БАНК ГОНЧИГ ОЮУНЦЭЦЭГ)","MN360005005003294569",confident,confident,matched,true,false,false,true,true,"Tugstsogt Bat-orshikh",1
+447,3000000,"12C Б.ТӨГСЦОГТ СУРГАЛТЫН ТӨЛБӨР (ХААН БАНК ГОНЧИГ ОЮУНЦЭЦЭГ)","MN360005005003294569",confident,confident,matched,true,false,false,true,true,"Tugstsogt Bat-orshikh",1
+448,3428571,"EB -эрдэнэ овогтой номгүн - 3 (ХУДАЛДАА ХӨГЖЛИЙН БАНК ЭРДЭНЭ ТУЛГА)","MN340004000417193728",attention,unbalanced,matched,false,false,true,true,false,"Nomgun Erdene",0
+449,3000000,"БЯМБАЖАРГАЛЫН ГЭГЭЭ, ?3 ЦЭЦЭРЛЭГ (ХААН БАНК УРАНЦЭЦЭГ БЯМБАЖАРГАЛ)","MN340005005751227170",confident,confident,matched,false,false,false,true,false,"Gegee Byambajargal",1
+450,3087500,"UNURZOLBOO NANDINGEGEE 4? (ГОЛОМТ БАНК НАРМАНДАХ ГАНБААТАР)","MN290015001205318365",confident,confident,matched,false,true,false,true,false,"Nandingegee Unurzolboo",1
+451,4000000,"UUGANBAATAR SHINESARAN 5C? (ХААН БАНК МИХЛАЙ ЭНХЧИМЭГ)","MN420005005307106027",confident,confident,matched,false,false,false,true,false,"Shinesaran Uuganbaatar",1
+452,400000,"EB -эрдэнэ овогтой номгүн - 3 бүртгэлийн хураамж (ХУДАЛДАА ХӨГЖЛИЙН БАНК ЭРДЭНЭ ТУЛГА)","MN340004000417193728",attention,missing_charge,matched,false,false,true,true,true,"Nomgun Erdene",1
+453,2500000,"GRADE 12 E.TEMUULEN (ХААН БАНК ДҮГЭРСҮРЭН ӨЛЗИЙХҮҮ)","MN690005005664215018",attention,flagged,matched,false,false,true,true,false,"Temuulen Enkhbat",1
+454,4250000,"EB -Nasanbat Alimansaran,5 A (ХУДАЛДАА ХӨГЖЛИЙН БАНК СОСОРБАРАМ ЗУНДУЙ)","MN750004000458155411",confident,confident,matched,false,false,true,true,false,"Alimansaran Nasanbat",1
+455,375000,"АВТОБУС-Б.МАНДУХАЙ 8D АНГИ (ХААН БАНК АЛТАНХУЯГ ЗУЛГЭРЭЛ)","MN130005005003624395",attention,missing_charge,matched,true,false,true,true,true,"Mandukhai Batbayar",1
+456,375000,"BUS 4SA ODMAA OYUTDARI (ГОЛОМТ БАНК ARIUNJARGAL PUREVDORJ)","MN130015001605272060",attention,missing_charge,matched,true,false,false,true,true,"Oyutdari Odmaa",1
+457,375000,"BUS - ENERELT ENKHBAYAR 9C (ХААН БАНК БАЯРСАЙХАН ЭНХБАЯР)","MN180005005000903164",attention,missing_charge,matched,true,false,false,true,true,"Enerelt Enkhbayar",1
+458,375000,"WILLIAM SHATWELL 5MA (ХААН БАНК ОЮУН ЗОЛЗАЯА)","MN790005005112440814",attention,missing_charge,matched,true,false,false,true,true,"William Shatwell",1
+459,375000,"LEWIS SHATWELL 8E (ХААН БАНК ОЮУН ЗОЛЗАЯА)","MN790005005112440814",attention,missing_charge,matched,true,false,false,true,true,"Lewis Shatwell",1
+460,375000,"#4 АВТАБУС 5TA O.TUGULDUR (ХААН БАНК РАДНАА ОДОНЧИМЭГ)","MN480005005030563187",attention,missing_charge,matched,true,false,true,true,true,"Tuguldur Odonchimeg",1
+461,1700000,"TUGULDUR TSELMEG 3? 2026-2027, REGIST FEE (ХААН БАНК ТӨМӨРХҮҮ ЦЭЛМЭГ)","MN200005005003801682",attention,low_confidence,low_confidence,false,true,false,true,false,"Tselmeg Delgerdalai",1
+462,375000,"АВТОБУС - Б.ЭРХСОЁРХУУН 10С (ГОЛОМТ БАНК БАТЗОРИГ ЭНХБОЛД)","MN050015002705014845",attention,missing_charge,matched,true,false,false,true,true,"Erkhsoyorkhuun Batzorig",1
+463,375000,"АВТОБУС - Б.ЭРХМАНДУУН 8E (ГОЛОМТ БАНК БАТЗОРИГ ЭНХБОЛД)","MN050015002705014845",attention,missing_charge,matched,true,false,false,true,true,"Erkhmanduun Batzorig",1
+464,375000,"АВТОБУС - Б.ЭРХНОМУУН 5CB (ГОЛОМТ БАНК БАТЗОРИГ ЭНХБОЛД)","MN050015002705014845",attention,missing_charge,matched,true,false,false,true,true,"Erkhnomuun Batzorig",1
+465,5000000,"12С НОМИН ЧОЙЖАЛБУУ (ХААН БАНК МОЛОМЖАМЦ ЧОЙЖАЛБУУ)","MN320005005060004236",confident,confident,matched,true,false,false,true,false,"Nomin Choijalbuu",1
+466,0,"Эм хангамж авахад  (ГОЛОМТ БАНК МОНОС УЛААНБААТАР ХХК)","MN340015001601178961",filtered,filtered,unmatched,false,false,false,true,false,"",0
+467,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[200.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+468,375000,"BUS 3SE DAVAA-OCHIR (ХААН БАНК САМБУУДОРЖ ЗОЛЗАЯА)","MN710005005020815049",attention,missing_charge,matched,true,false,false,true,true,"Davaa-Ochir Ariunbayar",1
+469,255000,"MINA CHUNG, 4MK, ART CLUB (ХААН БАНК SHIN SE HYUN)","MN220005005107139141",confident,confident,matched,true,false,false,true,true,"Mina Chung",1
+470,360000,"E.ANIRLAN 6E ANGI MATEMATICK DUGUILAN (M BANK СҮХБААТАР ГАНЧИМЭГ)","MN380039008888888666",confident,confident,matched,true,false,true,true,false,"Anirlan Erdenebayar",1
+471,255000,"EANIRLAN 6E ANGI GAR BUMBUG DUGUILAN (M BANK СҮХБААТАР ГАНЧИМЭГ)","MN380039008888888666",confident,confident,matched,true,false,true,true,true,"Anirlan Erdenebayar",1
+472,375000,"BUS- 9B Б.СҮНЖИДМАА (ХААН БАНК ЭНХТАЙВАН ОДМАА)","MN110005005006297169",attention,missing_charge,matched,true,false,false,true,true,"Sunjidmaa Batsaikhan",1
+473,0,"Данс хоорондын гүйлгээ (ГОЛОМТ БАНК И ЭС ЭМ ОЛОН УЛСЫН ДУНД СУРГУУЛЬ ХХК)","MN320015001205100740",filtered,filtered,unmatched,false,false,false,true,false,"",0
+474,0,"БАНК ХООРОНД БЭЛЭН БУС ГҮЙЛГЭЭНИЙ ШИМТГЭЛ/ IBANK/:[400.00MNT] /431208","FEE",filtered,filtered,unmatched,false,false,true,true,true,"",0
+475,375000,"EB -bus Sarnai 5MA (ХУДАЛДАА ХӨГЖЛИЙН БАНК ОРГИЛМАА ДАШНЯМ)","MN780004000432015118",attention,missing_charge,matched,true,false,false,true,true,"Sarnai Bat-Orshikh",1
+476,375000,"EB-BUS B.CHINHUSEL 5CB (ХААН БАНК МЯДАГСҮРЭН ЭРДЭНЭБИЛЭГ)","MN350005005427022015",attention,missing_charge,matched,true,false,false,true,true,"Chinkhusel Battushig",1
+477,35850000,"Сургалтын төлбөр Б.Ананд Б.Намулан (КАПИТРОН БАНК МГБИ ХХК)","MN670030003026049999",attention,multiple_candidates,matched,false,false,false,true,true,"Namulan Battuvshin",1
+478,35850000,"Сургалтын төлбөр Б.Батул Б.Жамул (КАПИТРОН БАНК МГБИ ХХК)","MN670030003026049999",attention,multiple_candidates,matched,false,false,false,true,true,"Jamul Batjargal",1
+479,375000,"EB -BUS, Ariuntengis.A, 4MK (ХУДАЛДАА ХӨГЖЛИЙН БАНК ХИШИГЖАРГАЛ ПҮРЭВ)","MN510004000499139313",attention,missing_charge,matched,true,false,false,true,true,"Ariuntengis Ariunbold",1
+480,300000,"EB -Ariuntengis A, 4MK, Basketball club term4 (ХУДАЛДАА ХӨГЖЛИЙН БАНК ХИШИГЖАРГАЛ ПҮРЭВ)","MN510004000499139313",confident,confident,matched,true,false,false,true,true,"Ariuntengis Ariunbold",1
+481,375000,"4SA, BAT-ORGIL.YO (ГОЛОМТ БАНК СУВДАА ЭРДЭНЭБАЯР)","MN070015002025105337",attention,missing_charge,matched,true,false,false,true,true,"Bat-Orgil Yondonnorov",1
+482,375000,"5MA, NARANBAATAR.YO (ГОЛОМТ БАНК СУВДАА ЭРДЭНЭБАЯР)","MN070015002025105337",attention,missing_charge,matched,true,false,false,true,true,"Naranbaatar Yondonnorov",1
+483,375000,"АВТОБУС, ODKHUU NOMINZUL 8A (ГОЛОМТ БАНК ОДХҮҮ ЭНХТАЙВАН)","MN870015002205104178",attention,missing_charge,matched,true,false,false,true,true,"Nominzul Odkhuu",1
+484,2400000,"EB -Бодьхүү овогтой Ариунгоо 1-р анги (ХУДАЛДАА ХӨГЖЛИЙН БАНК БОДЬХҮҮ ЗОРИГТ)","MN720004000419037014",attention,flagged,matched,false,false,true,true,false,"Ariungoo Bodikhuu",1
+485,300000,"YI JI DA ER HAN（EDA）/5TA/FOOTBALL (ГОЛОМТ БАНК MENGGENQIQIGE XXX)","MN240015001205256569",attention,multiple_candidates,matched,true,false,false,true,true,"Yi Bo / Tergel Gong",0
+486,375000,"BUS- TS. OYUNBILGUUN-8D (ХААН БАНК БӨХХУЯГ ХИШИГЖАРГАЛ)","MN610005005058097373",attention,missing_charge,matched,true,false,false,true,true,"Oyunbilguun Tserenjamts",1
+487,1125000,"BUS12 Х. ЕСҮХЭЙ, ЕСҮЙ, ЕСҮТЭЙ (ХААН БАНК БАТМӨНХ БААСАНСҮРЭН)","MN150005005653323375",attention,multiple_candidates,matched,false,false,true,true,false,"Yesui Kherlen",1
+488,375000,"3TM B.GUNBILIG BUS (ГОЛОМТ БАНК ХАНДМАА ЁНДОН)","MN820015002105106289",attention,missing_charge,matched,true,false,false,true,true,"Gunbilig Batsaikhan",1
+489,300000,"ENKHTUVSHIN ENERLEN 3SE BASKETBALL (ХААН БАНК ЮРА УЯНГА)","MN470005005102081014",attention,unbalanced,matched,true,false,false,true,true,"Enerlen Enkhtuvshin",0
+490,300000,"TUGULDUR.JAMSRANJAV BASKETBALL (ХААН БАНК ГАНБААТАР БАЯРЧИМЭГ)","MN500005005954217424",attention,multiple_candidates,matched,false,false,false,true,true,"Tuguldur Jamsranjav",1
+491,12350000,"ERKHEMBILEG Burenjargal 4RR grade_TUITION FEE","MN290034340702073250",confident,confident,matched,true,false,true,true,true,"Erkhembileg Burenjargal",1
+492,375000,"МӨНГӨНХӨЛӨГ АНУ-ҮЖИН 11Д АНГИ (ХААН БАНК ПАЛАМ ДУЛАМСҮРЭН)","MN020005005077297451",attention,missing_charge,matched,true,false,true,true,true,"Anu-Ujin Mungunkhulug",1
+493,375000,"EB -9 D Anir (ХУДАЛДАА ХӨГЖЛИЙН БАНК БАТСАЙХАН АНАНД)","MN030004000495019908",attention,missing_charge,matched,true,false,false,true,true,"Anir Batsaikhan",1
+494,5000000,"Lkhagvadorj Misheel 10A-angi (ХАС БАНК ЛХАГВАДОРЖ ЧУЛУУНБАТ)","MN550032005005734367",confident,confident,matched,true,false,false,true,false,"Misheel lkhagvadorj",1
+495,255000,"ЧАМИН-ЭРДЭНЭ 5КО 99101969 (ХААН БАНК ХИШГЭЭ АЛТАНЗУЛ)","MN180005005400906138",confident,confident,matched,true,false,false,true,false,"Chamin-Erdene Chinzorig",1
+496,1505715,"GAQIURI 3PER 4D SEASON (ХААН БАНК TE RIGELE)","MN770005005664561067",attention,low_confidence,low_confidence,false,false,true,true,false,"Qiuri Ga",1
+497,285000,"Ё.ЭНГҮҮН 2GS БАЛЕТ ДУГУЙЛАН (ХААН БАНК ЖООНГОЙ АЛТАНТУЯА)","MN900005005026505406",attention,multiple_candidates,matched,true,false,false,true,true,"Enguun Yondonbat",1
+498,375000,"С.ОЧИР-ЭРДЭНЭ 7-Р АНГИ 4-Р УЛИРАЛ АВТОБУСНЫ ТӨЛБӨР (ХААН БАНК ЛХАГВАСҮРЭН СҮМБАНД)","MN680005005116018081",attention,missing_charge,matched,false,false,true,true,true,"Ochir-erdene Sumband",1
+499,255000,"EB -YiErgui-6B，volleyball (ХУДАЛДАА ХӨГЖЛИЙН БАНК TANG HAI)","MN020004000821054192",attention,unmatched,unmatched,true,false,false,true,true,"",0
+500,375000,"AMAR GUNJINLKHAM 12D (ХААН БАНК НУУРХҮҮ АМАР)","MN680005005361028441",attention,missing_charge,matched,true,false,false,true,true,"Gunjinlkham Amar",1
+501,375000,"12C AMIRLIN.M TERM 4 BUS (ХААН БАНК ҮҮРЦАЙХ МӨНХБАТ)","MN400005005070457491",attention,missing_charge,matched,true,false,true,true,true,"Amirlin Munkhbat",1
+502,300000,"art club. Tsegts","MN130034103100322696",attention,multiple_candidates,matched,false,false,false,true,true,"Tsegts Munkhtsooj",1
+503,690000,"DORJCHIMID MISHEEL 3VO HOMEWORK CLUB (ХААН БАНК МӨНХБАЯР СОЛОНГО)","MN150005005003523964",attention,flagged,matched,true,false,false,true,true,"Dorjchimid Misheel",1
+504,342000,"KIM MINA 11C (ХААН БАНК KIM JONG OK)","MN530005005111170970",attention,multiple_candidates,matched,true,false,false,true,false,"Min A Kim",1
+505,375000,"6A CHULUUNBAATAR ENEREL BUS TULBUR (ХААН БАНК ХУТАГ ЧАНЦАЛ)","MN790005005920040407",attention,missing_charge,matched,true,false,false,true,true,"Enerel Chuluunbaatar",1
+506,690000,"O.MERGEN 2OB ГЭРИЙН ДААЛГАВАР (ХААН БАНК ГАНЗОРИГ ОРГИЛЦЭЦЭГ)","MN110005005026382959",attention,flagged,matched,true,false,false,true,true,"Mergen Orgiltsetseg",1
+507,750000,"АВТОБУС-Ч.ЭНЭРЛИН 6B, Ч.ГЭГЭЭЛИН 2GS (ГОЛОМТ БАНК БОЛОР-ЭРДЭНЭ ЛХАГВАДОРЖ)","MN130015005270001997",attention,multi_student,matched_multi,true,false,false,true,true,"Enerlin Chinbat",1
+508,1000000,"Б.ТӨГСЦОГТ 12C ТӨЛБӨРИЙН ҮЛДЭГДЭЛ (ХААН БАНК ГОНЧИГ ОЮУНЦЭЦЭГ)","MN360005005003294569",confident,confident,matched,true,false,false,true,false,"Tugstsogt Bat-orshikh",1
+509,500000,"TUITION 10C М.ТӨГӨЛДӨР 91918882 (ХААН БАНК БАТ-ЭРДЭНЭ ОЮУ-ЭРДЭНЭ)","MN870005005021615108",confident,confident,matched,true,false,false,true,true,"Tuguldur Munkhbat",1
+510,375000,"АВТОБУС АЗЖАРГАЛЫН АНАНД 8 В АНГИ (ХААН БАНК ЛХАГВАЖАВ АЗЖАРГАЛ)","MN630005005029629292",attention,missing_charge,matched,true,false,true,true,true,"Anand Azjargal",1
+511,375000,"АВТОБУС АЗЖАРГАЛЫН АНАР 9 D АНГИ (ХААН БАНК ЛХАГВАЖАВ АЗЖАРГАЛ)","MN630005005029629292",attention,missing_charge,matched,true,false,true,true,true,"Anar Azjargal",1
+512,375000,"АВТОБУС АЗЖАРГАЛЫН ИНДРА 5 CB АНГИ (ХААН БАНК ЛХАГВАЖАВ АЗЖАРГАЛ)","MN630005005029629292",attention,missing_charge,matched,true,false,true,true,true,"Indra Azjargal",1
+513,375000,"АВТОБУС АЗЖАРГАЛЫН АРИУНЗУЛ 3 SE (ХААН БАНК ЛХАГВАЖАВ АЗЖАРГАЛ)","MN630005005029629292",attention,missing_charge,matched,true,false,false,true,true,"Ariunzul Azjargal",1
+514,375000,"EB -О.Бэхболд 11D (ХУДАЛДАА ХӨГЖЛИЙН БАНК ОДГЭРЭЛ ПҮРЭВДОЛГОР)","MN840004000499148322",attention,missing_charge,matched,true,false,false,true,true,"Bekhbold Odgerel",1
+515,375000,"EB -Isabella Ujin 8B bus payment (ХУДАЛДАА ХӨГЖЛИЙН БАНК ЭРДЭНЭТУЯА БАДАМРАА)","MN700004000452070303",attention,missing_charge,matched,true,false,false,true,true,"Isabella Ujin Guy",1
+516,690000,"2LB MUNKHDUL ENGUUNGOO HOMEWORK CLUB (ХААН БАНК ХЭНЗБАТ БАТ-ОЮУН)","MN200005005001432263",attention,flagged,matched,true,false,false,true,true,"Enguungoo Munkhdul",1
+517,375000,"D.SUGARGEREL 10B ANGI (ХААН БАНК БИЛЭГТ ДАШДАВАА)","MN550005005174035664",attention,missing_charge,matched,true,false,true,true,true,"Sugargerel Dashdavaa",1
+518,375000,"АВТОБУС - ХАДААН МИШЭЭЛ, 5MA - 4Р УЛИРАЛ (ХААН БАНК ДАВААСАМБУУ ХАДААН)","MN070005005028627999",attention,missing_charge,matched,true,false,false,true,true,"Misheel Khadaan",1
+519,300000,"EB -B.Michidbaatar. 4 BE. Сагсан бөмбөг дугуйлан (ХУДАЛДАА ХӨГЖЛИЙН БАНК НАРАНЦЭЦЭГ ОЮУНГЭРЭЛ)","MN270004000495106485",confident,confident,matched,false,false,true,true,true,"Michidbaatar Battogtokh",1
+520,690000,"1JA D. Ariunjargal home work","MN160034109000110768",attention,flagged,matched,true,false,false,true,true,"Ariunjargal Dashdendev",1
+521,375000,"EB -Bus-Enerel Demiddoo 4RR (ХУДАЛДАА ХӨГЖЛИЙН БАНК ДЭМИДДОО ЦЭДЭВСҮРЭН)","MN050004000423047133",attention,missing_charge,matched,true,false,false,true,true,"Enerel Demiddo",1
+522,50000,"Э.УХААНЗАЯА 5TA (ХААН БАНК ӨЛЗИЙСАЙХАН ЭРДЭНЭСАЙХАН)","MN230005005027778767",attention,unbalanced,matched,true,false,false,true,false,"Ukhaanzaya Erdenesaikhan",0
+523,375000,"EB -автус. 6E Баатарын Адъяа (ХУДАЛДАА ХӨГЖЛИЙН БАНК БӨРТЭ-ҮЖИН БАДРАЛ)","MN620004000472078734",attention,missing_charge,matched,true,false,false,true,true,"Adiya Baatar",1
+524,690000,"ANKHILUUN MORSAL SHAH MOHAMMAD 2ABHOMEWORK CLUB (ХААН БАНК ДАЯНЖАВ ЛХАГВА)","MN650005005042341300",attention,unbalanced,matched,true,false,false,true,false,"Ankhiluun Morsal Shakh Mokhammad",0
+525,600000,"EB -T.Nandin-Erdene 1JA Ballet (ХУДАЛДАА ХӨГЖЛИЙН БАНК ТҮШИГ ЭРХЭМБАЯР)","MN350004000411034598",attention,multiple_candidates,matched,true,false,false,true,true,"Nandin-Erdene Tushig",1
+526,3000000,"АРУУХАН 1BO TUITION (ГОЛОМТ БАНК ОЮУНГЭРЭЛ БАЛДАНГОМБО)","MN570015001175147175",attention,multiple_candidates,matched,false,false,true,true,true,"Yi Bo / Tergel Gong",1
+527,375000,"EB -bus 6D Enkh-Enerel 4r uliral (ХУДАЛДАА ХӨГЖЛИЙН БАНК ОЮУМАА СҮРЭНЖАВ)","MN680004000821021188",attention,missing_charge,matched,true,false,false,true,true,"Enkh-Enerel Ankhbayar",1
+528,800000,"1JK JARGALAN O, 3TM GALDAN O (ГОЛОМТ БАНК БОЛОР ЧОЙДОГЖАМЦ)","MN930015002705105411",attention,multi_student,matched_multi,true,false,false,true,false,"Jargalan Otgonsuren",1
+529,342000,"EB -Sheroz Saidkhadzhaev, 7C, Math’s Club Joel teacher (ХУДАЛДАА ХӨГЖЛИЙН БАНК FIRUZ SAIDKHADZHAEV)","MN300004000404341591",confident,confident,matched,true,false,false,true,true,"Sheroz Saidkhadzhaev",1
+530,375000,"TSOGJARGAL BATDELGER 5IA (ХААН БАНК НЯМХҮҮ БАТДЭЛГЭР)","MN420005005169648103",attention,missing_charge,matched,true,false,false,true,true,"Tsogjargal Batdelger",1
+531,255000,"Э.СОЛОНГОО- 4SA /УРАН ЗУРАГ/ 99805775 (ХААН БАНК БАЯНМӨНХ ЦОЛМОНЧИМЭГ)","MN070005005306892384",confident,confident,matched,true,false,false,true,true,"Sodongoo Enkh-Amgalan",1
+532,342000,"Ч. ТОДСАРАН 12В МАТ (ХААН БАНК ЦЭДЭНДАМБА АЛТАНЦЭЦЭГ)","MN390005005019169438",confident,confident,matched,true,false,false,true,false,"Todsaran Chinbat",1
+533,750000,"Ч. ТОДСАРАН 12В, Ч.ХУЛАН 8А BUS (ХААН БАНК ЦЭДЭНДАМБА АЛТАНЦЭЦЭГ)","MN390005005019169438",attention,multi_student,matched_multi,true,false,false,true,true,"Todsaran Chinbat",1
+534,375000,"EB -Tsengel TSELMUUN 6C bus fee (ХУДАЛДАА ХӨГЖЛИЙН БАНК ЦЭНГЭЛ ЭНХЦАГ)","MN800004000421035555",attention,missing_charge,matched,true,false,false,true,true,"Tselmuun Tsengel",1
+535,375000,"EB -Bus- A.Khaidu 7a -4th term (ХУДАЛДАА ХӨГЖЛИЙН БАНК АНУНАРАН АЛТАНГЭРЭЛ)","MN690004000452566476",attention,missing_charge,matched,true,false,true,true,true,"Khaidu Anunaran",1
+536,375000,"АВТОБУС 5IA O.AZJARGAL 99171130 (ХААН БАНК СҮХЭЭ БОЛОРСҮХ)","MN410005005021647946",attention,missing_charge,matched,true,false,false,true,true,"Azjargal Odkhuu",1
+537,375000,"АВТОБУС А.ИРМҮҮНТҮШИГ 2AB (ХААН БАНК БАТЧУЛУУН ГАНЧИМЭГ)","MN640005005447409826",attention,missing_charge,matched,true,false,false,true,true,"Irmuuntushig Ariunaa",1
+538,375000,"BYEKBOL-12A (ГОЛОМТ БАНК КҮМИСЖАН ХАЛАМ)","MN760015001131000484",attention,missing_charge,matched,true,false,false,true,true,"Byekbol Tsengel",1
+539,3250000,"EB -5348218 Amjiltiin ezed-s Ch.Bat-Amgalan 4 (ХУДАЛДАА ХӨГЖЛИЙН БАНК АМЖИЛТЫН ЭЗЭД ХХК)","MN880004000409023416",attention,multiple_candidates,matched,false,false,true,true,false,"Soyon Bat-Amgalan",1
+540,750000,"EB -Н. Баясгалан 12В/ Н. Түшиг 9В автобус (ХУДАЛДАА ХӨГЖЛИЙН БАНК НАРАНДАШ ДАШДАВАА)","MN220004000404216896",attention,multiple_candidates,matched,true,false,false,true,true,"Tushig Narandash",0
+541,3000000,"9A Ш.ЭРДЭМ СУРГАЛТЫН ТӨЛБӨР (ГОЛОМТ БАНК САЙНБИЛЭГ ЭНХТӨМӨР)","MN380015001105218762",confident,confident,matched,true,false,false,true,true,"Erdem Shinebayar",1
+542,10000,"EB -Amar 12B ID (ХУДАЛДАА ХӨГЖЛИЙН БАНК САРАНТУЯА БААСАНХҮҮ)","MN720004000457026870",attention,unbalanced,matched,true,false,false,true,false,"Amar Baasanbat",0
+543,5000000,"1PB.ULSBOLD GOOGERELT (ХААН БАНК ОРГИЛ УЛСБОЛД)","MN540005005058576388",confident,confident,matched,true,false,false,true,false,"Googerelt Ulsbold",1
+544,394000,"Home work 2 T.MunhkErdene","MN110034312600044882",attention,low_confidence,low_confidence,false,false,true,true,true,"Munkh-Erdene Tuvshintur",1
+545,3134000,"3? LEE HYEOK TUITION TERM4 (ГОЛОМТ БАНК HOGEUN LEE)","MN750015002705186245",confident,confident,matched,false,true,false,true,true,"HYEOK LEE",1
+546,3250000,"DAVAADORJ TSENGUUN 4?B (ХААН БАНК ГАНБААТАР МӨНХЗУЛ)","MN500005005028660302",confident,confident,matched,false,true,false,true,false,"Tsenguun Davaadorj",1
+547,342000,"EB -E.Enerel 6D math’s club (ХУДАЛДАА ХӨГЖЛИЙН БАНК МӨНХЖАРГАЛ БАЯРСАЙХАН)","MN510004000499202363",attention,multiple_candidates,matched,true,false,false,true,true,"Enerel Enkhjargal",1
+548,4000000,"ТӨГӨЛДӨР ТЭМҮҮЖИН ЦЭЦЭРЛЭГ 5?C 99098772 (ХААН БАНК ШАТАР ПҮРЭВДУЛАМ)","MN040005005032392914",attention,flagged,matched,false,true,false,true,false,"Temuujin Tuguldur",1
+549,375000,"YANJINLKHAM.Z 11C AVTOBUS TULBURT (ГОЛОМТ БАНК ПҮРЭВДУЛАМ БЯМБАСҮРЭН)","MN580015001109135844",attention,missing_charge,matched,true,false,false,true,true,"Yanjinlkham Zolbayar",1
+550,510000,"1JB,E.NARANGOO, HOMEWORK (ХААН БАНК ГАНБОЛД ЭНХ-УЧРАЛ)","MN640005005009314467",confident,confident,matched,true,false,false,true,true,"Narangoo Enkh-Uchral",1
+551,615000,"Б.ХУЛАН (ГЭРИЙН ДААЛГАВАР) 99106866 (ХААН БАНК ГАЛСАНДОВЖОО БАТЦЭЦЭГ)","MN970005005035105688",attention,multiple_candidates,matched,false,false,false,true,true,"Khulan Bat-Orshikh",1
+552,300000,"EB -4BA Munkhbadrakh Munkhkhuyag, Football Q4 (ХУДАЛДАА ХӨГЖЛИЙН БАНК МӨНХХУЯГ ГАНХУЯГ)","MN920004000410036121",confident,confident,matched,true,false,false,true,true,"Munkhbadrakh Munkhkhuyag",1
+553,375000,"12B ENKHBAYAR ENEREL AVTOBUS (ХААН БАНК БОЛД БАДАМ)","MN230005005169119407",attention,missing_charge,matched,true,false,false,true,true,"Enerel Enkhbayar",1
+554,315000,"EB -D.Ninjin, 2LB, homework club (ХУДАЛДАА ХӨГЖЛИЙН БАНК ЭНХТУЯА МӨНХБАТ)","MN110004000842001859",confident,confident,matched,true,false,false,true,true,"Ninjin Davgadorj",1
+555,375000,"AVTOBUS #8, B.NAMUDARI 7B (ГОЛОМТ БАНК БАТБАЯР ГҮРБАЗАР)","MN340015001105092055",attention,missing_charge,matched,true,false,false,true,true,"Namudari Batbayar",1
+556,555000,"HOMEWORK ERKHEMBAYAR IVEEL 1JK (ХААН БАНК ЗУЛХҮҮ АРИУНЖАРГАЛ)","MN420005005176173487",confident,confident,matched,true,false,false,true,true,"Iveel Erkhembayar",1
+557,375000,"EB -Bus fee B.Tumurbold 10A 9999-0720 (ХУДАЛДАА ХӨГЖЛИЙН БАНК БОЛОР-ЭРДЭНЭ ОТГОНХҮҮ)","MN020004000440000362",attention,missing_charge,matched,true,false,false,true,true,"Tumurbold Bolor-Erdene",1
+558,15880000,"2AB Б.БИЛИГТБӨХ, 1JA Б.АЛТАНГҮНЖ ТӨЛБӨР (ХААН БАНК МӨНХЖАРГАЛ БАДАМХАТАН)","MN840005005031657475",attention,multi_student,matched_multi,true,false,false,true,false,"Biligtbukh Battuvshin",1
+559,10000000,"Б.СОРШҮР, Б.ГИЙСЭМ ТӨЛБӨР (ГОЛОМТ БАНК ОТГОНЧИМЭГ АЛТАНГЭРЭЛ)","MN210015002209262883",attention,multi_student,matched_multi,false,false,false,true,false,"Sorshur Bat-Orgil",1
+560,7500000,"Б.СОНДОР Б.АНИР 6819974 БАЙГУУЛЛАГААР (ХААН БАНК БАТБОЛД БАТБАЯР)","MN070005005751168292",attention,multiple_candidates,matched,false,false,false,true,false,"Sondor Batzorig",1
+561,225000,"9D CHINGUUN (ХААН БАНК ЧОЙДОРЖ МӨНХЗУЛ)","MN320005005006555393",attention,unbalanced,matched,true,false,false,true,false,"Chinguun Munkhzul",0
+562,255000,"BAIGUULSAN 7A FOOTBALL (ГОЛОМТ БАНК ADULECAO XXX)","MN550015001175176893",confident,confident,matched,true,false,false,true,true,"Baiguulsan Altan-Uul",1
+563,896375713,"","",filtered,filtered,unmatched,false,false,false,false,false,"",0
+564,0,"","",filtered,filtered,unmatched,false,false,false,false,false,"",0
+565,0,"","",filtered,filtered,unmatched,false,false,false,false,false,"",0

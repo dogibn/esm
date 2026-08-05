@@ -1,15 +1,15 @@
 import { Logo } from "@/components/ui/Logo";
 import { NavLink } from "@/components/ui/nav-link";
 import { strings } from "@/app/strings";
-import { SignOutButton } from "@/features/auth";
-import { requireUserForLayout } from "@/lib/auth";
+import { UserMenu } from "@/features/auth";
+import { requireUserProfileForLayout } from "@/lib/auth";
 
 export default async function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  await requireUserForLayout();
+  const { user, displayName, avatarUrl } = await requireUserProfileForLayout();
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
@@ -31,10 +31,14 @@ export default async function AppLayout({
             <NavLink href="/imports">{strings.nav.imports}</NavLink>
             <NavLink href="/transactions">{strings.nav.transactions}</NavLink>
             <NavLink href="/discounts">{strings.nav.discounts}</NavLink>
-            <NavLink href="/history">{strings.nav.history}</NavLink>
           </nav>
           <div className="ml-auto flex items-center">
-            <SignOutButton>{strings.auth.signOut}</SignOutButton>
+            <UserMenu
+              email={user.email}
+              role={user.role}
+              displayName={displayName}
+              avatarUrl={avatarUrl}
+            />
           </div>
         </div>
       </header>

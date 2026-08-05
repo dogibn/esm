@@ -28,7 +28,7 @@ bank fees, own-account transfers) and never reach a reviewer in production.
 | `matched_multi` (siblings) | 0 | 6 |
 
 On the labelled set (`scripts/qa/fixtures/matching_cases.json`, 29 cases):
-**precision 50% → 93%, recall 33% → 93%.**
+**precision 50% → 96%, recall 33% → 96%** (93% → 96% with Phase 8 below).
 
 Three bulk passes now clear ~59% of a file's rows, against 14% before.
 
@@ -176,15 +176,58 @@ tier on purpose: confirming writes a charge to the ledger, so it is opt-in.
   other schools, utility bills, refunds, and the cash register. They get their
   own unmatched reason, their own tab, and a bulk discard (soft, undoable).
 
+### Phase 8 — auditing the proposals, not just the buckets
+
+`scripts/qa/audit_matching.ts` (`pnpm qa:matching:audit`) re-reads every incoming
+row against what the memo itself claims — surname initial, class, level, named
+fee, how many children — and against the student's ledger, and writes
+`features/imports/data/bank_transactions_sample.matching_errors.{md,csv}`. The
+dry run says which bucket a row landed in and the fixture score says whether 29
+of them are right; this covers the other 305 without labels. Findings are
+suspicions, graded: `high` is the memo and the proposal contradicting each
+other. Three of its root causes were fixed:
+
+- **`ye` folds to `e` in `phoneticFold`.** Cyrillic Е transliterates to "ye",
+  but the directory romanizes the same letter both ways — the Kherlen siblings
+  are stored as "Yesui", "Esukhei", "Esutei". Cyrillic memos could only ever
+  reach the "Ye…" half, leaving the rest to fuzzy at a tier too low to survive
+  multi-student detection. `Х.ЕСҮЙ, Х.ЕСҮХЭЙ ТӨЛБӨР` now splits 15M across both
+  children. The `e → ye` entry in `VISUAL_CONFUSABLES` retired with it.
+- **A written fee outranks one read off the amount.** "TAEKWONDO 400,000" was
+  settling a 400,000 *registration* charge: 400,000 is the registration rate, so
+  the inferred hint matched a charge the written one never could. An explicit
+  hint now retires the inferred one (`targetFees`) and stands down the searches
+  that match on amount alone (cases A, C, D), so an unsatisfied named fee goes
+  to a human instead of onto the wrong charge. Three rows, one of them
+  previously `confident`.
+- **The trailing `(BANK PAYER NAME)` block is no longer read as a second
+  child.** `match.ts` passes the raw memo to `detectMultiStudent` for its
+  separators; it now passes `splitSenderBlock(memo).body`. A parent surname that
+  coincides with a student's was one exact-name collision away from splitting a
+  transfer across a stranger.
+
+Net: confident 117 → 118, and the rows that moved out of `confident` were the
+wrong-charge ones. What the audit still reports, by count: 26 near-tied
+candidate pairs, 19 fuzzy-only identifications, 12 unmatched rows within two
+edits of a real name, 11 memos naming a level the proposed student is not in, 6
+memos whose surname initial contradicts the proposed student, 3 class
+contradictions.
+
 ---
 
 ## 4. Still open
 
-- **Two sibling memos** (`Х.ЕСҮЙ, Х.ЕСҮХЭЙ ТӨЛБӨР` 15M, `BUS12 Х. ЕСҮХЭЙ, ЕСҮЙ,
-  ЕСҮТЭЙ`) identify the right children but come back as single matches: the
-  first because no even split of the total is allocatable, the second because
-  "ЕСҮЙ" alone is ambiguous across five students named Yesui. Resolving them
-  needs the shared-surname inference the segments imply.
+- **One sibling memo** (`BUS12 Х. ЕСҮХЭЙ, ЕСҮЙ, ЕСҮТЭЙ`, three children at the
+  bus rate) still comes back as a single match: the bare segment "ЕСҮЙ" is
+  ambiguous across several students of that name, and one ambiguous segment
+  abandons the whole split. Resolving it needs the shared-surname inference the
+  segments imply. Its sibling case is fixed — see Phase 8.
+- **Multi-term fees dead-end** — four no-allocation rows are exact multiples of
+  the 375,000 bus rate (750,000 = two terms). `proposableFor` requires the
+  amount to equal the rate exactly, deliberately: two terms is two charges, and
+  proposing one charge at twice the rate would write an amount the school has no
+  rate for. Fixing it properly means a proposal that creates *several* charges,
+  which `ProposedCharge` and `proposalToEdit` are both singular about.
 - **`unbalanced` (34 rows)** — an identified student whose amount fits nothing
   they owe. Often a prepayment for next year ("BATBOLD SETSEN 26-27",
   "2026.09САРД"), which the current-term-only charge context cannot represent.

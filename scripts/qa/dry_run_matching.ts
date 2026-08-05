@@ -265,6 +265,8 @@ async function main(): Promise<void> {
       2,
     ),
   );
+  // The postgres pool keeps the event loop alive; the report is written.
+  process.exit(0);
 }
 
 main().catch((e) => {

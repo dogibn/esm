@@ -1,6 +1,6 @@
 import { allocateCharges } from './allocate-charges';
 import { buildMatchingContext } from './build-index';
-import { extractSignals } from './extract-signals';
+import { extractSignals, splitSenderBlock } from './extract-signals';
 import { looksNonStudent, shouldAttemptMatch } from './filter';
 import { detectMultiStudent, resolveStudent } from './resolve-student';
 import type {
@@ -40,11 +40,13 @@ export function match(
   }
 
   // Multi-student detection — uses the raw memo so explicit separators
-  // (commas / "and" / "&" / ";") survive into segmentation.
+  // (commas / "and" / "&" / ";") survive into segmentation, minus the trailing
+  // payer block: that names the account holder, and a parent surname that
+  // coincides with some student's is not a second child.
   const multi = detectMultiStudent(
     candidates,
     signals,
-    tx.memo ?? '',
+    splitSenderBlock(tx.memo ?? '').body,
     context,
   );
   if (multi) {

@@ -53,6 +53,16 @@ describe('normalize', () => {
     expect(normalize('Энхжаргал')).toBe(normalize('Enkhjargal'));
   });
 
+  it('folds ye→e so Cyrillic Е matches both directory romanizations', () => {
+    // The Kherlen siblings are stored as "Yesui", "Esukhei" and "Esutei" — one
+    // Cyrillic letter written two ways. A Cyrillic memo must reach all three.
+    expect(normalize('ЕСҮХЭЙ')).toBe(normalize('Esukhei'));
+    expect(normalize('ЕСҮТЭЙ')).toBe(normalize('Esutei'));
+    expect(normalize('ЕСҮЙ')).toBe(normalize('Yesui'));
+    expect(normalize('Yesui')).toBe(normalize('Esui'));
+    expect(normalize('Х.ЕСҮХЭЙ')).toBe('h.esuhei');
+  });
+
   it('handles a typical memo end-to-end', () => {
     const memo = 'Б.БААТАР 8Д САГСАН БӨМБӨГ';
     const out = normalize(memo);

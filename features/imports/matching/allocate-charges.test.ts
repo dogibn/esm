@@ -330,6 +330,39 @@ describe('allocateCharges — a named fee whose balance has moved', () => {
     expect(p.flags.has('manual_review')).toBe(false);
   });
 
+  it('refuses to pay an unrelated charge that merely costs the same', () => {
+    // "TAEKWONDO 400,000" against a student with no taekwondo charge but a
+    // 400,000 registration charge: the amounts agree, the fees do not, and the
+    // memo already said which fee this is.
+    const ctx = ctxWithCharges(1, [
+      charge(10, 'tuition', BigInt('20000000')),
+      charge(11, 'registration', BigInt('400000')),
+    ]);
+    const s = signals({
+      feeHints: { explicit: [{ kind: 'club_category', category: 'taekwondo' }], fromAmount: null },
+    });
+    const p = allocateCharges(candidate(1), BigInt('400000'), s, ctx);
+    expect(p.allocations).toEqual([]);
+    expect(p.flags.has('manual_review')).toBe(true);
+  });
+
+  it('refuses a sole open charge of the wrong fee even when it matches to the tugrik', () => {
+    const ctx = ctxWithCharges(1, [charge(11, 'registration', BigInt('400000'))]);
+    const s = signals({
+      feeHints: { explicit: [{ kind: 'club_category', category: 'taekwondo' }], fromAmount: null },
+    });
+    const p = allocateCharges(candidate(1), BigInt('400000'), s, ctx);
+    expect(p.allocations).toEqual([]);
+    expect(p.flags.has('manual_review')).toBe(true);
+  });
+
+  it('still empties the ledger when the named fee is the one that is owed', () => {
+    const ctx = ctxWithCharges(1, [charge(11, 'registration', BigInt('400000'))]);
+    const s = signals({ feeHints: { explicit: ['registration'], fromAmount: null } });
+    const p = allocateCharges(candidate(1), BigInt('400000'), s, ctx);
+    expect(p.allocations).toEqual([{ chargeId: 11, amount: BigInt('400000') }]);
+  });
+
   it('pays a named fee short without giving up', () => {
     const ctx = ctxWithCharges(1, [
       charge(10, 'tuition', BigInt('20000000')),

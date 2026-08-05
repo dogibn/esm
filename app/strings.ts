@@ -12,10 +12,8 @@ export const strings = {
     imports: "Imports",
     transactions: "Transactions",
     discounts: "Discounts",
-    history: "History",
   },
   auth: {
-    signOut: "Sign out",
     login: {
       title: "Sign in",
       subtitle: "Sign in with your staff account to continue.",

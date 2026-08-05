@@ -130,12 +130,20 @@ export function normalize(input: string): string {
 //  - o → u, for the o/u back-rounded-vowel ambiguity ("Dolgoon"/"Dulguun"):
 //    Mongolian о/ө/у/ү get romanized inconsistently on both sides.
 //
-// Both collapse genuinely-distinct spellings too (e.g. "bor"/"bur"), but two
-// *different* students almost never differ only by these romanization choices,
-// and where a collision does occur both land as candidates and are separated
-// downstream by the grade/amount signals.
+//  - ye → e. Cyrillic Е carries a glide our table spells out ("ye"), but the
+//    (Latin) directory romanizes the same letter both ways — the Kherlen
+//    siblings are stored as "Yesui", "Esukhei" and "Esutei", one Cyrillic
+//    letter written two ways. Without the fold, a Cyrillic memo can only ever
+//    reach the "Ye…" half of the directory, and the "E…" half is left to fuzzy,
+//    which drops those students to a tier too low to survive multi-student
+//    detection. Folding both sides to "e" makes the whole family reachable.
+//
+// All three collapse genuinely-distinct spellings too (e.g. "bor"/"bur"), but
+// two *different* students almost never differ only by these romanization
+// choices, and where a collision does occur both land as candidates and are
+// separated downstream by the grade/amount signals.
 export function phoneticFold(input: string): string {
-  return input.replace(/kh/g, 'h').replace(/o/g, 'u');
+  return input.replace(/kh/g, 'h').replace(/o/g, 'u').replace(/ye/g, 'e');
 }
 
 // Cyrillic letters that *look* like a Latin letter but transliterate to a
@@ -151,7 +159,9 @@ export function phoneticFold(input: string): string {
 const VISUAL_CONFUSABLES: Record<string, string> = {
   b: 'v', // В
   c: 's', // С
-  e: 'ye', // Е
+  // Е is absent on purpose: phoneticFold now folds its "ye" transliteration
+  // back to "e", so a class written with Cyrillic Е already normalizes to the
+  // Latin form and an alias for it could never match anything.
   h: 'n', // Н
   n: 'h', // Н read the other way
   p: 'r', // Р

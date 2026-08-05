@@ -28,6 +28,7 @@
     "qa:tuition-totals": "tsx --env-file=.env.local scripts/qa/verify_tuition_totals.ts",
     "qa:matching": "tsx --env-file=.env.local scripts/qa/dry_run_matching.ts && tsx --env-file=.env.local scripts/qa/score_matching.ts",
     "qa:matching:score": "tsx --env-file=.env.local scripts/qa/score_matching.ts",
+    "qa:matching:audit": "tsx --env-file=.env.local scripts/qa/audit_matching.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },

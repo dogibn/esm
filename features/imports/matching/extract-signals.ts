@@ -8,19 +8,32 @@ function feeTagKey(tag: FeeTag): string {
   return `club:${tag.feeStructureId}`;
 }
 
+/**
+ * Separate a memo's payment text from the trailing "(BANK PAYER NAME)" block
+ * the bank appends. That block names whoever holds the account — a parent, an
+ * aunt, a company — never a student, so nothing that identifies a *student* may
+ * read from it. Exported because multi-student detection works on the raw memo
+ * (normalize wipes the commas it splits on) and would otherwise read a payer's
+ * surname as a second child.
+ */
+export function splitSenderBlock(memo: string): { body: string; senderBlock: string } {
+  const parenMatch = memo.match(/\(([^)]*)\)\s*$/);
+  if (!parenMatch) return { body: memo, senderBlock: '' };
+  return {
+    body: memo.slice(0, parenMatch.index ?? memo.length),
+    senderBlock: parenMatch[1] ?? '',
+  };
+}
+
 export function extractSignals(
   memo: string,
   amount: bigint,
   context: MatchingContext,
 ): ExtractedSignals {
   // 1. Split off any trailing parenthetical block.
-  let body = memo ?? '';
-  let senderBlock = '';
-  const parenMatch = body.match(/\(([^)]*)\)\s*$/);
-  if (parenMatch) {
-    senderBlock = normalize(parenMatch[1] ?? '');
-    body = body.slice(0, parenMatch.index ?? body.length);
-  }
+  const split = splitSenderBlock(memo ?? '');
+  const body = split.body;
+  const senderBlock = normalize(split.senderBlock);
 
   const norm = normalize(body);
 

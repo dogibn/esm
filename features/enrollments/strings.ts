@@ -62,6 +62,11 @@ export const strings = {
     customValueMnt: "Amount (₮)",
     customValuePercent: "Percent (%)",
     notes: "Note",
+    notesPlaceholder: "Why this discount applies (optional)",
+    amountLabel: "Discount amount",
+    // Placeholder until the row resolves to an amount (no discount chosen, or
+    // a custom discount with no value yet).
+    amountPending: "—",
     add: "Add discount",
     remove: "Remove",
     moveUp: "Move up",
@@ -69,11 +74,11 @@ export const strings = {
     empty: "No discounts.",
     noCatalog: "No discounts in the catalog yet. An admin can add them.",
     sibling: "Sibling",
-    siblingPlaceholder: "Link the sibling student",
+    // Short enough for the inline sibling column in the discount row.
+    siblingPlaceholder: "Link sibling",
     siblingSearch: "Search by name or ID…",
     siblingNoMatch: "No students match.",
     siblingClear: "No sibling linked",
-    siblingHint: "Who the discount pairs this student with.",
     // How a discount reads: "10%" or "300,000₮".
     expressed: (unit: "mnt" | "percent", value: number): string =>
       unit === "percent"

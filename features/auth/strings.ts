@@ -1,4 +1,11 @@
 export const strings = {
+  menu: {
+    trigger: "Account menu",
+    history: "History",
+    signOut: "Sign out",
+    roleAdmin: "Admin",
+    roleAccountant: "Accountant",
+  },
   login: {
     emailLabel: "Email",
     emailPlaceholder: "you@school.edu",

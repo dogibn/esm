@@ -136,10 +136,20 @@ export function EnrollmentForm({ context, initialMode }: Props) {
   };
 
   // Live compounding preview: reductions align to resolvable rows, in order.
-  const preview = useMemo(() => {
-    const resolved = discounts.map(resolveRow);
-    const applied = resolved
-      .map((r, i) => (r ? { i, ...r } : null))
+  //
+  // Deliberately NOT memoized on `discounts`. react-hook-form mutates its
+  // internal values object in place, so `watch("discounts")` hands back the
+  // same array reference on every render — editing a row changes its contents
+  // without changing the reference. A useMemo keyed on it would never
+  // invalidate, so the preview would stay frozen until useFieldArray replaced
+  // the array wholesale (add/remove/reorder). computeTuition is a fold over a
+  // handful of rows; recomputing each render costs nothing.
+  const preview = (() => {
+    const applied = discounts
+      .map((row, i) => {
+        const r = resolveRow(row);
+        return r ? { i, ...r } : null;
+      })
       .filter((x): x is { i: number; unit: "mnt" | "percent"; value: number } => x !== null);
     const comp = computeTuition(
       Number(tuitionAmount) || 0,
@@ -148,8 +158,7 @@ export function EnrollmentForm({ context, initialMode }: Props) {
     const amountByRow = new Map<number, number>();
     applied.forEach((a, idx) => amountByRow.set(a.i, comp.lines[idx]!.amount));
     return { net: comp.net, discountTotal: comp.discountTotal, amountByRow };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [discounts, tuitionAmount, typeById]);
+  })();
 
   const discountTotal = preview.discountTotal;
   const netTuition = preview.net;
@@ -576,7 +585,7 @@ export function EnrollmentForm({ context, initialMode }: Props) {
             {strings.discounts.description}
           </span>
         </CardHeader>
-        <CardContent className="flex flex-col gap-3">
+        <CardContent className="flex flex-col gap-2">
           {context.discountTypes.length === 0 ? (
             <span className="text-sm text-muted-foreground">
               {strings.discounts.noCatalog}
@@ -594,13 +603,16 @@ export function EnrollmentForm({ context, initialMode }: Props) {
             const showSibling = isSiblingDiscount(rowType?.name ?? "");
             const reduction = preview.amountByRow.get(index);
             return (
-              <div key={row.id} className="flex flex-col gap-2 rounded-lg border p-2">
-                <div className="flex items-start gap-1.5">
+              <div
+                key={row.id}
+                className="rounded-lg border border-border p-2.5"
+              >
+                <div className="flex items-center gap-2">
                   <div className="flex flex-col">
                     <Button
                       type="button"
                       variant="ghost"
-                      size="icon-sm"
+                      size="icon-xs"
                       aria-label={strings.discounts.moveUp}
                       disabled={index === 0}
                       onClick={() => move(index, index - 1)}
@@ -610,7 +622,7 @@ export function EnrollmentForm({ context, initialMode }: Props) {
                     <Button
                       type="button"
                       variant="ghost"
-                      size="icon-sm"
+                      size="icon-xs"
                       aria-label={strings.discounts.moveDown}
                       disabled={index === fields.length - 1}
                       onClick={() => move(index, index + 1)}
@@ -618,7 +630,15 @@ export function EnrollmentForm({ context, initialMode }: Props) {
                       <ArrowDownIcon />
                     </Button>
                   </div>
-                  <div className="grid flex-1 grid-cols-1 gap-2 sm:grid-cols-[minmax(10rem,1fr)_9rem]">
+                  {/* Columns: discount · sibling · rate (or the custom-value
+                      input) · the MNT it takes off · note. The sibling slot is
+                      reserved on every row — empty on discounts that don't pair
+                      students — so the amounts stay in one scannable column
+                      down the list. Only the note is fractional, so it absorbs
+                      the row's leftover width. The single-line form needs
+                      ~864px of row, so it starts at lg; between md and lg the
+                      controls pair up two per line, and below md they stack. */}
+                  <div className="grid flex-1 grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-[minmax(0,11rem)_minmax(0,12rem)_6rem_8.5rem_minmax(10rem,1fr)]">
                     <Controller
                       control={control}
                       name={`discounts.${index}.discountTypeId`}
@@ -649,6 +669,79 @@ export function EnrollmentForm({ context, initialMode }: Props) {
                         </Select>
                       )}
                     />
+                    {showSibling ? (
+                      <Controller
+                        control={control}
+                        name={`discounts.${index}.siblingStudentId`}
+                        render={({ field }) => {
+                          const selected =
+                            siblingOptions.find((s) => s.id === field.value) ??
+                            null;
+                          return (
+                            <Combobox
+                              items={siblingOptions}
+                              value={selected}
+                              onValueChange={(s) =>
+                                field.onChange(
+                                  (s as ExistingStudentOption | null)?.id ?? null,
+                                )
+                              }
+                              itemToStringLabel={(s: ExistingStudentOption) =>
+                                `${s.lastName} ${s.firstName} ${s.studentId}`
+                              }
+                            >
+                              <ComboboxTrigger
+                                aria-label={strings.discounts.sibling}
+                                // Unlinked reads as a call to action, not as a
+                                // filled-in value.
+                                className={
+                                  selected ? undefined : "text-muted-foreground"
+                                }
+                              >
+                                <ComboboxValue>
+                                  {selected
+                                    ? `${selected.lastName} ${selected.firstName}`
+                                    : strings.discounts.siblingPlaceholder}
+                                </ComboboxValue>
+                              </ComboboxTrigger>
+                              <ComboboxContent>
+                                <ComboboxInputGroup>
+                                  <ComboboxInput
+                                    placeholder={strings.discounts.siblingSearch}
+                                  />
+                                </ComboboxInputGroup>
+                                <ComboboxList>
+                                  {(item: ExistingStudentOption) => (
+                                    <ComboboxItem key={item.id} value={item}>
+                                      <span className="flex flex-col">
+                                        <span>
+                                          {item.lastName} {item.firstName}
+                                        </span>
+                                        <span className="text-xs text-muted-foreground">
+                                          {item.studentId}
+                                          {item.enrolledThisYear
+                                            ? ` · ${strings.mode.existing}`
+                                            : ""}
+                                        </span>
+                                      </span>
+                                    </ComboboxItem>
+                                  )}
+                                </ComboboxList>
+                                <ComboboxEmpty>
+                                  {strings.discounts.siblingNoMatch}
+                                </ComboboxEmpty>
+                              </ComboboxContent>
+                            </Combobox>
+                          );
+                        }}
+                      />
+                    ) : (
+                      // Holds the column open so the rate/amount/note columns
+                      // line up with the sibling rows above and below. Only in
+                      // the single-line layout — wrapped layouts have no column
+                      // to hold, so an empty cell would just be a hole.
+                      <div aria-hidden className="hidden lg:block" />
+                    )}
                     {isCustom ? (
                       <Controller
                         control={control}
@@ -678,10 +771,40 @@ export function EnrollmentForm({ context, initialMode }: Props) {
                         )}
                       />
                     ) : (
-                      <span className="flex items-center justify-end text-xs text-muted-foreground tabular-nums">
-                        {reduction !== undefined ? `−${money(reduction)}` : ""}
+                      // Rate column, so the amount column stays aligned across
+                      // catalog-valued and custom rows.
+                      <span className="flex items-center justify-end text-sm text-muted-foreground tabular-nums">
+                        {rowType ? strings.discounts.expressed(rowType.unit, rowType.value!) : ""}
                       </span>
                     )}
+                    {/* Live reduction for this row, in MNT: what the chosen
+                        discount takes off the running total at this position
+                        (rows compound top to bottom). Shown before the contract
+                        is created so the amount is verifiable while choosing. */}
+                    <span
+                      className="flex items-center justify-end text-sm font-medium tabular-nums"
+                      aria-label={strings.discounts.amountLabel}
+                    >
+                      {reduction !== undefined ? (
+                        `−${money(reduction)}`
+                      ) : (
+                        <span className="text-muted-foreground">
+                          {strings.discounts.amountPending}
+                        </span>
+                      )}
+                    </span>
+                    <Controller
+                      control={control}
+                      name={`discounts.${index}.notes`}
+                      render={({ field }) => (
+                        <Input
+                          {...field}
+                          value={field.value ?? ""}
+                          placeholder={strings.discounts.notesPlaceholder}
+                          aria-label={strings.discounts.notes}
+                        />
+                      )}
+                    />
                   </div>
                   <Button
                     type="button"
@@ -693,79 +816,10 @@ export function EnrollmentForm({ context, initialMode }: Props) {
                     <XIcon />
                   </Button>
                 </div>
-                {isCustom && reduction !== undefined ? (
-                  <span className="pl-9 text-xs text-muted-foreground tabular-nums">
-                    −{money(reduction)}
-                  </span>
-                ) : null}
-                {showSibling ? (
-                  <Controller
-                    control={control}
-                    name={`discounts.${index}.siblingStudentId`}
-                    render={({ field }) => {
-                      const selected =
-                        siblingOptions.find((s) => s.id === field.value) ?? null;
-                      return (
-                        <Field
-                          label={strings.discounts.sibling}
-                          hint={strings.discounts.siblingHint}
-                        >
-                          <Combobox
-                            items={siblingOptions}
-                            value={selected}
-                            onValueChange={(s) =>
-                              field.onChange(
-                                (s as ExistingStudentOption | null)?.id ?? null,
-                              )
-                            }
-                            itemToStringLabel={(s: ExistingStudentOption) =>
-                              `${s.lastName} ${s.firstName} ${s.studentId}`
-                            }
-                          >
-                            <ComboboxTrigger>
-                              <ComboboxValue>
-                                {selected
-                                  ? `${selected.lastName} ${selected.firstName}`
-                                  : strings.discounts.siblingPlaceholder}
-                              </ComboboxValue>
-                            </ComboboxTrigger>
-                            <ComboboxContent>
-                              <ComboboxInputGroup>
-                                <ComboboxInput
-                                  placeholder={strings.discounts.siblingSearch}
-                                />
-                              </ComboboxInputGroup>
-                              <ComboboxList>
-                                {(item: ExistingStudentOption) => (
-                                  <ComboboxItem key={item.id} value={item}>
-                                    <span className="flex flex-col">
-                                      <span>
-                                        {item.lastName} {item.firstName}
-                                      </span>
-                                      <span className="text-xs text-muted-foreground">
-                                        {item.studentId}
-                                        {item.enrolledThisYear
-                                          ? ` · ${strings.mode.existing}`
-                                          : ""}
-                                      </span>
-                                    </span>
-                                  </ComboboxItem>
-                                )}
-                              </ComboboxList>
-                              <ComboboxEmpty>
-                                {strings.discounts.siblingNoMatch}
-                              </ComboboxEmpty>
-                            </ComboboxContent>
-                          </Combobox>
-                        </Field>
-                      );
-                    }}
-                  />
-                ) : null}
               </div>
             );
           })}
-          <div>
+          <div className="pt-1">
             <Button
               type="button"
               variant="outline"

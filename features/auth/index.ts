@@ -1,2 +1,2 @@
 export { LoginForm } from "./components/LoginForm";
-export { SignOutButton } from "./components/SignOutButton";
+export { UserMenu } from "./components/UserMenu";

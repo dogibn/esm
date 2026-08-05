@@ -17,7 +17,7 @@ When this doc and those disagree, update them together — one owner per fact.
 |---|---|
 | 1 — Reversible confirm | **Done.** |
 | 2 — Soft-discard | **Done.** |
-| 3 — Activity log + History view | **Done.** `GET /api/history` (role-scoped read) + a `/history` page with per-row Undo. Nav link between Transactions and the sign-out button. |
+| 3 — Activity log + History view | **Done.** `GET /api/history` (role-scoped read) + a `/history` page with per-row Undo. Reached from the account menu in the header (avatar button, top right). |
 | 4.2 — Reversible enrollment creation | **Done.** The New Contract flow records a `create_enrollment` operation; undo deletes the enrollment, its charges and discounts, and a student it created, guarded by a live-payment check. |
 | 4.1 — Reversible discount add | **Deferred.** See note below. |
 | 5 — Retention & purge | **Not started** (explicitly optional/later). |
@@ -246,7 +246,8 @@ role-scoped read — accountants are filtered to `actor_user_id = user.id`
 server-side, admins see all), `schemas.ts` (`GET /api/history` params: `kind`,
 `from`/`to`, pagination), `types.ts`, `strings.ts`, and
 `components/HistoryView.tsx`. Route `app/api/history/route.ts`; page
-`app/(app)/history/page.tsx`; nav link in `app/(app)/layout.tsx`. Each row
+`app/(app)/history/page.tsx`; entry point is the account menu
+(`features/auth/components/UserMenu.tsx`, mounted in `app/(app)/layout.tsx`). Each row
 exposes `undoOperationId` only when the viewer may undo it (owner-or-admin **and**
 in window) — the same gate the Transactions view already uses — and Undo posts to
 the existing `/api/imports/operations/:id/undo`.

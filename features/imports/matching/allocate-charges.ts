@@ -104,8 +104,35 @@ export function allocateCharges(
   const hintedFees: FeeTag[] = [...signals.feeHints.explicit];
   if (signals.feeHints.fromAmount) hintedFees.push(signals.feeHints.fromAmount);
 
+  /**
+   * A fee the parent *wrote* is a statement about what this money is for, and
+   * it outranks any arithmetic. Case B below is the only place allowed to spend
+   * against an explicit hint: if it cannot place the money on the named fee —
+   * because the student holds no such charge, or holds several and none of the
+   * combinations fit — then the amount agreeing with some unrelated charge is a
+   * coincidence, not evidence. "TAEKWONDO 400,000" must not settle a 400,000
+   * registration charge just because the numbers line up.
+   *
+   * So the searches that match on amount alone (A, C, D) stand down whenever an
+   * explicit hint is present and unsatisfied, and the row goes to the
+   * proposed-charge path or to a human. Fees read off the *amount* don't gate
+   * anything — that would be circular.
+   */
+  const explicitHints = signals.feeHints.explicit;
+  const amountAloneMayDecide = explicitHints.length === 0;
+
+  /**
+   * Which fees may claim this money. A fee read off the amount is a guess of
+   * last resort, so a written fee retires it entirely rather than sitting
+   * beside it: "TAEKWONDO 400,000" for a student holding a 400,000 registration
+   * charge used to resolve as registration, because 400,000 *is* the
+   * registration rate and the inferred hint matched a charge the written one
+   * never could.
+   */
+  const targetFees: FeeTag[] = amountAloneMayDecide ? hintedFees : explicitHints;
+
   const proposeMissingCharge = (): MatchProposal | null => {
-    const fee = hintedFees.length > 0 ? proposableFor(hintedFees, amount, context) : null;
+    const fee = targetFees.length > 0 ? proposableFor(targetFees, amount, context) : null;
     if (!fee) return null;
     return {
       studentId: candidate.studentId,
@@ -132,8 +159,13 @@ export function allocateCharges(
     };
   }
 
-  // Case A: single open charge whose balance equals amount.
-  if (charges.length === 1 && charges[0]!.outstandingBalance === amount) {
+  // Case A: single open charge whose balance equals amount — provided the memo
+  // didn't name a different fee.
+  if (
+    charges.length === 1 &&
+    charges[0]!.outstandingBalance === amount &&
+    (amountAloneMayDecide || feeTagMatches(charges[0]!.feeName, explicitHints))
+  ) {
     return {
       studentId: candidate.studentId,
       score: candidate.score,
@@ -147,8 +179,8 @@ export function allocateCharges(
   // ("basketball", "bus", "registration") is authoritative, so this runs BEFORE
   // the generic amount-subset search below — otherwise a coincidental subset of
   // unrelated charges could win over the fee the parent actually named.
-  if (hintedFees.length > 0) {
-    const matchingCharges = charges.filter((c) => feeTagMatches(c.feeName, hintedFees));
+  if (targetFees.length > 0) {
+    const matchingCharges = charges.filter((c) => feeTagMatches(c.feeName, targetFees));
     const sum = sumBalances(matchingCharges);
     // B1: hinted charges sum exactly to the amount → pay them in full.
     if (sum === amount && matchingCharges.length > 0) {
@@ -204,8 +236,9 @@ export function allocateCharges(
     }
   }
 
-  // Case C: any subset of charges sums to amount.
-  const combos = findCombosSummingTo(charges, amount);
+  // Case C: any subset of charges sums to amount. Reaching here with an
+  // explicit hint means Case B already failed to satisfy the named fee.
+  const combos = amountAloneMayDecide ? findCombosSummingTo(charges, amount) : [];
   if (combos.length === 1) {
     const pick = combos[0]!;
     return {
@@ -248,9 +281,10 @@ export function allocateCharges(
     if (proposed) return proposed;
   }
 
-  // Case D: overpayment.
+  // Case D: overpayment. Same gate as Case C — emptying a ledger of fees the
+  // memo did not name is not what "TAEKWONDO" asked for.
   const totalOutstanding = sumBalances(charges);
-  if (amount > totalOutstanding) {
+  if (amountAloneMayDecide && amount > totalOutstanding) {
     flags.add('overpayment');
     return {
       studentId: candidate.studentId,

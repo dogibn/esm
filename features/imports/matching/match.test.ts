@@ -282,6 +282,80 @@ describe('match — siblings sharing one transfer', () => {
     }
   });
 
+  it('splits a Cyrillic sibling memo whose names are romanized inconsistently', () => {
+    // The directory writes one Cyrillic Е two ways ("Yesui" / "Esukhei"); the
+    // memo writes both children the same way. Both must be reachable, or the
+    // whole transfer lands on the one child that happens to be spelled "Ye…".
+    const ctx = buildMatchingContext({
+      academicTermId: 4,
+      students: [
+        { id: 1, firstName: 'Yesui', lastName: 'Kherlen' },
+        { id: 2, firstName: 'Esukhei', lastName: 'Kherlen' },
+      ],
+      enrollments: [
+        { studentId: 1, gradeName: '5CB', gradeLevelCode: '5' },
+        { studentId: 2, gradeName: '8A', gradeLevelCode: '8' },
+      ],
+      currentTermFees: [
+        { feeStructureId: 1, feeName: 'bus', amount: BigInt('375000'), isClub: false },
+      ],
+      currentYearFees: [],
+      clubAliases: {},
+      confirmedAccountLinks: [],
+      openCharges: [],
+    });
+    const result = match(
+      { memo: 'Х.ЕСҮЙ, Х.ЕСҮХЭЙ АВТОБУС', amount: BigInt('750000'), senderAccount: 'ACC' },
+      ctx,
+    );
+    expect(result.kind).toBe('matched_multi');
+    if (result.kind === 'matched_multi') {
+      expect(result.proposal.proposals.map((p) => p.studentId).sort()).toEqual([1, 2]);
+    }
+  });
+
+  it('does not read the trailing payer block as a second child', () => {
+    // "(ХААН БАНК ХИШГЭЭ АЛТАНЗУЛ)" is the account holder. Altanzul is also
+    // some other student's surname; that is a coincidence, not a sibling.
+    const ctx = buildMatchingContext({
+      academicTermId: 4,
+      students: [
+        { id: 1, firstName: 'Chamin-Erdene', lastName: 'Chinzorig' },
+        { id: 2, firstName: 'Tamir', lastName: 'Altanzul' },
+      ],
+      enrollments: [
+        { studentId: 1, gradeName: '5KO', gradeLevelCode: '5' },
+        { studentId: 2, gradeName: '3CL', gradeLevelCode: '3' },
+      ],
+      currentTermFees: [],
+      currentYearFees: [],
+      clubAliases: {},
+      confirmedAccountLinks: [],
+      openCharges: [
+        {
+          studentId: 1,
+          id: 100,
+          feeName: 'tuition',
+          scope: { kind: 'year', academicYearId: 1 },
+          grossAmount: BigInt('255000'),
+          outstandingBalance: BigInt('255000'),
+        },
+      ],
+    });
+    const result = match(
+      {
+        memo: 'ЧАМИН-ЭРДЭНЭ 5КО 99101969 (ХААН БАНК ХИШГЭЭ АЛТАНЗУЛ)',
+        amount: BigInt('255000'),
+        senderAccount: 'ACC',
+      },
+      ctx,
+    );
+    expect(result.kind).toBe('matched');
+    if (result.kind === 'matched') {
+      expect(result.proposals[0]?.studentId).toBe(1);
+    }
+  });
+
   it('refuses a split that does not divide evenly', () => {
     const ctx = buildContext({
       students: baseStudents,
