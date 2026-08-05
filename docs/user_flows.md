@@ -4,6 +4,21 @@ UI workflows the accountant performs in the app. The fourth lifecycle (year/term
 
 ---
 
+## 0. Navigation
+
+Every flow below starts from a **left sidebar**, in two groups.
+
+- **The daily loop, unlabelled at the top:** Students, Imports, Transactions, **History**. History sits here on purpose — it drives reversals and is used constantly, so filing it with configuration would lend a daily tool the weight of "settings I shouldn't be poking at".
+- **Setup:** Academic calendar, Classes, Fee rates, Discounts. Everything here is configuration — touched a few times a year, read far more often than written. One group rather than two: once History moves up, splitting the rest into "school" and "money" only invites the argument about which one Classes is.
+
+The sidebar also carries the brand and, at its foot, the **identity block** — name, role, and sign-out. That is the one place for "things about me", which is why there is no account menu in a header. There is no header bar at all: each page's own `PageHeader` owns the title and that page's primary action (New contract on Students, Add year on Academic calendar).
+
+**Collapse.** The sidebar collapses to an icon rail, remembered per browser in the `esm-sidebar` cookie — read on the server, so a reload paints at the right width instead of snapping. Expanded is the real state: icon-only navigation is exactly where a twice-a-year item like Academic calendar becomes unfindable, so collapse is a temporary "I need the width for this table" gesture. In the rail each item grows a tooltip, and keeps an `aria-label` — the tooltip is a hover affordance, not an accessible name. Below the `md` breakpoint there is no room for labels, so the rail is the only layout and the toggle is hidden.
+
+Pages that don't exist yet (Clubs, Users and access) have no nav row: a link to a page that isn't there costs more than the row saves.
+
+---
+
 ## 1. Tracking view
 
 **Purpose**

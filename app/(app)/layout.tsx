@@ -1,9 +1,14 @@
-import { Logo } from "@/components/ui/Logo";
-import { NavLink } from "@/components/ui/nav-link";
-import { strings } from "@/app/strings";
-import { UserMenu } from "@/features/auth";
+import { cookies } from "next/headers";
+
+import { AppSidebar, SIDEBAR_COOKIE, isCollapsedCookie } from "@/features/shell";
 import { requireUserProfileForLayout } from "@/lib/auth";
 
+/**
+ * App shell: navigation on the left, page on the right. There is no header
+ * bar — the sidebar carries the brand, the navigation, and the identity block,
+ * which leaves each page's own <PageHeader> to own the title and that page's
+ * primary action.
+ */
 export default async function AppLayout({
   children,
 }: {
@@ -11,41 +16,24 @@ export default async function AppLayout({
 }) {
   const { user, displayName, avatarUrl } = await requireUserProfileForLayout();
 
+  // Read on the server so the first paint is already the right width.
+  const cookieStore = await cookies();
+  const collapsed = isCollapsedCookie(cookieStore.get(SIDEBAR_COOKIE)?.value);
+
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground">
-      <header className="sticky top-0 z-40 border-b border-border bg-card">
-        <div className="mx-auto flex h-14 w-full max-w-7xl items-stretch gap-4 px-4 sm:gap-6 sm:px-6">
-          <div className="flex items-center gap-3">
-            <Logo width={34} height={34} />
-            <div className="hidden flex-col leading-tight md:flex">
-              <span className="text-sm font-semibold whitespace-nowrap">
-                {strings.brand.schoolName}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {strings.brand.portalName}
-              </span>
-            </div>
-          </div>
-          <nav className="flex items-stretch">
-            <NavLink href="/students">{strings.nav.tracking}</NavLink>
-            <NavLink href="/imports">{strings.nav.imports}</NavLink>
-            <NavLink href="/transactions">{strings.nav.transactions}</NavLink>
-            <NavLink href="/discounts">{strings.nav.discounts}</NavLink>
-            <NavLink href="/calendar">{strings.nav.calendar}</NavLink>
-            <NavLink href="/classes">{strings.nav.classes}</NavLink>
-            <NavLink href="/fees">{strings.nav.fees}</NavLink>
-          </nav>
-          <div className="ml-auto flex items-center">
-            <UserMenu
-              email={user.email}
-              role={user.role}
-              displayName={displayName}
-              avatarUrl={avatarUrl}
-            />
-          </div>
-        </div>
-      </header>
-      <main className="flex-1">{children}</main>
+    <div className="flex min-h-svh bg-background text-foreground">
+      <AppSidebar
+        defaultCollapsed={collapsed}
+        user={{
+          email: user.email,
+          role: user.role,
+          displayName,
+          avatarUrl,
+        }}
+      />
+      {/* min-w-0 so a wide table scrolls inside the page instead of stretching
+          the shell. */}
+      <main className="min-w-0 flex-1">{children}</main>
     </div>
   );
 }
