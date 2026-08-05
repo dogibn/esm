@@ -92,10 +92,37 @@ export function confidentProposal(
   return p;
 }
 
+/**
+ * A sibling split that meets the same bar as a confident single: every child
+ * resolved uniquely (the splitter guarantees that), every share fully allocated
+ * against charges that already exist, nothing but benign flags, and the shares
+ * together covering the whole transfer. Charge-creating splits (a bus fee per
+ * child) stay out — writing charges to the ledger remains opt-in, same as the
+ * Missing fee group.
+ */
+export function isConfidentMulti(
+  result: MatchResultWire,
+  txAmount: number,
+): boolean {
+  if (result.kind !== "matched_multi") return false;
+  const ps = result.proposal.proposals;
+  if (ps.length < 2) return false;
+  let total = 0;
+  for (const p of ps) {
+    if (p.proposedCharge) return false;
+    if (p.allocations.length === 0) return false;
+    if (p.allocations.some((a) => a.chargeId <= 0)) return false;
+    if (!p.flags.every((f) => BENIGN_FLAGS.has(f))) return false;
+    total += sumAllocations(p);
+  }
+  return total === txAmount;
+}
+
 export function classifyProposal(
   result: MatchResultWire,
   txAmount: number,
 ): ProposalTier {
+  if (isConfidentMulti(result, txAmount)) return "confident";
   return confidentProposal(result, txAmount) ? "confident" : "attention";
 }
 
@@ -182,52 +209,91 @@ export function groupByAttentionReason(
 }
 
 // ----------------------------------------------------------------------
-// Inline edit state — one student, one or more charges (a split). The row
-// controls this; ReviewTable owns the map so bulk confirm reads live edits.
+// Inline edit state — a list of charge lines, each naming its own student. A
+// transfer paying two children is the same shape as one paying two of a single
+// child's fees, which is why the student sits on the line rather than above it.
+// The row controls this; ReviewTable owns the map so bulk confirm reads live
+// edits.
+//
+// Invariant: at least one line. A row with nothing filled in holds one blank
+// line, so the editor always has a student and charge cell to render.
 // ----------------------------------------------------------------------
 
-export type ChargeLine = { chargeId: number; amount: number };
-export type RowEdit = {
+export type ChargeLine = {
   studentId: number;
-  lines: ChargeLine[];
+  chargeId: number;
+  amount: number;
   /**
-   * A fee to create for this student as part of confirming. Lines that pay it
-   * carry `chargeId: NEW_CHARGE_PLACEHOLDER_ID`; the server swaps in the real
-   * id once the charge exists.
+   * A fee to create for this line's student as part of confirming — the bus
+   * case, where the school has a rate but no Charge row. It stays on the line
+   * while that student does, even if the charge cell currently points at a real
+   * charge, so switching back to "+ Add bus" remains possible. The line pays it
+   * by carrying `chargeId: NEW_CHARGE_PLACEHOLDER_ID`; the server swaps in the
+   * real id once the charge exists.
    */
   newCharge?: ProposedChargeWire;
 };
+export type RowEdit = { lines: ChargeLine[] };
+
+/** An empty line to start from, taking the whole transfer. */
+export function blankLine(amount: number): ChargeLine {
+  return { studentId: 0, chargeId: 0, amount };
+}
+
+/** Does this line bring a charge into existence when confirmed? */
+export function lineCreatesCharge(line: ChargeLine): boolean {
+  return line.chargeId === NEW_CHARGE_PLACEHOLDER_ID && line.newCharge !== undefined;
+}
 
 /** Does this edit pay a charge that doesn't exist yet? */
 export function editCreatesCharge(edit: RowEdit): boolean {
-  return (
-    edit.newCharge !== undefined &&
-    edit.lines.some((l) => l.chargeId === NEW_CHARGE_PLACEHOLDER_ID)
-  );
+  return edit.lines.some(lineCreatesCharge);
 }
 
-function firstProposal(result: MatchResultWire): MatchProposalWire | null {
+/**
+ * The proposals the editor is seeded from: a sibling split contributes every
+ * child, anything else its best candidate. Alternatives are offered separately
+ * (see `resultCandidates`) rather than stacked into the same edit.
+ */
+function seedProposals(result: MatchResultWire): MatchProposalWire[] {
   switch (result.kind) {
     case "matched":
     case "low_confidence":
-      return result.proposals[0] ?? null;
+      return result.proposals.slice(0, 1);
     case "matched_multi":
-      return result.proposal.proposals[0] ?? null;
+      return result.proposal.proposals;
     case "unmatched":
-      return null;
+      return [];
   }
 }
 
-/** Seed the inline editor from a proposal's top single-student allocation. */
-export function proposalToEdit(item: ProposalListItemWire): RowEdit {
-  const p = firstProposal(item.result);
-  if (!p) return { studentId: 0, lines: [] };
-  const edit: RowEdit = {
+/** The edit lines a single proposal contributes, one per allocated charge. */
+export function proposalLines(p: MatchProposalWire, fallbackAmount: number): ChargeLine[] {
+  if (p.allocations.length === 0) {
+    // A student with no charge picked yet — keep the student, leave the charge
+    // cell empty rather than dropping the match the matcher did make.
+    return [{ studentId: p.studentId, chargeId: 0, amount: fallbackAmount }];
+  }
+  return p.allocations.map((a) => ({
     studentId: p.studentId,
-    lines: p.allocations.map((a) => ({ chargeId: a.chargeId, amount: a.amount })),
-  };
-  if (p.proposedCharge) edit.newCharge = p.proposedCharge;
-  return edit;
+    chargeId: a.chargeId,
+    amount: a.amount,
+    ...(p.proposedCharge ? { newCharge: p.proposedCharge } : {}),
+  }));
+}
+
+/** Seed the inline editor from a match result. */
+export function proposalToEdit(item: ProposalListItemWire): RowEdit {
+  const amount = item.transactionPreview.amount;
+  const proposals = seedProposals(item.result);
+  if (proposals.length === 0) return { lines: [blankLine(amount)] };
+  // One proposal splitting the transfer between charges keeps the whole amount
+  // on its single line; several proposals each hold their own share already.
+  // A lone proposal with nothing allocated yet may as well claim the whole
+  // transfer; one child of a split must not, or the shares would overshoot.
+  const fallback = proposals.length === 1 ? amount : 0;
+  const lines = proposals.flatMap((p) => proposalLines(p, fallback));
+  return { lines: lines.length > 0 ? lines : [blankLine(amount)] };
 }
 
 export function editSum(edit: RowEdit): number {
@@ -241,53 +307,53 @@ export function editToLines(
   const values: AllocationFormValues = {
     bankTransactionId,
     lines: edit.lines.map((l) => ({
-      studentId: edit.studentId,
+      studentId: l.studentId,
       chargeId: l.chargeId,
       amount: l.amount,
     })),
   };
-  if (editCreatesCharge(edit)) {
-    const c = edit.newCharge!;
-    values.createCharges = [
-      {
-        studentId: edit.studentId,
-        feeName: c.feeName,
-        amount: c.amount,
-        scope: c.scope,
-        academicTermId: c.academicTermId,
-      },
-    ];
-  }
+  // One fee per student, matching what the confirm endpoint accepts — two lines
+  // for the same child's new fee are rejected before we get here.
+  const createCharges = edit.lines.filter(lineCreatesCharge).map((l) => ({
+    studentId: l.studentId,
+    feeName: l.newCharge!.feeName,
+    amount: l.newCharge!.amount,
+    scope: l.newCharge!.scope,
+    academicTermId: l.newCharge!.academicTermId,
+  }));
+  if (createCharges.length > 0) values.createCharges = createCharges;
   return values;
 }
 
 /**
- * Whether the current inline edit can be confirmed: a student, at least one
- * charge, no duplicate/blank charges or amounts, and the amounts sum to the
- * transaction amount (the full transfer must be allocated).
+ * Whether the current inline edit can be confirmed: every line names a student,
+ * a charge and a positive amount; no charge is paid twice; and the amounts sum
+ * to the transaction amount (the full transfer must be allocated).
  *
  * A line against a not-yet-created charge is legitimate, but only while the
- * edit still carries the fee to create — switching the student clears it, and
- * a dangling placeholder must not be confirmable.
+ * line still carries the fee to create — switching that line's student clears
+ * it, and a dangling placeholder must not be confirmable. Two placeholder lines
+ * for one student are rejected too: both would resolve to the same new charge.
  */
 export function isEditConfirmable(edit: RowEdit, txAmount: number): boolean {
-  if (edit.studentId <= 0) return false;
   if (edit.lines.length === 0) return false;
-  const placeholders = edit.lines.filter(
-    (l) => l.chargeId === NEW_CHARGE_PLACEHOLDER_ID,
-  );
-  if (placeholders.length > 0 && !edit.newCharge) return false;
-  if (placeholders.length > 1) return false;
-  if (
-    edit.lines.some(
-      (l) =>
-        (l.chargeId <= 0 && l.chargeId !== NEW_CHARGE_PLACEHOLDER_ID) || l.amount <= 0,
-    )
-  ) {
-    return false;
+  for (const l of edit.lines) {
+    if (l.studentId <= 0) return false;
+    if (l.amount <= 0) return false;
+    if (l.chargeId === NEW_CHARGE_PLACEHOLDER_ID) {
+      if (!l.newCharge) return false;
+    } else if (l.chargeId <= 0) {
+      return false;
+    }
   }
-  const ids = edit.lines.map((l) => l.chargeId);
-  if (new Set(ids).size !== ids.length) return false;
+  const realIds = edit.lines
+    .map((l) => l.chargeId)
+    .filter((id) => id !== NEW_CHARGE_PLACEHOLDER_ID);
+  if (new Set(realIds).size !== realIds.length) return false;
+  const newFeeStudents = edit.lines
+    .filter((l) => l.chargeId === NEW_CHARGE_PLACEHOLDER_ID)
+    .map((l) => l.studentId);
+  if (new Set(newFeeStudents).size !== newFeeStudents.length) return false;
   return editSum(edit) === txAmount;
 }
 
@@ -358,12 +424,17 @@ export function resultFlags(result: MatchResultWire): AllocationFlag[] {
   return [...out];
 }
 
-/** Alternative candidate students (proposals beyond the first) to one-click apply. */
-export function resultAlternatives(result: MatchResultWire): MatchProposalWire[] {
+/**
+ * Every candidate student the matcher considered, best first, to one-click
+ * apply. The top candidate is included rather than dropped as "the one already
+ * filled in": once a reviewer tries an alternative, the original is the thing
+ * they most often want back, and slicing it off left no way to return to it.
+ */
+export function resultCandidates(result: MatchResultWire): MatchProposalWire[] {
   switch (result.kind) {
     case "matched":
     case "low_confidence":
-      return result.proposals.slice(1);
+      return result.proposals;
     case "matched_multi":
     case "unmatched":
       return [];

@@ -8,6 +8,7 @@ import {
   editSum,
   editToLines,
   groupByAttentionReason,
+  isConfidentMulti,
   isEditConfirmable,
   proposalToEdit,
   rollupSignals,
@@ -173,58 +174,97 @@ describe("inline edit helpers", () => {
     const edit = proposalToEdit(
       item(matched(proposal({ studentId: 3, allocations: [{ chargeId: 10, amount: 1_000 }] }))),
     );
-    expect(edit).toEqual({ studentId: 3, lines: [{ chargeId: 10, amount: 1_000 }] });
+    expect(edit).toEqual({ lines: [{ studentId: 3, chargeId: 10, amount: 1_000 }] });
   });
 
-  it("seeds an empty edit for an unmatched row", () => {
+  it("seeds one blank line for an unmatched row", () => {
     expect(proposalToEdit(item({ kind: "unmatched", reason: "no_candidates" }))).toEqual({
-      studentId: 0,
-      lines: [],
+      lines: [{ studentId: 0, chargeId: 0, amount: 1_000 }],
     });
   });
 
-  it("editToLines stamps the student onto every charge line", () => {
-    const edit: RowEdit = {
-      studentId: 5,
+  it("keeps a matched student whose charge is still undecided", () => {
+    const edit = proposalToEdit(
+      item(matched(proposal({ studentId: 3, allocations: [] }))),
+    );
+    expect(edit).toEqual({ lines: [{ studentId: 3, chargeId: 0, amount: 1_000 }] });
+  });
+
+  it("seeds a sibling split as one line per child, each with its own student", () => {
+    const edit = proposalToEdit(
+      item(
+        {
+          kind: "matched_multi",
+          proposal: {
+            proposals: [
+              proposal({ studentId: 1, allocations: [{ chargeId: 10, amount: 600 }] }),
+              proposal({ studentId: 2, allocations: [{ chargeId: 11, amount: 400 }] }),
+            ],
+            totalAmount: 1_000,
+          },
+        },
+        1_000,
+      ),
+    );
+    expect(edit).toEqual({
       lines: [
-        { chargeId: 10, amount: 600 },
-        { chargeId: 11, amount: 400 },
+        { studentId: 1, chargeId: 10, amount: 600 },
+        { studentId: 2, chargeId: 11, amount: 400 },
+      ],
+    });
+    expect(isEditConfirmable(edit, 1_000)).toBe(true);
+  });
+
+  it("editToLines passes each line's own student through", () => {
+    const edit: RowEdit = {
+      lines: [
+        { studentId: 5, chargeId: 10, amount: 600 },
+        { studentId: 6, chargeId: 11, amount: 400 },
       ],
     };
     expect(editToLines(7, edit)).toEqual({
       bankTransactionId: 7,
       lines: [
         { studentId: 5, chargeId: 10, amount: 600 },
-        { studentId: 5, chargeId: 11, amount: 400 },
+        { studentId: 6, chargeId: 11, amount: 400 },
       ],
     });
     expect(editSum(edit)).toBe(1_000);
   });
 
-  it("isEditConfirmable requires a student, charges, and a balanced total", () => {
-    const ok: RowEdit = { studentId: 5, lines: [{ chargeId: 10, amount: 1_000 }] };
+  it("isEditConfirmable requires a student per line, charges, and a balanced total", () => {
+    const ok: RowEdit = { lines: [{ studentId: 5, chargeId: 10, amount: 1_000 }] };
     expect(isEditConfirmable(ok, 1_000)).toBe(true);
     expect(isEditConfirmable(ok, 999)).toBe(false); // unbalanced
-    expect(isEditConfirmable({ studentId: 0, lines: ok.lines }, 1_000)).toBe(false);
-    expect(isEditConfirmable({ studentId: 5, lines: [] }, 0)).toBe(false);
     expect(
-      isEditConfirmable(
-        { studentId: 5, lines: [{ chargeId: 0, amount: 1_000 }] },
-        1_000,
-      ),
+      isEditConfirmable({ lines: [{ studentId: 0, chargeId: 10, amount: 1_000 }] }, 1_000),
+    ).toBe(false); // no student on the line
+    expect(isEditConfirmable({ lines: [] }, 0)).toBe(false);
+    expect(
+      isEditConfirmable({ lines: [{ studentId: 5, chargeId: 0, amount: 1_000 }] }, 1_000),
     ).toBe(false); // no charge chosen
     expect(
       isEditConfirmable(
         {
-          studentId: 5,
           lines: [
-            { chargeId: 10, amount: 500 },
-            { chargeId: 10, amount: 500 },
+            { studentId: 5, chargeId: 10, amount: 500 },
+            { studentId: 5, chargeId: 10, amount: 500 },
           ],
         },
         1_000,
       ),
     ).toBe(false); // duplicate charge
+    expect(
+      isEditConfirmable(
+        {
+          lines: [
+            { studentId: 5, chargeId: 10, amount: 500 },
+            { studentId: 6, chargeId: 11, amount: 500 },
+          ],
+        },
+        1_000,
+      ),
+    ).toBe(true); // a split between two children
   });
 });
 
@@ -238,15 +278,20 @@ describe("rollupSignals", () => {
 
 describe("edits that create a charge", () => {
   const busEdit: RowEdit = {
-    studentId: 5,
-    lines: [{ chargeId: NEW_CHARGE_PLACEHOLDER_ID, amount: 375_000 }],
-    newCharge: {
-      feeName: "bus",
-      amount: 375_000,
-      scope: "term",
-      academicTermId: 4,
-      reason: "fee_hint_explicit",
-    },
+    lines: [
+      {
+        studentId: 5,
+        chargeId: NEW_CHARGE_PLACEHOLDER_ID,
+        amount: 375_000,
+        newCharge: {
+          feeName: "bus",
+          amount: 375_000,
+          scope: "term",
+          academicTermId: 4,
+          reason: "fee_hint_explicit",
+        },
+      },
+    ],
   };
 
   it("carries the fee to create onto the confirm payload", () => {
@@ -268,16 +313,36 @@ describe("edits that create a charge", () => {
   });
 
   it("is not confirmable once the fee to create has gone", () => {
-    const orphan: RowEdit = { studentId: 5, lines: busEdit.lines };
+    const orphan: RowEdit = {
+      lines: [{ studentId: 5, chargeId: NEW_CHARGE_PLACEHOLDER_ID, amount: 375_000 }],
+    };
     expect(isEditConfirmable(orphan, 375_000)).toBe(false);
   });
 
-  it("omits createCharges when no line actually pays the new fee", () => {
+  it("omits createCharges when the line no longer pays the new fee", () => {
     const values = editToLines(7, {
-      ...busEdit,
-      lines: [{ chargeId: 99, amount: 375_000 }],
+      lines: [{ ...busEdit.lines[0]!, chargeId: 99 }],
     });
     expect(values.createCharges).toBeUndefined();
+  });
+
+  it("creates one fee per child when a split needs two", () => {
+    const twoBuses: RowEdit = {
+      lines: [busEdit.lines[0]!, { ...busEdit.lines[0]!, studentId: 6 }],
+    };
+    expect(editToLines(7, twoBuses).createCharges?.map((c) => c.studentId)).toEqual([
+      5, 6,
+    ]);
+    expect(isEditConfirmable(twoBuses, 750_000)).toBe(true);
+  });
+
+  it("rejects two new-fee lines for the same child — both would be the same charge", () => {
+    expect(
+      isEditConfirmable(
+        { lines: [busEdit.lines[0]!, { ...busEdit.lines[0]! }] },
+        750_000,
+      ),
+    ).toBe(false);
   });
 
   it("seeds the editor from a proposal that wants a charge created", () => {
@@ -292,9 +357,13 @@ describe("edits that create a charge", () => {
       },
     });
     const edit = proposalToEdit(item(matched(p), 375_000));
-    expect(edit.newCharge?.feeName).toBe("bus");
     expect(edit.lines).toEqual([
-      { chargeId: NEW_CHARGE_PLACEHOLDER_ID, amount: 375_000 },
+      {
+        studentId: 1,
+        chargeId: NEW_CHARGE_PLACEHOLDER_ID,
+        amount: 375_000,
+        newCharge: p.proposedCharge,
+      },
     ]);
   });
 });
@@ -344,5 +413,74 @@ describe("groupByAttentionReason", () => {
 
   it("returns nothing for an empty list", () => {
     expect(groupByAttentionReason([])).toEqual([]);
+  });
+});
+
+describe("isConfidentMulti / classifyProposal for sibling splits (Phase 9e)", () => {
+  const multi = (ps: MatchProposalWire[]): MatchResultWire => ({
+    kind: "matched_multi",
+    proposal: { proposals: ps, totalAmount: ps.length * 1_000 },
+  });
+
+  it("a clean fully-allocated split is confident", () => {
+    const result = multi([
+      proposal({ studentId: 1, allocations: [{ chargeId: 10, amount: 1_000 }] }),
+      proposal({ studentId: 2, allocations: [{ chargeId: 11, amount: 1_000 }] }),
+    ]);
+    expect(isConfidentMulti(result, 2_000)).toBe(true);
+    expect(classifyProposal(result, 2_000)).toBe("confident");
+  });
+
+  it("a split that must create a charge stays attention — writing the ledger is opt-in", () => {
+    const result = multi([
+      proposal({ studentId: 1, allocations: [{ chargeId: 10, amount: 1_000 }] }),
+      proposal({
+        studentId: 2,
+        allocations: [{ chargeId: NEW_CHARGE_PLACEHOLDER_ID, amount: 1_000 }],
+        proposedCharge: {
+          feeName: "bus_fee",
+          amount: 1_000,
+          scope: "term",
+          academicTermId: 4,
+          reason: "fee_hint_explicit",
+        },
+      }),
+    ]);
+    expect(isConfidentMulti(result, 2_000)).toBe(false);
+    expect(classifyProposal(result, 2_000)).toBe("attention");
+  });
+
+  it("a split short of the transfer stays attention", () => {
+    const result = multi([
+      proposal({ studentId: 1, allocations: [{ chargeId: 10, amount: 1_000 }] }),
+      proposal({ studentId: 2, allocations: [{ chargeId: 11, amount: 500 }] }),
+    ]);
+    expect(isConfidentMulti(result, 2_000)).toBe(false);
+  });
+
+  it("a non-benign flag on any share stays attention", () => {
+    const result = multi([
+      proposal({ studentId: 1, allocations: [{ chargeId: 10, amount: 1_000 }] }),
+      proposal({
+        studentId: 2,
+        allocations: [{ chargeId: 11, amount: 1_000 }],
+        flags: ["manual_review"],
+      }),
+    ]);
+    expect(isConfidentMulti(result, 2_000)).toBe(false);
+  });
+
+  it("confirms through the ordinary edit path, one line per child", () => {
+    const result = multi([
+      proposal({ studentId: 1, allocations: [{ chargeId: 10, amount: 1_000 }] }),
+      proposal({ studentId: 2, allocations: [{ chargeId: 11, amount: 1_000 }] }),
+    ]);
+    expect(editToLines(7, proposalToEdit(item(result, 2_000)))).toEqual({
+      bankTransactionId: 7,
+      lines: [
+        { studentId: 1, chargeId: 10, amount: 1_000 },
+        { studentId: 2, chargeId: 11, amount: 1_000 },
+      ],
+    });
   });
 });

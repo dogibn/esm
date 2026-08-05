@@ -89,17 +89,38 @@ export function extractSignals(
     }
   }
 
+  // Degrade a grade-like token that names no real class. "4A" when the classes
+  // are 4BA/4SA/4+A is a parent abbreviating, not naming: the digit is still a
+  // level, and the letter still narrows to the classes containing it — the same
+  // constraint semantics as the explicit `4~a` wildcard. Dropping the token
+  // (what happened before) threw away the memo's only disambiguator.
+  const degradeClassLike = (digits: string, letters: string): void => {
+    for (const cls of context.classVocabulary) {
+      if (!cls.startsWith(digits)) continue;
+      const rest = cls.slice(digits.length);
+      if (rest.length === 0 || /^\d/.test(rest)) continue;
+      if (rest.includes(letters)) wildcardTokens.push(cls);
+    }
+    levelTokens.push(digits);
+  };
+
   // 3b-2. A class split across a separator — "3 LM", "4 BE.", "10 B". normalize
   // turns the separator into a space, so the contiguous pass above can't see it.
-  // Only a join that lands on a real class (or a lookalike alias) is accepted,
-  // which is what keeps "5 В" (no such class) from inventing one.
+  // A join that lands on a real class (or a lookalike alias) is a class token;
+  // one that doesn't ("5 В" — no such class) degrades to level + wildcard
+  // rather than inventing a class.
   {
-    const splitRe = /(?<![a-z0-9~+])(\d{1,2})\s+([a-z]{1,3})(?![a-z0-9])/g;
+    // The trailing `.` guard keeps a level keyword's digit away from a
+    // following initial form — "GRADE 12 E.TEMUULEN" is not "12 E".
+    const splitRe = /(?<![a-z0-9~+])(\d{1,2})\s+([a-z]{1,3})(?![a-z0-9.])/g;
     let m: RegExpExecArray | null;
     while ((m = splitRe.exec(norm)) !== null) {
       const joined = `${m[1]}${m[2]}`;
       if (context.classLookup.has(joined)) {
         classTokens.push(joined);
+        consumeRange(m.index, m[0].length);
+      } else if (m[2]!.length <= 2) {
+        degradeClassLike(m[1]!, m[2]!);
         consumeRange(m.index, m[0].length);
       }
     }
@@ -195,13 +216,51 @@ export function extractSignals(
   // student matching any spelling counts once, not once per variant.
   const nameGroups: string[][] = [];
   const bareDigits: string[] = [];
-  for (const tok of remaining) {
+
+  // A single-letter token next to a name is an initial the dot didn't survive
+  // normalize: "I KHUSLEN" (leading), or "SONDOR.E" (trailing — the dot after a
+  // multi-letter word becomes a space, stranding the surname initial). Re-join
+  // it into the directory's `x.name` form, but only when that form actually
+  // resolves — like the genitive recovery, consulting the index means this can
+  // only ever add a real student, never noise.
+  const initialJoins = new Map<number, string[]>();
+  for (let i = 0; i < remaining.length; i++) {
+    if (!/^[a-z]$/.test(remaining[i]!)) continue;
+    outer: for (const j of [i + 1, i - 1]) {
+      const name = remaining[j];
+      if (!name || name.length < 2 || !/^[a-z][a-z-]+$/.test(name)) continue;
+      // A bank prefix glued with a hyphen ("EB-ENEREL") hides the name, so try
+      // the hyphen parts too.
+      const parts = name.includes('-')
+        ? [name, ...name.split('-').filter((p) => p.length >= 2)]
+        : [name];
+      for (const part of parts) {
+        const joined = `${remaining[i]}.${part}`;
+        if (!context.nameIndex.has(joined)) continue;
+        const list = initialJoins.get(j);
+        if (list) list.push(joined);
+        else initialJoins.set(j, [joined]);
+        break outer;
+      }
+    }
+  }
+
+  for (let tokIndex = 0; tokIndex < remaining.length; tokIndex++) {
+    const tok = remaining[tokIndex]!;
     if (/^\d{1,2}$/.test(tok)) {
       // A lone 1–12 is a grade level far more often than it is anything else
       // ("Б.ЭЛБЭРЭЛ 3", "ENHBAT TSEGTSHUR 1"). Held back until we know the memo
       // carries a name too, so a stray number in an otherwise nameless memo
       // can't drag in a whole grade.
       bareDigits.push(tok);
+      continue;
+    }
+    // A digit-letter token the class pass didn't consume is a grade the school
+    // has no class for ("4A" against 4BA/4SA/4+A) — degrade it, never treat it
+    // as a name.
+    const classLike = tok.match(/^(\d{1,2})([a-z]{1,2})$/);
+    if (classLike) {
+      degradeClassLike(classLike[1]!, classLike[2]!);
       continue;
     }
     if (tok.length < 2) continue;
@@ -245,6 +304,9 @@ export function extractSignals(
       const deg = degenitiveVariant(form, context.nameIndex);
       if (deg) group.add(deg);
     }
+    // An adjacent single-letter initial rejoined into the `x.name` form belongs
+    // to this written name, not to a name of its own.
+    for (const joined of initialJoins.get(tokIndex) ?? []) group.add(joined);
     nameGroups.push([...group]);
   }
 

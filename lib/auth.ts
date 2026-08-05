@@ -1,12 +1,14 @@
 /**
- * Layout/server-component variant of requireUser ...
+ * The authorization gate. Two entry points over the same rule:
  *
- * NOT currently wired in. The (app) layout does a bare getUser() session
- * check only. The users-row check below is intentionally deferred — API
- * routes' requireUser() already enforces it (403 on missing row), so a
- * deactivated user's session degrades to empty data rather than rendering
- * a usable shell. Swap the layout's inline getUser() for this call when
- * shell-level bounce-on-deactivation becomes worth the extra query.
+ *   requireUser / requireAdmin      — API route handlers; throw HttpError.
+ *   requireUserForLayout / ...Profile — server components; redirect to /login.
+ *
+ * The rule: a verified Supabase session is not enough. The email must also
+ * have an ACTIVE row in the `users` allowlist. Both the missing-row and the
+ * deactivated-row cases are rejected identically, so revoking access on the
+ * Users and access page takes effect on the next request in both the shell
+ * and the API.
  */
 import { eq } from 'drizzle-orm';
 import { cookies } from 'next/headers';
@@ -42,7 +44,10 @@ export async function requireUser(req: Request): Promise<{ user: User; applyAuth
 
   const rows = await db.select().from(users).where(eq(users.email, email)).limit(1);
 
-  if (rows.length === 0) {
+  // A deactivated row is treated exactly like a missing one. Revoking access on
+  // the Users and access page therefore takes effect on the very next request,
+  // without waiting for the Supabase session to expire.
+  if (rows.length === 0 || !rows[0]!.isActive) {
     throw new HttpError(403, 'Forbidden');
   }
 
@@ -135,9 +140,10 @@ async function resolveLayoutSession(): Promise<{
   }
 
   const rows = await db.select().from(users).where(eq(users.email, email)).limit(1);
-  if (rows.length === 0) {
-    // Authenticated (e.g. via Google) but not on the allowlist. Carry a reason
-    // so the login page can explain the bounce instead of looping silently.
+  if (rows.length === 0 || !rows[0]!.isActive) {
+    // Authenticated (e.g. via Google) but not on the allowlist, or allowlisted
+    // and since deactivated. Carry a reason so the login page can explain the
+    // bounce instead of looping silently.
     redirect('/login?error=not_authorized');
   }
 

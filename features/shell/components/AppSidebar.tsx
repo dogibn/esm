@@ -15,7 +15,7 @@ import { strings } from "@/app/strings";
 import { UserBlock } from "@/features/auth";
 import { cn } from "@/lib/utils";
 
-import { NAV_GROUPS } from "../nav";
+import { visibleNavGroups } from "../nav";
 import { persistSidebarCollapsed } from "../sidebar-state";
 
 type Props = {
@@ -29,6 +29,11 @@ type Props = {
 };
 
 export function AppSidebar({ defaultCollapsed, user }: Props) {
+  // Role comes from the server-rendered session, not from anything the client
+  // can set, so hiding admin-only rows here is safe to trust visually. The
+  // pages behind them still check the role themselves.
+  const groups = visibleNavGroups(user.role);
+
   return (
     <Sidebar
       defaultCollapsed={defaultCollapsed}
@@ -57,7 +62,7 @@ export function AppSidebar({ defaultCollapsed, user }: Props) {
       </SidebarHeader>
 
       <SidebarNav>
-        {NAV_GROUPS.map((group, index) => (
+        {groups.map((group, index) => (
           <SidebarGroup key={group.label ?? `group-${index}`} label={group.label}>
             {group.items.map((item) => (
               <SidebarItem

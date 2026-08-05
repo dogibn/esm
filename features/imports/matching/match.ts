@@ -54,7 +54,9 @@ export function match(
     if (multiResult) {
       return { kind: 'matched_multi', proposal: multiResult };
     }
-    // Multi-student allocation failed → fall through to single-student.
+    // Multi-student allocation failed → fall through to single-student, but
+    // flagged: the memo names several children, so recording the whole
+    // transfer under one of them must never happen without a human.
   }
 
   const surfaceable = shortlist(candidates);
@@ -66,6 +68,9 @@ export function match(
     surfaceable.map((c) => allocateCharges(c, tx.amount, signals, context)),
     tx.amount,
   );
+  if (multi) {
+    for (const p of proposals) p.flags.add('multi_student_unresolved');
+  }
 
   const allTier4 = surfaceable.every((c) => c.tier === 4);
   return {
@@ -114,10 +119,33 @@ const RELATIVE_FLOOR = 0.45;
 function shortlist(candidates: StudentCandidate[]): StudentCandidate[] {
   const surfaceable = candidates.filter((c) => c.tier <= 4);
   if (surfaceable.length === 0) return [];
-  const best = surfaceable[0]!.score; // resolveStudent sorts by score desc
+  const top = surfaceable[0]!; // resolveStudent sorts by score desc
   return surfaceable
-    .filter((c) => c.score >= best * RELATIVE_FLOOR)
+    .filter((c) => c === top || !subsumedBy(c, top))
+    .filter((c) => c.score >= top.score * RELATIVE_FLOOR)
     .slice(0, MAX_PROPOSALS);
+}
+
+/**
+ * A runner-up whose entire evidence the top candidate already explains is not
+ * competition — the classic case is "ENKHBAYAR ENEREL 12B", where the memo's
+ * surname doubles as another student's first name. Requires strict subsumption:
+ * fewer name groups hit, every matched token also matched by the top candidate,
+ * no grade signal the top lacks, and no evidence outside the exact-name stage
+ * (an account link or a fuzzy hit is independent evidence and exempts it).
+ */
+function subsumedBy(c: StudentCandidate, top: StudentCandidate): boolean {
+  if (c.signals.has('sender_account') || c.signals.has('memo_name_fuzzy')) return false;
+  const cHits = c.nameGroupsHit ?? 0;
+  if (cHits === 0 || cHits >= (top.nameGroupsHit ?? 0)) return false;
+  const cTokens = c.matchedNameTokens;
+  const topTokens = top.matchedNameTokens;
+  if (!cTokens || !topTokens) return false;
+  for (const t of cTokens) if (!topTokens.has(t)) return false;
+  for (const s of c.signals) {
+    if (s.startsWith('memo_grade') && !top.signals.has(s)) return false;
+  }
+  return true;
 }
 
 /**
@@ -166,11 +194,26 @@ function allocateMultiEqualShare(
   const share = totalAmount / n;
   if (share <= BigInt('0')) return null;
 
+  // The amount→fee inference ran on the whole transfer, but here each child
+  // pays a share — two siblings at the bus rate is 750,000, which maps to no
+  // fee while 375,000 maps to the bus. Re-derive the hint at the share amount
+  // so a memo with no fee word ("З.ОЮУДАРЬ 11A З.НОМИНДАРЬ 8D") still lands.
+  const shareSignals: ExtractedSignals =
+    signals.feeHints.explicit.length > 0
+      ? signals
+      : {
+          ...signals,
+          feeHints: {
+            explicit: signals.feeHints.explicit,
+            fromAmount: context.amountFeeIndex.get(share) ?? null,
+          },
+        };
+
   const proposals: MatchProposal[] = [];
   for (const sid of studentIds) {
     const cand = candidates.find((c) => c.studentId === sid);
     if (!cand) return null;
-    const p = allocateCharges(cand, share, signals, context);
+    const p = allocateCharges(cand, share, shareSignals, context);
     // Every share must land somewhere definite; one sibling the matcher can't
     // place makes the whole split a guess.
     if (p.allocations.length === 0) return null;

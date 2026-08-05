@@ -1,8 +1,9 @@
 export { currentSchoolFeeNames, listFeeRates, publishFeeRate } from "./api";
 export { formatMnt } from "./format";
-export { feeRatePublishSchema } from "./schemas";
-export type { FeeRatePublishInput } from "./schemas";
+export { FEES_TABS, feeRatePublishSchema, feesQuerySchema } from "./schemas";
+export type { FeeRatePublishInput, FeesQuery, FeesTab } from "./schemas";
 export {
+  TUITION_FEE_NAME,
   buildByGradeData,
   buildFlatData,
   checkByGradeCoverage,

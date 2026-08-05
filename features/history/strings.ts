@@ -22,6 +22,7 @@ export const strings = {
     restore_transaction: "Restored",
     create_enrollment: "New contract",
     add_discount: "Discount added",
+    user_access: "User access",
     undo: "Undo",
   } as Record<OperationKindValue, string>,
   columns: {

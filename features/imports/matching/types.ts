@@ -52,6 +52,15 @@ export type StudentCandidate = {
   /** Accumulated evidence weight; the actual ranking key. */
   score: number;
   fuzzyDistance?: number;
+  /**
+   * Exact name tokens that hit this student, and how many written names
+   * (groups) they came from. Lets the shortlist recognise a runner-up whose
+   * entire evidence is a subset of the top candidate's — e.g. the memo's
+   * surname doubling as another student's first name — and drop it as
+   * non-competition instead of dragging the row into manual review.
+   */
+  matchedNameTokens?: Set<string>;
+  nameGroupsHit?: number;
 };
 
 export type AllocationFlag =
@@ -62,7 +71,13 @@ export type AllocationFlag =
   | 'multiple_valid_combos'
   | 'multiple_tuition_charges'
   | 'fee_inferred_from_amount'
-  | 'manual_review';
+  | 'manual_review'
+  /**
+   * The memo names several students but the split could not be allocated, so
+   * this proposal covers the whole transfer under one child's name. Never
+   * confident: a human must decide how the siblings share it.
+   */
+  | 'multi_student_unresolved';
 
 /**
  * A charge the student does not have yet, but that the transaction clearly pays
@@ -151,6 +166,12 @@ export type MatchingContext = {
   levelIndex: Map<string, number[]>;
   nameIndex: Map<string, number[]>;
   nameTokenList: string[];
+  /**
+   * Normalized last name per student — what lets a sibling memo's ambiguous
+   * segment ("ЕСҮЙ" among several Yesuis) borrow the surname its co-segments
+   * already resolved to.
+   */
+  lastNameNormByStudent: Map<number, string>;
   accountIndex: Map<string, number[]>;
   openChargesByStudent: Map<number, ChargeWithBalance[]>;
   amountFeeIndex: Map<bigint, FeeTag>;

@@ -57,13 +57,17 @@ export { ReviewTable, type ReviewTableHandle } from "./components/ReviewTable";
 export { UploadDropzone } from "./components/UploadDropzone";
 export {
   attentionReason,
+  blankLine,
   classifyProposal,
   confidentProposal,
+  editCreatesCharge,
   editSum,
   editToLines,
   isEditConfirmable,
+  lineCreatesCharge,
+  proposalLines,
   proposalToEdit,
-  resultAlternatives,
+  resultCandidates,
   resultFlags,
   resultSignals,
   rollupSignals,

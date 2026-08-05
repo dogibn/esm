@@ -195,6 +195,64 @@
       "kind": "multi_student",
       "students": ["Bat-Erdene Dorj", "Anar Dorj"],
       "why": "two siblings disambiguated by class, one bus fee each, neither has a bus charge"
+    },
+    {
+      "memo": "ENKHBAYAR ENEREL ULDEGDEL TOLBOR 12B 99556365",
+      "amount": 7000000,
+      "student": "Enerel Enkhbayar",
+      "why": "surname + first name + class 12B all match one student; the runner-up shares only the surname token"
+    },
+    {
+      "memo": "EB -Энх-Учрал 4А ; 99097953",
+      "amount": 1625000,
+      "student": "Enkh-uchral Gurbazar",
+      "why": "no class named 4A exists; among the 4* classes (4BA/4SA/4+A/...) exactly one student is named Enkh-Uchral"
+    },
+    {
+      "memo": "VOLLEYBALL SONDOR.E 8E",
+      "amount": 210000,
+      "student": "Sondor Erkhembayar",
+      "why": "two Sondors in 8E; the trailing .E surname initial picks Erkhembayar over Sain-Od"
+    },
+    {
+      "memo": "EB-ENEREL.E 8B MATH-JOEL",
+      "amount": 360000,
+      "student": "Enerel Enkhbaatar",
+      "why": "two Enerels in 8B-adjacent scores; the trailing .E surname initial picks Enkhbaatar over Lkhagvasuren"
+    },
+    {
+      "memo": "EB -E.Enerel 6D math’s club",
+      "amount": 342000,
+      "student": "Enerel Enkhjargal",
+      "why": "initial form E.Enerel + class 6D; Tugs-Enerel Damdinpurev shares the name part but not the initial"
+    },
+    {
+      "memo": "З.ОЮУДАРЬ 11A З.НОМИНДАРЬ 8D",
+      "amount": 750000,
+      "kind": "multi_student",
+      "students": ["Oyudari Zolbayar", "Nomindari Zolbayar"],
+      "why": "two initial-form siblings with classes, no separator between them"
+    },
+    {
+      "memo": "I KHUSLEN I KHULAN AVTOBUS",
+      "amount": 750000,
+      "kind": "multi_student",
+      "students": ["Khuslen Ikhbayar", "Khulan Ikhbayar"],
+      "why": "single-letter surname initial I before each name; exactly one Khuslen I. and one Khulan I. in the directory"
+    },
+    {
+      "memo": "Сургалтын төлбөр Б.Батул Б.Жамул",
+      "amount": 35850000,
+      "kind": "multi_student",
+      "students": ["Batul Batjargal", "Jamul Batjargal"],
+      "why": "two initial-form siblings, no separator; tuition balances settle together"
+    },
+    {
+      "memo": "EB -Н. Баясгалан 12В/ Н. Түшиг 9В автобус",
+      "amount": 750000,
+      "kind": "multi_student",
+      "students": ["Bayasgalan Narandash", "Tushig Narandash"],
+      "why": "slash-separated siblings, Cyrillic homoglyph classes, one bus fee each"
     }
   ]
 }

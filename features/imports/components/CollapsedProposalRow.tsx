@@ -43,13 +43,16 @@ import { cn } from "@/lib/utils";
 import { NEW_CHARGE_PLACEHOLDER_ID } from "../matching";
 import { memoWithoutSenderBlock } from "../memo";
 import {
+  blankLine,
   editCreatesCharge,
   editSum,
   isEditConfirmable,
-  resultAlternatives,
+  proposalLines,
+  resultCandidates,
   resultFlags,
   resultSignals,
   rollupSignals,
+  type ChargeLine,
   type RowEdit,
 } from "../triage";
 import { strings } from "../strings";
@@ -71,15 +74,20 @@ const ALL_CLASSES = "__all__";
  * whole point.
  *
  * Reading order follows the work: what the bank sent (memo, amount) first, then
- * where it goes (class → student → charge). The amount is sized for eight
- * digits and no more.
+ * where it goes (class → student → charge → how much of the transfer). The
+ * transaction amount is sized for eight digits and no more.
+ *
+ * The same template is used for a split's extra charge rows, so the second
+ * charge sits directly under the first with its own class and student.
  *
  * The row is wider than a small screen; the list scrolls sideways rather than
  * squashing the columns (see MIN_ROW_WIDTH).
  */
 const ROW_GRID =
-  "grid grid-cols-[3rem_minmax(14rem,1fr)_5.5rem_5.5rem_9.5rem_11.5rem_6rem_10.5rem] items-start gap-x-2";
+  "grid grid-cols-[3rem_minmax(14rem,1fr)_5.5rem_5.5rem_9.5rem_11.5rem_7rem_10.5rem] items-start gap-x-2";
 const MIN_ROW_WIDTH = "min-w-[70rem]";
+/** First allocation column — where a split row's cells start. */
+const ALLOCATION_COL_START = "col-start-4";
 
 /**
  * Let a trigger grow to fit its label instead of clipping it. `h-auto!` is the
@@ -141,11 +149,21 @@ export function CollapsedProposalRow({
   const txAmount = t.amount;
   const displayMemo = memoWithoutSenderBlock(t.memo);
 
-  const selectedStudent = studentById.get(edit.studentId) ?? null;
-  const [classFilter, setClassFilter] = useState<string | null>(
-    () => selectedStudent?.gradeName ?? null,
+  // Every allocation line names its own student, so a transfer shared by two
+  // children and one shared by two of a child's fees are the same shape: line
+  // one lives in the row proper, the rest are charge rows underneath it.
+  const lines = edit.lines.length > 0 ? edit.lines : [blankLine(txAmount)];
+  const splitMode = lines.length > 1;
+
+  /**
+   * Class narrows the student list; it is not part of the allocation, so it
+   * lives here, per line. A line with no explicit choice follows its own
+   * student's class — which is what makes a seeded sibling split come up with
+   * each child already filtered to their own class.
+   */
+  const [classFilters, setClassFilters] = useState<Record<number, string | null>>(
+    {},
   );
-  const [splitOpen, setSplitOpen] = useState(edit.lines.length > 1);
   const [expanded, setExpanded] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [rowError, setRowError] = useState<string | null>(null);
@@ -153,127 +171,139 @@ export function CollapsedProposalRow({
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  const splitMode = splitOpen || edit.lines.length > 1;
-  const confirmable = isEditConfirmable(edit, txAmount);
-  const openCharges = openChargesByStudent.get(edit.studentId) ?? [];
-  // The matcher's proposed fee only stands while its student is selected —
-  // "create a bus charge" is a statement about *this* child.
-  const newCharge =
-    edit.newCharge && edit.studentId > 0 ? edit.newCharge : undefined;
-  const creatingCharge = editCreatesCharge(edit);
-  const chargeOptions: Array<{ value: string; label: string }> = [
-    ...openCharges.map((c) => ({
+  const classFilterFor = (i: number): string | null =>
+    i in classFilters
+      ? classFilters[i] ?? null
+      : studentById.get(lines[i]?.studentId ?? 0)?.gradeName ?? null;
+
+  const studentsByClass = useMemo(() => {
+    const m = new Map<string, ReviewStudent[]>();
+    for (const s of allStudents) {
+      if (!s.gradeName) continue;
+      const arr = m.get(s.gradeName);
+      if (arr) arr.push(s);
+      else m.set(s.gradeName, [s]);
+    }
+    return m;
+  }, [allStudents]);
+
+  const studentsFor = (i: number): ReviewStudent[] => {
+    const cls = classFilterFor(i);
+    return cls === null ? allStudents : studentsByClass.get(cls) ?? [];
+  };
+
+  const chargeOptionsFor = (line: ChargeLine) => {
+    const options = (openChargesByStudent.get(line.studentId) ?? []).map((c) => ({
       value: String(c.id),
       label: `${c.feeName} · ${fmt(c.outstandingBalance)}`,
-    })),
-    ...(newCharge
-      ? [
-          {
-            value: NEW_CHARGE_VALUE,
-            label: strings.triage.controls.addFeeOption(
-              newCharge.feeName,
-              fmt(newCharge.amount),
-            ),
-          },
-        ]
-      : []),
-  ];
-
-  const selectedChargeValue = edit.lines[0]?.chargeId
-    ? String(edit.lines[0]?.chargeId)
-    : "";
-  const chargeLabelOf = (value: string) =>
-    chargeOptions.find((o) => o.value === value)?.label ?? null;
-  const selectedChargeLabel = chargeLabelOf(selectedChargeValue);
-  const lineChargeLabel = (chargeId: number) =>
-    chargeId ? chargeLabelOf(String(chargeId)) : null;
-
-  const filteredStudents = useMemo(
-    () =>
-      classFilter === null
-        ? allStudents
-        : allStudents.filter((s) => s.gradeName === classFilter),
-    [allStudents, classFilter],
-  );
+    }));
+    // The matcher's proposed fee stays on offer while its student does — "create
+    // a bus charge" is a statement about *this* child.
+    if (line.newCharge) {
+      options.push({
+        value: NEW_CHARGE_VALUE,
+        label: strings.triage.controls.addFeeOption(
+          line.newCharge.feeName,
+          fmt(line.newCharge.amount),
+        ),
+      });
+    }
+    return options;
+  };
 
   // Editing helpers — all funnel through onEditChange so ReviewTable stays the
   // single source of truth.
-  const setStudent = (s: ReviewStudent | null) => {
-    // Switching students invalidates the chosen charge(s) — and any fee the
-    // matcher proposed creating, which was about the student it picked.
-    onEditChange({ studentId: s ? s.id : 0, lines: [] });
-    if (s) setClassFilter(s.gradeName ?? null);
+  const setLines = (next: ChargeLine[]) => {
+    onEditChange({ lines: next });
     setRowError(null);
   };
 
-  const changeClass = (cls: string | null) => {
-    setClassFilter(cls);
-    // Bug fix: if the selected student isn't in the new class, clear it so a
-    // stale student can't stay attached to the wrong class.
+  const setLineStudent = (i: number, s: ReviewStudent | null) => {
+    // Switching students invalidates that line's charge — and any fee the
+    // matcher proposed creating, which was about the student it picked.
+    setLines(
+      lines.map((l, idx) =>
+        idx === i
+          ? { studentId: s ? s.id : 0, chargeId: 0, amount: l.amount }
+          : l,
+      ),
+    );
+    setClassFilters((prev) => ({ ...prev, [i]: s?.gradeName ?? null }));
+  };
+
+  const setLineClass = (i: number, cls: string | null) => {
+    setClassFilters((prev) => ({ ...prev, [i]: cls }));
+    // If this line's student isn't in the new class, clear it so a stale
+    // student can't stay attached to the wrong class.
+    const line = lines[i];
     if (
       cls !== null &&
-      edit.studentId > 0 &&
-      studentById.get(edit.studentId)?.gradeName !== cls
+      line &&
+      line.studentId > 0 &&
+      studentById.get(line.studentId)?.gradeName !== cls
     ) {
-      onEditChange({ studentId: 0, lines: [] });
+      setLines(
+        lines.map((l, idx) =>
+          idx === i ? { studentId: 0, chargeId: 0, amount: l.amount } : l,
+        ),
+      );
     }
   };
 
-  // A charge id of 0 means "nothing selected"; the negative placeholder means
-  // the fee being created, which is a real selection.
-  const isChosen = (chargeId: number) =>
-    chargeId > 0 || chargeId === NEW_CHARGE_PLACEHOLDER_ID;
+  const setLineCharge = (i: number, chargeId: number) =>
+    setLines(lines.map((l, idx) => (idx === i ? { ...l, chargeId } : l)));
 
-  const setSingleCharge = (chargeId: number) => {
-    onEditChange({
-      ...edit,
-      studentId: edit.studentId,
-      lines: isChosen(chargeId) ? [{ chargeId, amount: txAmount }] : [],
+  const setLineAmount = (i: number, amount: number) =>
+    setLines(lines.map((l, idx) => (idx === i ? { ...l, amount } : l)));
+
+  /**
+   * A new charge row starts on the student above it — most splits pay two of
+   * one child's fees — and claims whatever of the transfer is still unallocated.
+   * Siblings are one combobox away.
+   */
+  const addLine = () => {
+    const last = lines[lines.length - 1];
+    setLines([
+      ...lines,
+      {
+        studentId: last?.studentId ?? 0,
+        chargeId: 0,
+        amount: Math.max(0, txAmount - editSum({ lines })),
+      },
+    ]);
+  };
+
+  const removeLine = (i: number) => {
+    if (lines.length <= 1) return;
+    setLines(lines.filter((_, idx) => idx !== i));
+    // Class filters are keyed by position, so the ones below the removed line
+    // shift up with it.
+    setClassFilters((prev) => {
+      const next: Record<number, string | null> = {};
+      for (const [key, value] of Object.entries(prev)) {
+        const idx = Number(key);
+        if (idx < i) next[idx] = value;
+        else if (idx > i) next[idx - 1] = value;
+      }
+      return next;
     });
-    setRowError(null);
   };
 
   const toggleSplit = () => {
-    if (splitMode) {
-      // Collapse back to a single charge line at the full amount.
-      const first = edit.lines.find((l) => isChosen(l.chargeId));
-      onEditChange({
-        ...edit,
-        studentId: edit.studentId,
-        lines: first ? [{ chargeId: first.chargeId, amount: txAmount }] : [],
-      });
-      setSplitOpen(false);
-    } else {
-      setSplitOpen(true);
+    if (!splitMode) {
+      addLine();
+      return;
     }
+    // Collapse back to the first line, taking the whole transfer back.
+    setLines([{ ...lines[0]!, amount: txAmount }]);
+    setClassFilters((prev) =>
+      0 in prev ? ({ 0: prev[0] ?? null } as Record<number, string | null>) : {},
+    );
   };
 
-  const addChargeLine = () =>
-    onEditChange({ ...edit, lines: [...edit.lines, { chargeId: 0, amount: 0 }] });
-  const removeChargeLine = (i: number) =>
-    onEditChange({ ...edit, lines: edit.lines.filter((_, idx) => idx !== i) });
-  const setLineCharge = (i: number, chargeId: number) =>
-    onEditChange({
-      ...edit,
-      lines: edit.lines.map((l, idx) => (idx === i ? { ...l, chargeId } : l)),
-    });
-  const setLineAmount = (i: number, amount: number) =>
-    onEditChange({
-      ...edit,
-      lines: edit.lines.map((l, idx) => (idx === i ? { ...l, amount } : l)),
-    });
-
-  const applyAlternative = (p: MatchProposalWire) => {
-    onEditChange({
-      studentId: p.studentId,
-      lines: p.allocations.map((a) => ({ chargeId: a.chargeId, amount: a.amount })),
-      // The alternative may come with its own missing fee — a sibling who also
-      // has no bus charge, say — so it travels with the switch.
-      ...(p.proposedCharge ? { newCharge: p.proposedCharge } : {}),
-    });
-    setClassFilter(studentById.get(p.studentId)?.gradeName ?? null);
-    setSplitOpen(p.allocations.length > 1);
-    setRowError(null);
+  const applyCandidate = (p: MatchProposalWire) => {
+    setLines(proposalLines(p, txAmount));
+    setClassFilters({});
   };
 
   const runConfirm = async () => {
@@ -298,10 +328,151 @@ export function CollapsedProposalRow({
     }
   };
 
-  const allocated = editSum(edit);
+  const allocated = editSum({ lines });
+  const confirmable = isEditConfirmable({ lines }, txAmount);
+  const creatingCharge = editCreatesCharge({ lines });
   const signals = rollupSignals(resultSignals(item.result));
   const flags = resultFlags(item.result);
-  const alternatives = resultAlternatives(item.result);
+  const candidates = resultCandidates(item.result);
+
+  /**
+   * The three allocation cells of one line — class, student, charge. Rendered
+   * from the same function for the row's own line and for a split's extra
+   * rows, which is what keeps them in one column each.
+   */
+  const allocationCells = (line: ChargeLine, i: number) => {
+    const options = chargeOptionsFor(line);
+    const chargeLabel = line.chargeId
+      ? options.find((o) => o.value === String(line.chargeId))?.label ?? null
+      : null;
+    const student = studentById.get(line.studentId) ?? null;
+    const cls = classFilterFor(i);
+    return (
+      <>
+        <Select
+          items={{
+            [ALL_CLASSES]: strings.triage.controls.classAll,
+            ...Object.fromEntries(classes.map((c) => [c.gradeName, c.gradeName])),
+          }}
+          value={cls ?? ALL_CLASSES}
+          onValueChange={(v) => setLineClass(i, v === ALL_CLASSES ? null : v)}
+        >
+          <SelectTrigger
+            size="sm"
+            className={cn(WRAPPING_TRIGGER, "min-w-0", ALLOCATION_COL_START)}
+            aria-label={strings.triage.controls.classLabel}
+          >
+            <span className="min-w-0 flex-1">
+              {cls ?? strings.triage.controls.classAll}
+            </span>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL_CLASSES}>
+              {strings.triage.controls.classAll}
+            </SelectItem>
+            {classes.map((c) => (
+              <SelectItem
+                key={`${c.gradeLevelCode}-${c.gradeName}`}
+                value={c.gradeName}
+              >
+                {c.gradeName}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Combobox
+          items={studentsFor(i)}
+          value={student}
+          onValueChange={(s) => setLineStudent(i, s as ReviewStudent | null)}
+          itemToStringLabel={(s: ReviewStudent) => `${s.lastName} ${s.firstName}`}
+        >
+          <ComboboxTrigger
+            className={cn(WRAPPING_TRIGGER, "h-auto")}
+            aria-label={strings.triage.controls.studentValue}
+          >
+            <span className="min-w-0 flex-1 break-words">
+              {student
+                ? `${student.lastName} ${student.firstName}`
+                : strings.triage.controls.studentNone}
+            </span>
+          </ComboboxTrigger>
+          <ComboboxContent>
+            <ComboboxInputGroup>
+              <ComboboxInput
+                placeholder={strings.triage.controls.studentPlaceholder}
+              />
+            </ComboboxInputGroup>
+            <ComboboxList>
+              {(s: ReviewStudent) => (
+                <ComboboxItem key={s.id} value={s}>
+                  <span className="flex flex-col">
+                    <span>
+                      {s.lastName} {s.firstName}
+                    </span>
+                    {s.gradeName ? (
+                      <span className="text-xs text-muted-foreground">
+                        {s.gradeName}
+                      </span>
+                    ) : null}
+                  </span>
+                </ComboboxItem>
+              )}
+            </ComboboxList>
+            <ComboboxEmpty>{strings.triage.controls.studentNoMatch}</ComboboxEmpty>
+          </ComboboxContent>
+        </Combobox>
+
+        <Select
+          items={Object.fromEntries(options.map((o) => [o.value, o.label]))}
+          value={line.chargeId ? String(line.chargeId) : ""}
+          onValueChange={(v) => setLineCharge(i, v ? Number(v) : 0)}
+          disabled={line.studentId === 0 || options.length === 0}
+        >
+          <SelectTrigger
+            size="sm"
+            className={WRAPPING_TRIGGER}
+            aria-label={strings.form.charge}
+          >
+            <span
+              className={cn(
+                "min-w-0 flex-1 break-words",
+                !chargeLabel && "text-muted-foreground",
+              )}
+            >
+              {chargeLabel ??
+                (line.studentId > 0 && options.length === 0
+                  ? strings.triage.controls.noOpenCharges
+                  : strings.triage.controls.chargePlaceholder)}
+            </span>
+          </SelectTrigger>
+          <SelectContent>
+            {options.map((o) => (
+              <SelectItem key={o.value} value={o.value}>
+                {o.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </>
+    );
+  };
+
+  /** How much of the transfer this line pays — editable only while splitting. */
+  const amountCell = (line: ChargeLine, i: number) => (
+    <Input
+      type="number"
+      min={1}
+      step={1000}
+      className="w-full"
+      aria-label={strings.triage.split.amountLabel(i + 1)}
+      placeholder={strings.triage.split.amountPlaceholder}
+      value={line.amount === 0 ? "" : line.amount}
+      onChange={(e) =>
+        setLineAmount(i, e.target.value === "" ? 0 : Number(e.target.value))
+      }
+    />
+  );
 
   return (
     <div
@@ -352,120 +523,24 @@ export function CollapsedProposalRow({
           {fmt(txAmount)}
         </span>
 
-        {/* Allocation: class → student → charge, one grid column each. */}
-        <Select
-          items={{
-            [ALL_CLASSES]: strings.triage.controls.classAll,
-            ...Object.fromEntries(classes.map((c) => [c.gradeName, c.gradeName])),
-          }}
-          value={classFilter ?? ALL_CLASSES}
-          onValueChange={(v) => changeClass(v === ALL_CLASSES ? null : v)}
-        >
-          <SelectTrigger size="sm" className={cn(WRAPPING_TRIGGER, "min-w-0")}>
-            <span className="min-w-0 flex-1">
-              {classFilter ?? strings.triage.controls.classAll}
-            </span>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL_CLASSES}>
-              {strings.triage.controls.classAll}
-            </SelectItem>
-            {classes.map((c) => (
-              <SelectItem key={`${c.gradeLevelCode}-${c.gradeName}`} value={c.gradeName}>
-                {c.gradeName}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {allocationCells(lines[0]!, 0)}
 
-        <Combobox
-          items={filteredStudents}
-          value={selectedStudent}
-          onValueChange={(s) => setStudent(s as ReviewStudent | null)}
-          itemToStringLabel={(s: ReviewStudent) =>
-            `${s.lastName} ${s.firstName}`
-          }
-        >
-          <ComboboxTrigger className={cn(WRAPPING_TRIGGER, "h-auto")}>
-            <span className="min-w-0 flex-1 break-words">
-              {selectedStudent
-                ? `${selectedStudent.lastName} ${selectedStudent.firstName}`
-                : strings.triage.controls.studentNone}
-            </span>
-          </ComboboxTrigger>
-          <ComboboxContent>
-            <ComboboxInputGroup>
-              <ComboboxInput
-                placeholder={strings.triage.controls.studentPlaceholder}
-              />
-            </ComboboxInputGroup>
-            <ComboboxList>
-              {(s: ReviewStudent) => (
-                <ComboboxItem key={s.id} value={s}>
-                  <span className="flex flex-col">
-                    <span>
-                      {s.lastName} {s.firstName}
-                    </span>
-                    {s.gradeName ? (
-                      <span className="text-xs text-muted-foreground">
-                        {s.gradeName}
-                      </span>
-                    ) : null}
-                  </span>
-                </ComboboxItem>
-              )}
-            </ComboboxList>
-            <ComboboxEmpty>
-              {strings.triage.controls.studentNoMatch}
-            </ComboboxEmpty>
-          </ComboboxContent>
-        </Combobox>
-
-        {/* Single-charge select (hidden while splitting). */}
-        {!splitMode ? (
-          <Select
-            items={Object.fromEntries(chargeOptions.map((o) => [o.value, o.label]))}
-            value={selectedChargeValue}
-            onValueChange={(v) => setSingleCharge(v ? Number(v) : 0)}
-            disabled={edit.studentId === 0 || chargeOptions.length === 0}
-          >
-            <SelectTrigger size="sm" className={WRAPPING_TRIGGER}>
-              <span
-                className={cn(
-                  "min-w-0 flex-1 break-words",
-                  !selectedChargeLabel && "text-muted-foreground",
-                )}
-              >
-                {selectedChargeLabel ?? strings.triage.controls.chargePlaceholder}
-              </span>
-            </SelectTrigger>
-            <SelectContent>
-              {chargeOptions.map((o) => (
-                <SelectItem key={o.value} value={o.value}>
-                  {o.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        {/* Last allocation column: how much this line takes while splitting,
+            and otherwise the control that starts a split. */}
+        {splitMode ? (
+          amountCell(lines[0]!, 0)
         ) : (
-          // Split mode: the charges are listed in full below, so this slot only
-          // says how many. Bordered like the select it replaces — as bare text
-          // it read as a stray label floating between two controls.
-          <span className="flex min-h-7 w-fit items-center rounded-lg border border-dashed border-input px-2 text-xs text-muted-foreground">
-            {strings.triage.split.acrossCharges(edit.lines.length)}
-          </span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="justify-start px-2"
+            onClick={toggleSplit}
+            disabled={lines[0]!.studentId === 0}
+          >
+            {strings.triage.split.enable}
+          </Button>
         )}
-
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="justify-start px-2"
-          onClick={toggleSplit}
-          disabled={edit.studentId === 0}
-        >
-          {splitMode ? strings.triage.split.disable : strings.triage.split.enable}
-        </Button>
 
         {/* Actions. The row no longer says *why* it needs attention — that is
             the group heading's job now, stated once instead of on every row. */}
@@ -494,76 +569,55 @@ export function CollapsedProposalRow({
         </div>
       </div>
 
-      {/* Split editor — one student, several charges summing to the transfer. */}
+      {/* The rest of the split: one charge row per line, in the same columns as
+          the row above — same student for a child paying two fees, a sibling's
+          class and name for a shared transfer. */}
       {splitMode ? (
-        <div className="flex flex-col gap-2 border-t border-border px-3 py-2">
-          {edit.lines.map((line, i) => (
-            <div key={i} className="flex flex-wrap items-start gap-2">
-              <Select
-                items={Object.fromEntries(chargeOptions.map((o) => [o.value, o.label]))}
-                value={line.chargeId ? String(line.chargeId) : ""}
-                onValueChange={(v) => setLineCharge(i, v ? Number(v) : 0)}
-                disabled={edit.studentId === 0}
-              >
-                <SelectTrigger
-                  size="sm"
-                  className={cn(WRAPPING_TRIGGER, "w-64 shrink-0")}
-                >
-                  <span
-                    className={cn(
-                      "min-w-0 flex-1 break-words",
-                      !lineChargeLabel(line.chargeId) && "text-muted-foreground",
-                    )}
+        <div className="flex flex-col gap-1.5 px-2 pb-2">
+          {lines.slice(1).map((line, idx) => {
+            const i = idx + 1;
+            return (
+              <div key={i} className={cn(ROW_GRID, "text-sm")}>
+                {allocationCells(line, i)}
+                {amountCell(line, i)}
+                <div className="flex items-start justify-end">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={strings.triage.split.remove}
+                    onClick={() => removeLine(i)}
                   >
-                    {lineChargeLabel(line.chargeId) ??
-                      strings.triage.controls.chargePlaceholder}
-                  </span>
-                </SelectTrigger>
-                <SelectContent>
-                  {chargeOptions.map((o) => (
-                    <SelectItem key={o.value} value={o.value}>
-                      {o.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Input
-                type="number"
-                min={1}
-                step={1000}
-                className="w-36 shrink-0"
-                value={line.amount === 0 ? "" : line.amount}
-                onChange={(e) =>
-                  setLineAmount(i, e.target.value === "" ? 0 : Number(e.target.value))
-                }
-                placeholder={strings.columns.amount}
-              />
+                    <XIcon />
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
+          <div className={cn(ROW_GRID, "text-xs")}>
+            <div
+              className={cn(
+                ALLOCATION_COL_START,
+                "col-span-3 flex flex-wrap items-center gap-2",
+              )}
+            >
               <Button
                 type="button"
-                variant="ghost"
-                size="icon-sm"
-                aria-label={strings.triage.split.remove}
-                onClick={() => removeChargeLine(i)}
+                variant="outline"
+                size="xs"
+                data-icon="inline-start"
+                onClick={addLine}
               >
-                <XIcon />
+                <PlusIcon />
+                {strings.triage.split.addCharge}
+              </Button>
+              <Button type="button" variant="ghost" size="xs" onClick={toggleSplit}>
+                {strings.triage.split.disable}
               </Button>
             </div>
-          ))}
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              data-icon="inline-start"
-              onClick={addChargeLine}
-              disabled={edit.studentId === 0}
-            >
-              <PlusIcon />
-              {strings.triage.split.addCharge}
-            </Button>
             <span
               className={cn(
-                "text-xs",
+                "col-span-2 self-center",
                 allocated === txAmount ? "text-success" : "text-destructive",
               )}
             >
@@ -643,23 +697,32 @@ export function CollapsedProposalRow({
             </ul>
           ) : null}
 
-          {alternatives.length > 0 ? (
+          {/* Every candidate, best first — including the one the matcher filled
+              in. Listing only the others meant that trying an alternative threw
+              the original away: there was nothing left on screen to switch back
+              to. Whichever candidate the row currently holds reads as a chip,
+              not a button. */}
+          {candidates.length > 1 ? (
             <div className="flex flex-wrap items-center gap-1.5">
               <span className="text-muted-foreground">
-                {strings.triage.info.alternatives}:
+                {strings.triage.info.candidates}:
               </span>
-              {alternatives.map((p) => {
+              {candidates.map((p) => {
                 const s = studentById.get(p.studentId);
                 const name = s
                   ? `${s.lastName} ${s.firstName}`
                   : `#${p.studentId}`;
-                return (
+                return lines.some((l) => l.studentId === p.studentId) ? (
+                  <Badge key={p.studentId} variant="secondary">
+                    {strings.triage.info.currentCandidate(name)}
+                  </Badge>
+                ) : (
                   <Button
                     key={p.studentId}
                     type="button"
                     variant="outline"
                     size="xs"
-                    onClick={() => applyAlternative(p)}
+                    onClick={() => applyCandidate(p)}
                   >
                     {strings.triage.info.apply(name)}
                   </Button>

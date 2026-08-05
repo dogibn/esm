@@ -16,6 +16,8 @@ export type StudentRow = {
   studentCode: string;
   firstName: string;
   lastName: string;
+  /** The class (`grades.id`) this row is enrolled in — what grouping folds on. */
+  gradeId: number;
   gradeName: string;
   gradeLevelCode: string;
   /** Gross charged minus applicable discounts, summed over the scoped charges. */
@@ -43,11 +45,36 @@ export type StudentListSummary = {
   totalOutstanding: number;
 };
 
-export type StudentListResponse = {
+// One class in the grouped table: the class row's own figures, plus every
+// student in it. Totals are the sum over `rows`, and `rows` is the whole class
+// — grouping paginates by class, so a class is never split across pages.
+export type StudentClassGroup = {
+  gradeId: number;
+  gradeName: string;
+  gradeLevelCode: string;
+  /** Denormalized on `grades` (domain_model.md § Grade); "" if unset. */
+  teacherName: string;
+  students: number;
+  due: number;
+  paid: number;
+  balance: number;
   rows: StudentRow[];
+};
+
+export type StudentListResponse = {
+  /** The page's students, flat. When grouped, the groups' rows concatenated. */
+  rows: StudentRow[];
+  /** The page's classes. Null unless the request asked to group by class. */
+  groups: StudentClassGroup[] | null;
   page: number;
+  /** Students per page — or classes per page, when grouped. */
   pageSize: number;
+  /** Students matching the filters, over every page. Never the class count. */
   total: number;
+  /** Classes matching the filters, over every page. Null unless grouped. */
+  totalGroups: number | null;
+  /** Pages available: over students, or over classes when grouped. */
+  pageCount: number;
   fee: FeeScopeValue;
   summary: StudentListSummary;
 };

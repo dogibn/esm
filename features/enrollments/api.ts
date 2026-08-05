@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, lte } from "drizzle-orm";
 
 import { db } from "@/db/index";
 import {
@@ -40,9 +40,13 @@ function nullify(v: string | undefined | null): string | null {
   return t ? t : null;
 }
 
-async function currentYear(): Promise<{ id: number; name: string }> {
+async function currentYear(): Promise<{ id: number; name: string; endDate: string }> {
   const [year] = await db
-    .select({ id: academicYears.id, name: academicYears.name })
+    .select({
+      id: academicYears.id,
+      name: academicYears.name,
+      endDate: academicYears.endDate,
+    })
     .from(academicYears)
     .where(eq(academicYears.isCurrent, true))
     .limit(1);
@@ -73,7 +77,20 @@ function resolveFlatAmount(data: unknown): number | null {
   return typeof amount === "number" && Number.isFinite(amount) ? amount : null;
 }
 
-async function activeFeeData(feeName: string): Promise<unknown | null> {
+/**
+ * The rate in force for the current academic year.
+ *
+ * Next year's rates are published before that year begins — the 2026-2027
+ * tuition row exists from the moment the workbook is loaded, months before the
+ * year is made current. Supersession alone therefore cannot decide which row
+ * applies: both are live, and picking either "the only un-superseded row" or
+ * simply the newest would start billing next year's prices early. So the
+ * current year bounds the search, and within that bound the latest rate wins.
+ */
+async function activeFeeData(
+  feeName: string,
+  yearEndDate: string,
+): Promise<unknown | null> {
   const rows = await db
     .select({ data: feeStructures.data })
     .from(feeStructures)
@@ -82,8 +99,10 @@ async function activeFeeData(feeName: string): Promise<unknown | null> {
         eq(feeStructures.feeName, feeName),
         isNull(feeStructures.academicTermId),
         isNull(feeStructures.supersededAt),
+        lte(feeStructures.effectiveFrom, yearEndDate),
       ),
     )
+    .orderBy(desc(feeStructures.effectiveFrom), desc(feeStructures.id))
     .limit(1);
   return rows[0]?.data ?? null;
 }
@@ -116,8 +135,8 @@ export async function getEnrollmentFormContext(): Promise<EnrollmentFormContext>
         .innerJoin(gradeLevels, eq(gradeLevels.id, grades.gradeLevelId))
         .where(eq(grades.academicYearId, year.id))
         .orderBy(asc(gradeLevels.sortOrder), asc(grades.name)),
-      activeFeeData("tuition"),
-      activeFeeData("registration"),
+      activeFeeData("tuition", year.endDate),
+      activeFeeData("registration", year.endDate),
       db
         .select({
           id: students.id,

@@ -217,11 +217,6 @@ contradictions.
 
 ## 4. Still open
 
-- **One sibling memo** (`BUS12 Х. ЕСҮХЭЙ, ЕСҮЙ, ЕСҮТЭЙ`, three children at the
-  bus rate) still comes back as a single match: the bare segment "ЕСҮЙ" is
-  ambiguous across several students of that name, and one ambiguous segment
-  abandons the whole split. Resolving it needs the shared-surname inference the
-  segments imply. Its sibling case is fixed — see Phase 8.
 - **Multi-term fees dead-end** — four no-allocation rows are exact multiples of
   the 375,000 bus rate (750,000 = two terms). `proposableFor` requires the
   amount to equal the rate exactly, deliberately: two terms is two charges, and
@@ -231,9 +226,122 @@ contradictions.
 - **`unbalanced` (34 rows)** — an identified student whose amount fits nothing
   they owe. Often a prepayment for next year ("BATBOLD SETSEN 26-27",
   "2026.09САРД"), which the current-term-only charge context cannot represent.
-- **`multiple_candidates` (35 rows)** — genuinely two plausible students.
+- **`multiple_candidates` (11 rows after Phase 9)** — genuinely two plausible
+  students; only a confirmed account link or a question can settle them.
 - **Registration for students not yet enrolled** — "Бүртгэлийн хураамж" for a
   child with no enrollment row has nothing to match against.
 - The bus workaround makes the *paid* bus population visible, not the enrolled
   one; `user_flows.md`'s "who hasn't paid the bus fee?" still needs the real
   opt-in source (`notes.md`).
+
+---
+
+## 5. Phase 9 — promote near-misses without losing precision (implemented)
+
+Three failure shapes, diagnosed from the dry run + audit. Fixture-first: the
+named rows went into `scripts/qa/fixtures/matching_cases.json` (now 38 cases)
+before any weight moved.
+
+**Result: confident 118 → 142 (43% of 334), `multiple_candidates` 36 → 11,
+sibling splits 7 → 16 (4 confident), fixtures 100% precision / 100% recall
+(from 83%/81% on the expanded set), audit rows-with-findings 87 → 75, and the
+count of confident rows carrying an audit finding is unchanged at 3.** Zero
+rows left the confident tier; zero confident rows changed student; four
+promoted rows (52, 134, 395, 526) had the wrong student on top at baseline and
+were corrected as well as promoted. Per-row detail:
+`scripts/reports/phase9_confident_transitions.md`.
+
+### 9a. A full name loses to its own surname (Row 11)
+
+`ENKHBAYAR ENEREL … 12B` scores Enerel Enkhbayar (both name groups + class)
+1.00 vs Enkhbayar Otgonbayar (one group + class) 0.75 — under the 1.5×
+dominance bar, so `multiple_candidates`. Two gaps:
+
+- **No coverage bonus.** Hitting a second name group only adds that token's
+  selectivity weight; `memo_name_full` is a label, not evidence. Add a bonus in
+  `resolve-student.ts` when ≥2 distinct groups hit the same student (~+0.2 per
+  extra group; calibrate against fixtures).
+- **Dominance is blind to subsumption.** The runner-up's only name token
+  (`enkhbayar`) *is the top candidate's surname* — it carries no independent
+  evidence. Track matched name tokens per candidate; a runner-up whose token
+  set is a strict subset of the top's (and hit fewer groups) doesn't count as
+  competition in `dominatesAlternatives`. Safe by construction: it never fires
+  when the runner-up has any evidence of its own.
+
+### 9b. A grade that names no class is dropped instead of degraded (Row 52)
+
+`Энх-Учрал 4А` → `4a` is not in `classLookup` (classes are 4BA/4SA/4+A), not a
+bare digit, and `peelGluedGrade` needs ≥2 trailing letters — so the memo's only
+disambiguator dies and both Enkh-Uchrals tie at 0.60.
+
+- **Degrade, don't drop**: in `extract-signals.ts`, an unconsumed
+  `^\d{1,2}[a-z]{1,2}$` token that matches no class becomes a *level* token
+  from its digit part (same for the 3b-2 split join when the joined form isn't
+  a class — "5 В").
+- **Let a grade break a name tie.** W_LEVEL 0.15 can't move a 0.60/0.60 tie to
+  1.5×. Add a relative rule in scoring: when a class/level constraint was
+  extracted and exactly one of the near-tied candidates satisfies it, boost
+  that candidate (or penalize the contradicting peers ~−0.15). *Relative only*
+  — when nobody satisfies the constraint, no one is punished, because memos
+  carry stale classes (Row 6 `10 B` vs student in 9B, Row 67 `9Д` vs 8D:
+  parents write next year's class). This also attacks the audit's 11
+  `level_mismatch` / 3 `class_mismatch` rows and the coin flips in rows 19,
+  21, 394, 441, 539.
+
+### 9c. The trailing surname initial is lost (rows 155, 259, 262)
+
+`ENEREL.E 8B` — normalize keeps `.` only after a *single* letter, so
+`enerel.e` splits to `enerel` + a dead one-letter token, and the one signal
+separating Enerel Enkhbaatar from Enerel Lkhagvasuren evaporates (also behind
+all 6 `surname_initial_mismatch` findings). Parse `NAME.X` as a per-group
+surname-initial constraint; corroboration adds weight, contradiction penalizes
+relative to peers — same shape as the grade rule in 9b.
+
+### 9d. Sibling memos that never reach the splitter
+
+`detectMultiStudent` splits on `, and & ;` or `\d+grade` boundaries only. The
+sample's failed sibling rows are all other shapes:
+
+- **Separators**: add `/` (Row 540 `12В/ Н. Түшиг 9В`) and fullwidth `，`/`、`
+  (Row 145). Nameless segments are already skipped, so phone blocks in
+  slashes stay harmless.
+- **Class-token boundaries**: split the normalized body after each class-token
+  hit — `З.ОЮУДАРЬ 11A ∥ З.НОМИНДАРЬ 8D` (Row 172). Replaces the crude
+  bare-digit heuristic in `splitOnGradeBoundaries`.
+- **Initial-form boundaries**: ≥2 `x.name` tokens → split before each
+  (`М.АРИУНХҮСЛЭН ∥ М.МӨНХХҮСЛЭН`, rows 353/386, 478, 560).
+- **Shared-surname inference** for the ambiguous segment (Row 487 `ЕСҮЙ`):
+  filter a tied segment's candidates by the surname the memo's *other*
+  segments resolved to (or the memo's initial letter); exactly one left →
+  take it. This is the open item in §4, made concrete.
+- **Fallback must confess**: when the splitter found ≥2 students but
+  `allocateMulti` failed, the single-student fallback gets a
+  `multi_student_unresolved` flag so it can never be confirmed as one child's
+  payment without a human (Row 15: 48.7M allocated to one of two named kids).
+
+### 9e. Clean splits deserve the confident tier
+
+`matched_multi` is unconditionally `attention`. Once 9d lands, a split where
+every share allocates exactly, every segment resolved uniquely, and only
+benign flags remain meets the same bar as a confident single — give it
+`confident` (or its own bulk-confirmable group, like Missing fee).
+
+### Guardrails (as built)
+
+- Contradiction penalties are always relative to peers, never absolute, and
+  only within the near-tie band — which is drawn on *identity* evidence
+  (names, account) minus grade weights, so a student matching a mere fragment
+  of the written name ("Энх" of "Энх-Учрал") can neither claim the grade nor
+  block the real tie from resolving.
+- Subsumption dominance requires strict-subset evidence: fewer name groups,
+  every matched token also matched by the top candidate, no grade signal the
+  top lacks, no account/fuzzy evidence of its own.
+- `INFERRED_FEE_MIN_SCORE` stays; the coverage bonus is what lifts a genuinely
+  full-named candidate over it, not a lower bar.
+- The multi-detection gate admits tier-4 *exact* names (never fuzzy) so a
+  sibling list of common first names is still recognised; a detected split
+  that cannot be allocated falls back flagged (`multi_student_unresolved`) and
+  can never be confirmed under one child's name without a human.
+- Splits are confident only when every share allocates exactly against
+  existing charges; charge-creating splits stay opt-in like the Missing fee
+  group.

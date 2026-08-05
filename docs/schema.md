@@ -26,9 +26,21 @@ For *what* the entities mean and *why* the schema looks like this, see `domain_m
 | Column | Type | Constraints |
 |---|---|---|
 | `id` | `uuid` | PK; equals `auth.users.id` |
-| `email` | `text` | NOT NULL, UNIQUE |
+| `email` | `text` | NOT NULL, UNIQUE — stored lowercased; the key authorization matches on |
 | `role` | `text` | NOT NULL, CHECK in (`'accountant'`, `'admin'`) |
+| `is_active` | `boolean` | NOT NULL DEFAULT `true` — FALSE means access revoked |
 | `created_at` | `timestamptz` | NOT NULL DEFAULT `now()` |
+| `updated_at` | `timestamptz` | NOT NULL DEFAULT `now()` |
+
+The access allowlist. A row here is the whole grant: `lib/auth.ts` looks the
+signed-in email up and rejects both a missing row and `is_active = FALSE`
+identically, so revocation takes effect on the next request without waiting for
+the Supabase session to expire.
+
+**Rows are never deleted.** `operations.actor_user_id` FKs here, so deleting a
+user would either fail or orphan the audit trail; access is revoked by clearing
+`is_active`, which is also what makes restoring it a one-click reversal.
+Managed from the Users and access screen (`docs/user_flows.md`).
 
 ### `grade_levels`
 

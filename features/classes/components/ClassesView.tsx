@@ -31,8 +31,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/toast";
 
+import { CLASSES_TABS, type ClassesTab } from "../schemas";
 import { strings } from "../strings";
 import type { ClassRow, ClassesOverview, GradeLevelRow } from "../types";
 
@@ -47,13 +49,16 @@ type ConfirmState =
 
 export function ClassesView({
   overview,
+  tab: initialTab,
   canEdit,
 }: {
   overview: ClassesOverview;
+  tab: ClassesTab;
   canEdit: boolean;
 }) {
   const router = useRouter();
   const { toast } = useToast();
+  const [tab, setTab] = useState<ClassesTab>(initialTab);
   const [levelDialog, setLevelDialog] = useState<{
     open: boolean;
     target: GradeLevelRow | null;
@@ -66,6 +71,15 @@ export function ClassesView({
 
   const year = overview.years.find((y) => y.id === overview.selectedYearId);
   const yearName = year?.name ?? "";
+
+  // Shallow URL update: the section stays linkable and survives a refresh
+  // without re-running the server component — neither tab needs new data.
+  const onTabChange = (next: ClassesTab) => {
+    setTab(next);
+    const url = new URL(window.location.href);
+    url.searchParams.set("tab", next);
+    window.history.replaceState(null, "", `${url.pathname}${url.search}`);
+  };
 
   const runDelete = async () => {
     if (!confirm.open) return;
@@ -93,195 +107,232 @@ export function ClassesView({
         description={canEdit ? s.page.description : s.page.adminHint}
       />
 
-      <Card size="sm">
-        <CardHeader className="border-b pb-3">
-          <CardTitle>{s.levels.title}</CardTitle>
-          <CardDescription>{s.levels.description}</CardDescription>
-          {canEdit ? (
-            <CardAction>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setLevelDialog({ open: true, target: null })}
-              >
-                <Plus />
-                {s.levels.add}
-              </Button>
-            </CardAction>
-          ) : null}
-        </CardHeader>
-        <CardContent className="p-0">
-          {overview.levels.length === 0 ? (
-            <p className="px-3 py-4 text-sm text-muted-foreground">{s.levels.empty}</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{s.levels.columns.code}</TableHead>
-                  <TableHead>{s.levels.columns.order}</TableHead>
-                  <TableHead>{s.levels.columns.tuition}</TableHead>
-                  <TableHead>{s.levels.columns.usage}</TableHead>
-                  {canEdit ? <TableHead className="w-0" /> : null}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {overview.levels.map((level) => (
-                  <TableRow key={level.id}>
-                    <TableCell className="font-medium">{level.code}</TableCell>
-                    <TableCell className="tabular-nums">{level.sortOrder}</TableCell>
-                    <TableCell>
-                      <Badge variant={level.usedInTuition ? "info" : "outline"}>
-                        {level.usedInTuition ? s.levels.priced : s.levels.notPriced}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {s.levels.usage(level.usage) || s.levels.unused}
-                    </TableCell>
-                    {canEdit ? (
-                      <TableCell className="text-right whitespace-nowrap">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setLevelDialog({ open: true, target: level })}
-                          aria-label={s.actions.editLevel(level.code)}
-                        >
-                          <Pencil />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          disabled={!level.canDelete}
-                          title={level.canDelete ? undefined : s.remove.blockedHint}
-                          onClick={() =>
-                            setConfirm({
-                              open: true,
-                              kind: "level",
-                              id: level.id,
-                              name: level.code,
-                            })
-                          }
-                          aria-label={s.actions.deleteLevel(level.code)}
-                        >
-                          <Trash2 />
-                        </Button>
-                      </TableCell>
-                    ) : null}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+      <Tabs
+        value={tab}
+        onValueChange={(next) => onTabChange(next as ClassesTab)}
+        className="gap-4"
+      >
+        {/* The label lands on the tablist, not the wrapper. */}
+        <TabsList variant="line" aria-label={s.tabs.label}>
+          {CLASSES_TABS.map((value) => (
+            <TabsTrigger key={value} value={value}>
+              {s.tabs[value]}
+            </TabsTrigger>
+          ))}
+        </TabsList>
 
-      <Card size="sm">
-        <CardHeader className="border-b pb-3">
-          <CardTitle>{s.classes.title(yearName)}</CardTitle>
-          <CardDescription>{s.classes.description}</CardDescription>
-          <CardAction className="flex items-center gap-2">
-            <Select
-              items={Object.fromEntries(
-                overview.years.map((y) => [String(y.id), y.name]),
-              )}
-              value={String(overview.selectedYearId)}
-              onValueChange={(v) => router.push(`/classes?year=${String(v)}`)}
-            >
-              <SelectTrigger size="sm" aria-label={s.yearPicker.label}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {overview.years.map((y) => (
-                  <SelectItem key={y.id} value={String(y.id)}>
-                    {y.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {canEdit ? (
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={overview.levels.length === 0}
-                onClick={() => setClassDialog({ open: true, target: null })}
-              >
-                <Plus />
-                {s.classes.add}
-              </Button>
-            ) : null}
-          </CardAction>
-        </CardHeader>
-        <CardContent className="p-0">
-          {overview.classes.length === 0 ? (
-            <p className="px-3 py-4 text-sm text-muted-foreground">{s.classes.empty}</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{s.classes.columns.name}</TableHead>
-                  <TableHead>{s.classes.columns.level}</TableHead>
-                  <TableHead>{s.classes.columns.teacher}</TableHead>
-                  <TableHead>{s.classes.columns.contact}</TableHead>
-                  <TableHead>{s.classes.columns.students}</TableHead>
-                  {canEdit ? <TableHead className="w-0" /> : null}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {overview.classes.map((cls) => (
-                  <TableRow key={cls.id}>
-                    <TableCell className="font-medium">{cls.name}</TableCell>
-                    <TableCell>{cls.gradeLevelCode}</TableCell>
-                    <TableCell>
-                      {cls.teacherName || (
-                        <span className="text-muted-foreground">
-                          {s.classes.noTeacher}
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      <span className="flex flex-col">
-                        <span>{cls.teacherEmail ?? s.classes.noTeacher}</span>
-                        {cls.teacherPhone ? (
-                          <span className="text-xs">{cls.teacherPhone}</span>
+        <TabsContent value="classes">
+          <Card size="sm">
+            <CardHeader className="border-b pb-3">
+              <CardTitle>{s.classes.title(yearName)}</CardTitle>
+              <CardDescription>{s.classes.description}</CardDescription>
+              <CardAction className="flex items-center gap-2">
+                <Select
+                  items={Object.fromEntries(
+                    overview.years.map((y) => [String(y.id), y.name]),
+                  )}
+                  value={String(overview.selectedYearId)}
+                  // The tab travels with the year: this is a real navigation,
+                  // and dropping it would bounce back to the default section.
+                  onValueChange={(v) =>
+                    router.push(`/classes?year=${String(v)}&tab=${tab}`)
+                  }
+                >
+                  <SelectTrigger size="sm" aria-label={s.yearPicker.label}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {overview.years.map((y) => (
+                      <SelectItem key={y.id} value={String(y.id)}>
+                        {y.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {canEdit ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={overview.levels.length === 0}
+                    onClick={() => setClassDialog({ open: true, target: null })}
+                  >
+                    <Plus />
+                    {s.classes.add}
+                  </Button>
+                ) : null}
+              </CardAction>
+            </CardHeader>
+            <CardContent className="p-0">
+              {overview.classes.length === 0 ? (
+                <p className="px-3 py-4 text-sm text-muted-foreground">
+                  {s.classes.empty}
+                </p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{s.classes.columns.name}</TableHead>
+                      <TableHead>{s.classes.columns.level}</TableHead>
+                      <TableHead>{s.classes.columns.teacher}</TableHead>
+                      <TableHead>{s.classes.columns.contact}</TableHead>
+                      <TableHead>{s.classes.columns.students}</TableHead>
+                      {canEdit ? <TableHead className="w-0" /> : null}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {overview.classes.map((cls) => (
+                      <TableRow key={cls.id}>
+                        <TableCell className="font-medium">{cls.name}</TableCell>
+                        <TableCell>{cls.gradeLevelCode}</TableCell>
+                        <TableCell>
+                          {cls.teacherName || (
+                            <span className="text-muted-foreground">
+                              {s.classes.noTeacher}
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          <span className="flex flex-col">
+                            <span>{cls.teacherEmail ?? s.classes.noTeacher}</span>
+                            {cls.teacherPhone ? (
+                              <span className="text-xs">{cls.teacherPhone}</span>
+                            ) : null}
+                          </span>
+                        </TableCell>
+                        <TableCell className="tabular-nums">
+                          {cls.enrollments}
+                        </TableCell>
+                        {canEdit ? (
+                          <TableCell className="text-right whitespace-nowrap">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                setClassDialog({ open: true, target: cls })
+                              }
+                              aria-label={s.actions.editClass(cls.name)}
+                            >
+                              <Pencil />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              disabled={!cls.canDelete}
+                              title={cls.canDelete ? undefined : s.remove.blockedHint}
+                              onClick={() =>
+                                setConfirm({
+                                  open: true,
+                                  kind: "class",
+                                  id: cls.id,
+                                  name: cls.name,
+                                })
+                              }
+                              aria-label={s.actions.deleteClass(cls.name)}
+                            >
+                              <Trash2 />
+                            </Button>
+                          </TableCell>
                         ) : null}
-                      </span>
-                    </TableCell>
-                    <TableCell className="tabular-nums">{cls.enrollments}</TableCell>
-                    {canEdit ? (
-                      <TableCell className="text-right whitespace-nowrap">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setClassDialog({ open: true, target: cls })}
-                          aria-label={s.actions.editClass(cls.name)}
-                        >
-                          <Pencil />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          disabled={!cls.canDelete}
-                          title={cls.canDelete ? undefined : s.remove.blockedHint}
-                          onClick={() =>
-                            setConfirm({
-                              open: true,
-                              kind: "class",
-                              id: cls.id,
-                              name: cls.name,
-                            })
-                          }
-                          aria-label={s.actions.deleteClass(cls.name)}
-                        >
-                          <Trash2 />
-                        </Button>
-                      </TableCell>
-                    ) : null}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="levels">
+          <Card size="sm">
+            <CardHeader className="border-b pb-3">
+              <CardTitle>{s.levels.title}</CardTitle>
+              <CardDescription>{s.levels.description}</CardDescription>
+              {canEdit ? (
+                <CardAction>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setLevelDialog({ open: true, target: null })}
+                  >
+                    <Plus />
+                    {s.levels.add}
+                  </Button>
+                </CardAction>
+              ) : null}
+            </CardHeader>
+            <CardContent className="p-0">
+              {overview.levels.length === 0 ? (
+                <p className="px-3 py-4 text-sm text-muted-foreground">
+                  {s.levels.empty}
+                </p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{s.levels.columns.code}</TableHead>
+                      <TableHead>{s.levels.columns.order}</TableHead>
+                      <TableHead>{s.levels.columns.tuition}</TableHead>
+                      <TableHead>{s.levels.columns.usage}</TableHead>
+                      {canEdit ? <TableHead className="w-0" /> : null}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {overview.levels.map((level) => (
+                      <TableRow key={level.id}>
+                        <TableCell className="font-medium">{level.code}</TableCell>
+                        <TableCell className="tabular-nums">
+                          {level.sortOrder}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={level.usedInTuition ? "info" : "outline"}>
+                            {level.usedInTuition ? s.levels.priced : s.levels.notPriced}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {s.levels.usage(level.usage) || s.levels.unused}
+                        </TableCell>
+                        {canEdit ? (
+                          <TableCell className="text-right whitespace-nowrap">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                setLevelDialog({ open: true, target: level })
+                              }
+                              aria-label={s.actions.editLevel(level.code)}
+                            >
+                              <Pencil />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              disabled={!level.canDelete}
+                              title={
+                                level.canDelete ? undefined : s.remove.blockedHint
+                              }
+                              onClick={() =>
+                                setConfirm({
+                                  open: true,
+                                  kind: "level",
+                                  id: level.id,
+                                  name: level.code,
+                                })
+                              }
+                              aria-label={s.actions.deleteLevel(level.code)}
+                            >
+                              <Trash2 />
+                            </Button>
+                          </TableCell>
+                        ) : null}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {canEdit ? (
         <>

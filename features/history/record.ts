@@ -9,6 +9,7 @@ export type OperationKind =
   | "restore_transaction"
   | "create_enrollment"
   | "add_discount"
+  | "user_access"
   | "undo";
 
 // A drizzle transaction handle (or the base client). recordOperation is always

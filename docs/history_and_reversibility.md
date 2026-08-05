@@ -124,7 +124,7 @@ Grouped by the phase that introduces them. Full column specs land in
 |---|---|---|
 | `id` | serial PK | |
 | `actor_user_id` | uuid FK users | who did it |
-| `kind` | text CHECK | `confirm_match`, `discard_transaction`, `restore_transaction`, `create_enrollment`, `add_discount`, `undo` |
+| `kind` | text CHECK | `confirm_match`, `discard_transaction`, `restore_transaction`, `create_enrollment`, `add_discount`, `user_access`, `undo` |
 | `bank_transaction_id` | int NULL FK bank_transactions | the row this operation concerns (all Phase 1-2 kinds); nullable for later entity kinds |
 | `created_at` | timestamptz | |
 | `undoable_until` | timestamptz NULL | NULL = not undoable (e.g. `undo` itself) |
@@ -199,6 +199,12 @@ Role-based, enforced server-side:
   independent of the window check.
 - The **history read** scopes non-admins to `actor_user_id = user.id`; admins
   see all. The UI never decides this — it only reflects what the API returns.
+- **Who holds a role** is itself managed in the app, on the admin-only Users
+  and access screen (`docs/user_flows.md`). Every grant, revocation, and role
+  change writes a `user_access` operation, so the audit trail covers changes to
+  the audit trail's own actors. Those operations are **not undoable** —
+  reversing one is a one-click action on that screen, which is clearer than an
+  undo that silently re-grants access.
 - Rationale: 4 accountants + 1 admin. Own-actions-only keeps each accountant
   accountable for their own corrections and avoids two people silently
   reverting each other during a shared import; the admin is the single escape

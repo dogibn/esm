@@ -155,12 +155,12 @@ export const strings = {
       noOpenCharges: "No open charges for this student",
     },
     split: {
-      acrossCharges: (n: number) =>
-        n === 1 ? "Split · 1" : `Split · ${n}`,
       enable: "Split",
       disable: "Single charge",
       addCharge: "Add charge",
-      remove: "Remove",
+      remove: "Remove this charge",
+      amountLabel: (n: number) => `Amount on charge ${n}`,
+      amountPlaceholder: "MNT",
       allocated: (allocated: number, total: number) =>
         `Allocated ${allocated.toLocaleString("en-US")} of ${total.toLocaleString("en-US")} MNT`,
     },
@@ -172,8 +172,9 @@ export const strings = {
       date: "Date",
       matchedOn: "Matched on",
       noSignals: "No matching signals — fill this in manually.",
-      alternatives: "Other candidate students",
+      candidates: "Candidate students",
       apply: (name: string) => `Use ${name}`,
+      currentCandidate: (name: string) => `${name} · in use`,
       warnings: "Warnings",
       reason: "Why there's no confident match",
     },
@@ -250,6 +251,8 @@ export const strings = {
     multiple_tuition_charges: "More than one tuition charge — pick the correct one.",
     fee_inferred_from_amount: "Fee was inferred from the amount; verify before confirming.",
     manual_review: "Manual review required.",
+    multi_student_unresolved:
+      "Memo names several students but the split failed — decide how they share it.",
   } as Record<string, string>,
 
   unmatched: {

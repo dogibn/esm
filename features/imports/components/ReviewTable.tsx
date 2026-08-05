@@ -357,6 +357,8 @@ export function ReviewTable({ initialData, handleRef }: Props) {
   const runBulk = async (rows: ProposalListItemWire[]) => {
     const jobs = rows
       .map((p) => {
+        // Sibling splits need no special case: their edit carries a line per
+        // child, each with its own student.
         const edit = edits.get(p.bankTransactionId);
         if (!edit) return null;
         if (!isEditConfirmable(edit, p.transactionPreview.amount)) return null;
@@ -390,7 +392,7 @@ export function ReviewTable({ initialData, handleRef }: Props) {
   ].filter(Boolean);
 
   const renderRow = (p: ProposalListItemWire) => {
-    const edit = edits.get(p.bankTransactionId) ?? { studentId: 0, lines: [] };
+    const edit = edits.get(p.bankTransactionId) ?? proposalToEdit(p);
     return (
       <CollapsedProposalRow
         key={p.bankTransactionId}

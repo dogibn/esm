@@ -1,0 +1,952 @@
+[
+ {
+  "student_id": "259",
+  "code": "201C02",
+  "last_name": "Temuulee",
+  "first_name": "Urjin",
+  "prev_class": "6E",
+  "prev_level": "6",
+  "current_class": null,
+  "bucket": "candidate delete"
+ },
+ {
+  "student_id": "385",
+  "code": "185C19",
+  "last_name": "Amgalanbaatar",
+  "first_name": "Arigbukh",
+  "prev_class": "12B",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "397",
+  "code": "185B10",
+  "last_name": "Otgonbayar",
+  "first_name": "Anand-Ochir",
+  "prev_class": "12A",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "398",
+  "code": "196D01",
+  "last_name": "Batzorig",
+  "first_name": "Dulguun",
+  "prev_class": "12D",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "405",
+  "code": "185C02",
+  "last_name": "Tsengel",
+  "first_name": "Byekbol",
+  "prev_class": "12A",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "409",
+  "code": "185B23",
+  "last_name": "Ryan",
+  "first_name": "Carlton Anthony",
+  "prev_class": "12A",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "414",
+  "code": "185B03",
+  "last_name": "Baljinnyam",
+  "first_name": "Erkhembileg",
+  "prev_class": "12D",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "415",
+  "code": "185C13",
+  "last_name": "Erdenebulgan",
+  "first_name": "Chingun",
+  "prev_class": "12A",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "418",
+  "code": "185C18",
+  "last_name": "Oyunbat",
+  "first_name": "Denzennyam",
+  "prev_class": "12A",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "421",
+  "code": "185A18",
+  "last_name": "Williams",
+  "first_name": "Harry Tengis",
+  "prev_class": "12D",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "424",
+  "code": "185C10",
+  "last_name": "Nasanjargal",
+  "first_name": "Enerel",
+  "prev_class": "12A",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "425",
+  "code": "185A05",
+  "last_name": "Xu",
+  "first_name": "Javkhaa",
+  "prev_class": "12D",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "428",
+  "code": "185C01",
+  "last_name": "Avtaikhuu",
+  "first_name": "Khishig",
+  "prev_class": "12D",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "430",
+  "code": "185C15",
+  "last_name": "Khishignemekh",
+  "first_name": "Enkhkhuslen",
+  "prev_class": "12A",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "432",
+  "code": "185C08",
+  "last_name": "Jambasuren",
+  "first_name": "Michelle",
+  "prev_class": "12D",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "433",
+  "code": "185B27",
+  "last_name": "Solongo",
+  "first_name": "Enkhtsatsralt",
+  "prev_class": "12A",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "437",
+  "code": "185B24",
+  "last_name": "Kim",
+  "first_name": "Minha",
+  "prev_class": "12D",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "440",
+  "code": "185B12",
+  "last_name": "Galsannyam",
+  "first_name": "Khaliun",
+  "prev_class": "12A",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "441",
+  "code": "196D03",
+  "last_name": "Bayanmunkh",
+  "first_name": "Munkhjin",
+  "prev_class": "12D",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "448",
+  "code": "196C01",
+  "last_name": "Gankhuyag",
+  "first_name": "Khaskhuyag",
+  "prev_class": "12A",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "457",
+  "code": "185B06",
+  "last_name": "Zotol",
+  "first_name": "Munkh-Orgil",
+  "prev_class": "12C",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "463",
+  "code": "229A01",
+  "last_name": "Badral",
+  "first_name": "Tselmuun",
+  "prev_class": "12A",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "464",
+  "code": "185C03",
+  "last_name": "Batsaikhan",
+  "first_name": "Orchlon",
+  "prev_class": "12A",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "466",
+  "code": "185A06",
+  "last_name": "Enkhbold",
+  "first_name": "Unubold",
+  "prev_class": "12D",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "469",
+  "code": "185A03",
+  "last_name": "Ganbat",
+  "first_name": "Orgil",
+  "prev_class": "12C",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "470",
+  "code": "196D02",
+  "last_name": "Chinsun",
+  "first_name": "Urikhan",
+  "prev_class": "12A",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "473",
+  "code": "185B18",
+  "last_name": "Lee",
+  "first_name": "Sunghan",
+  "prev_class": "12D",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "479",
+  "code": "185C06",
+  "last_name": "Mamidi",
+  "first_name": "Sofie",
+  "prev_class": "12A",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "481",
+  "code": "185A08",
+  "last_name": "Erdenebileg",
+  "first_name": "Tsolmon",
+  "prev_class": "12B",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "487",
+  "code": "207A01",
+  "last_name": "Munkhjargal",
+  "first_name": "Oyun-erdene",
+  "prev_class": "12A",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "490",
+  "code": "196C07",
+  "last_name": "Bayanzul",
+  "first_name": "Aminzul",
+  "prev_class": "12B",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "492",
+  "code": "185A01",
+  "last_name": "Odgerel",
+  "first_name": "Ariunbileg",
+  "prev_class": "12B",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "496",
+  "code": "196C02",
+  "last_name": "Narandash",
+  "first_name": "Bayasgalan",
+  "prev_class": "12B",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "509",
+  "code": "185C07",
+  "last_name": "Enkhbayar",
+  "first_name": "Enerel",
+  "prev_class": "12B",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "514",
+  "code": "185A13",
+  "last_name": "Chinbayar",
+  "first_name": "Enkhnaran",
+  "prev_class": "12B",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "523",
+  "code": "196Cc4",
+  "last_name": "Battsengel",
+  "first_name": "Gundolmaa",
+  "prev_class": "12B",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "528",
+  "code": "185C12",
+  "last_name": "Batbayar",
+  "first_name": "Javkhlan",
+  "prev_class": "12B",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "537",
+  "code": "185A10",
+  "last_name": "Enkhtuvshin",
+  "first_name": "Khuslen",
+  "prev_class": "12B",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "546",
+  "code": "185B08",
+  "last_name": "Tseren",
+  "first_name": "Magnai",
+  "prev_class": "12D",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "554",
+  "code": "196Cc1",
+  "last_name": "Batgerel",
+  "first_name": "Margad",
+  "prev_class": "12B",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "560",
+  "code": "185B16",
+  "last_name": "Galsansar",
+  "first_name": "Odmandakh",
+  "prev_class": "12B",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "569",
+  "code": "196Cc3",
+  "last_name": "Ichinnorov",
+  "first_name": "Temuge",
+  "prev_class": "12B",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "572",
+  "code": "185A09",
+  "last_name": "Enkhbat",
+  "first_name": "Temuulen",
+  "prev_class": "12B",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "579",
+  "code": "185A16",
+  "last_name": "Chinbat",
+  "first_name": "Todsaran",
+  "prev_class": "12B",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "746",
+  "code": "185B01",
+  "last_name": "Battulga",
+  "first_name": "Amanda",
+  "prev_class": "12C",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "749",
+  "code": "196Cc2",
+  "last_name": "Enkhbaatar",
+  "first_name": "Ankhiluun",
+  "prev_class": "12C",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "761",
+  "code": "185A21",
+  "last_name": "Dash",
+  "first_name": "Dorjsuren",
+  "prev_class": "12C",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "764",
+  "code": "207C03",
+  "last_name": "Cho",
+  "first_name": "Eunjin",
+  "prev_class": "12C",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "771",
+  "code": "185C11",
+  "last_name": "Ganzorig",
+  "first_name": "Munkhsaruul",
+  "prev_class": "12C",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "781",
+  "code": "185B14",
+  "last_name": "Duurenbayar",
+  "first_name": "Turmunkh",
+  "prev_class": "12A",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "791",
+  "code": "2411C02",
+  "last_name": "Nandin-Erdene",
+  "first_name": "Erkhtsolmon",
+  "prev_class": "12C",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "1100",
+  "code": "185A07",
+  "last_name": "Erdenetuul",
+  "first_name": "Saran Mariya",
+  "prev_class": "12B",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "1163",
+  "code": "186A04",
+  "last_name": "Yoon",
+  "first_name": "Elizabeth",
+  "prev_class": "12C",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "1614",
+  "code": "218C01",
+  "last_name": "Khosbayar",
+  "first_name": "Enkhrii",
+  "prev_class": "12B",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "1619",
+  "code": "218D02",
+  "last_name": "Uranzorigt",
+  "first_name": "Urandelbee",
+  "prev_class": "12D",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "1626",
+  "code": "218Cc4",
+  "last_name": "Nyamjargal",
+  "first_name": "Temuulen",
+  "prev_class": "12C",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "1627",
+  "code": "218Cc1",
+  "last_name": "Ariunjargal",
+  "first_name": "Nomin-erdene",
+  "prev_class": "12C",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "1630",
+  "code": "218Cc2",
+  "last_name": "Bat-orshikh",
+  "first_name": "Tugstsogt",
+  "prev_class": "12C",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "1763",
+  "code": "191A01",
+  "last_name": "Anunaran",
+  "first_name": "Khaidu",
+  "prev_class": "7A",
+  "prev_level": "7",
+  "current_class": null,
+  "bucket": "candidate delete"
+ },
+ {
+  "student_id": "1791",
+  "code": "185+12",
+  "last_name": "Amartuvshin",
+  "first_name": "Argun",
+  "prev_class": "7A",
+  "prev_level": "7",
+  "current_class": "8A",
+  "bucket": "still enrolled on esmlh"
+ },
+ {
+  "student_id": "1887",
+  "code": "218C02",
+  "last_name": "Kouassi-Komlan",
+  "first_name": "Faith Eva Anaja",
+  "prev_class": "12B",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "1907",
+  "code": "218C03",
+  "last_name": "Demberel",
+  "first_name": "Tsogtbaatar",
+  "prev_class": "12B",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "2583",
+  "code": "229D05",
+  "last_name": "Munkhbayar",
+  "first_name": "Misheel",
+  "prev_class": "12D",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "2584",
+  "code": "229D03",
+  "last_name": "Anar",
+  "first_name": "Margad",
+  "prev_class": "12D",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "2585",
+  "code": "229D06",
+  "last_name": "Enkhtaivan",
+  "first_name": "Soluun",
+  "prev_class": "12D",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "2589",
+  "code": "229C01",
+  "last_name": "Baasanbat",
+  "first_name": "Amar",
+  "prev_class": "12B",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "2590",
+  "code": "229C04",
+  "last_name": "Delgerdalai",
+  "first_name": "Tenuun",
+  "prev_class": "12B",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "2629",
+  "code": "229Cc1",
+  "last_name": "Amilyear",
+  "first_name": "Astro Jenko",
+  "prev_class": "12C",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "2630",
+  "code": "229Cc5",
+  "last_name": "Amarjargal",
+  "first_name": "Khaliun",
+  "prev_class": "12C",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "2632",
+  "code": "229Cc6",
+  "last_name": "Altaibayar",
+  "first_name": "Maral",
+  "prev_class": "12D",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "2640",
+  "code": "229D08",
+  "last_name": "Ahn",
+  "first_name": "Yaein",
+  "prev_class": "12A",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "2642",
+  "code": "229D02",
+  "last_name": "Munkhbaatar",
+  "first_name": "Bishrelt",
+  "prev_class": "12D",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "2654",
+  "code": "229A02",
+  "last_name": "Batchuluun",
+  "first_name": "Bayasgalan",
+  "prev_class": "12A",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "2673",
+  "code": "229A04",
+  "last_name": "Deleg",
+  "first_name": "Anungoo",
+  "prev_class": "12A",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "2702",
+  "code": "233+08",
+  "last_name": "Tsolmongerel",
+  "first_name": "Nomuun",
+  "prev_class": "5+B",
+  "prev_level": "5+",
+  "current_class": "1B",
+  "bucket": "still enrolled on esmlh"
+ },
+ {
+  "student_id": "2939",
+  "code": "2310A01",
+  "last_name": "Ankhbayar",
+  "first_name": "Emujin",
+  "prev_class": "12A",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "2943",
+  "code": "2310C02",
+  "last_name": "Gansukh",
+  "first_name": "Bilguun",
+  "prev_class": "12C",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "2988",
+  "code": "2310C01",
+  "last_name": "Tumurkhuyag",
+  "first_name": "Enkh-Uyanga",
+  "prev_class": "12C",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "3315",
+  "code": "2411A03",
+  "last_name": "Battogtokh",
+  "first_name": "Dolgorsuren",
+  "prev_class": "12A",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "3316",
+  "code": "2411C05",
+  "last_name": "Choijalbuu",
+  "first_name": "Nomin",
+  "prev_class": "12C",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "3318",
+  "code": "2411D02",
+  "last_name": "Banzragch",
+  "first_name": "Enkhsaruul",
+  "prev_class": "12B",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "3319",
+  "code": "2411A01",
+  "last_name": "Bum-Erdene",
+  "first_name": "Anar",
+  "prev_class": "12A",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "3320",
+  "code": "2411A04",
+  "last_name": "Badral",
+  "first_name": "Indra",
+  "prev_class": "12A",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "3321",
+  "code": "2411B01",
+  "last_name": "Otgonbayar",
+  "first_name": "Enkhbayar",
+  "prev_class": "12B",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "3324",
+  "code": "2411C06",
+  "last_name": "Khurts",
+  "first_name": "Shuuderkhen",
+  "prev_class": "12C",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "3325",
+  "code": "2411C03",
+  "last_name": "Urantuya",
+  "first_name": "Mina",
+  "prev_class": "12C",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "3326",
+  "code": "2411C04",
+  "last_name": "Erdenesukh",
+  "first_name": "Nandin-erdene",
+  "prev_class": "12C",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "3327",
+  "code": "2411C07",
+  "last_name": "Altan-Uul",
+  "first_name": "Yilagusen",
+  "prev_class": "12C",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "3328",
+  "code": "2411C01",
+  "last_name": "Munkhbat",
+  "first_name": "Amirlin",
+  "prev_class": "12C",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "3330",
+  "code": "2411D04",
+  "last_name": "Amar",
+  "first_name": "Gunjinlkham",
+  "prev_class": "12D",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "3336",
+  "code": "2411A02",
+  "last_name": "Zaya",
+  "first_name": "Chinzorig",
+  "prev_class": "12A",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "3353",
+  "code": "2411D01",
+  "last_name": "Manaljav",
+  "first_name": "Baasankhuu",
+  "prev_class": "12D",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "5273",
+  "code": "2512D01",
+  "last_name": "Uranchimeg",
+  "first_name": "Misheel",
+  "prev_class": "12D",
+  "prev_level": "12",
+  "current_class": null,
+  "bucket": "graduated"
+ },
+ {
+  "student_id": "5302",
+  "code": "251BO24",
+  "last_name": "Abdullaev",
+  "first_name": "Mukhammadamin",
+  "prev_class": "1ML",
+  "prev_level": "1",
+  "current_class": null,
+  "bucket": "candidate delete"
+ },
+ {
+  "student_id": "5310",
+  "code": "253TM02",
+  "last_name": "Shi",
+  "first_name": "Xinyi",
+  "prev_class": "3TM",
+  "prev_level": "3",
+  "current_class": "4TM",
+  "bucket": "still enrolled on esmlh"
+ }
+]

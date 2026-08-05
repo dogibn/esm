@@ -24,6 +24,7 @@ import {
   loadStudentChargeDetails,
   type StudentChargeDetail,
 } from "./balance";
+import { groupRowsByClass } from "./grouping";
 import type {
   ChargeCreateInput,
   ChargeUpdateInput,
@@ -31,25 +32,26 @@ import type {
   StudentUpdateInput,
   TuitionUpdateInput,
 } from "./schemas";
-import type {
-  FilterOptions,
-  StudentListResponse,
-  StudentRow,
-} from "./types";
+import type { FilterOptions, StudentListResponse, StudentRow } from "./types";
 
-type StudentBase = {
+// One enrolment as the query returns it. `teacherName` is class metadata the
+// grouped view puts on the class row, so it is picked off here rather than
+// riding along into every StudentRow.
+type EnrollmentBase = {
   studentId: number;
   studentCode: string;
   firstName: string;
   lastName: string;
+  gradeId: number;
   gradeName: string;
   gradeLevelCode: string;
+  teacherName: string;
 };
 
 // Fold a student's scoped charges into their single tracking row. Money math
 // lives in balance.ts; this only assembles the DTO.
 function buildStudentRow(
-  base: StudentBase,
+  base: EnrollmentBase,
   scopedCharges: StudentChargeDetail[],
   lastPaymentByCharge: Map<number, string>,
 ): StudentRow {
@@ -64,7 +66,13 @@ function buildStudentRow(
   }
 
   return {
-    ...base,
+    studentId: base.studentId,
+    studentCode: base.studentCode,
+    firstName: base.firstName,
+    lastName: base.lastName,
+    gradeId: base.gradeId,
+    gradeName: base.gradeName,
+    gradeLevelCode: base.gradeLevelCode,
     due: totals.due,
     paid: totals.paid,
     balance: totals.balance,
@@ -132,8 +140,10 @@ export async function listStudents(
         studentCode: students.studentId,
         firstName: students.firstName,
         lastName: students.lastName,
+        gradeId: grades.id,
         gradeName: grades.name,
         gradeLevelCode: gradeLevels.code,
+        teacherName: grades.teacherName,
       })
       .from(enrollments)
       .innerJoin(students, eq(students.id, enrollments.studentId))
@@ -195,8 +205,26 @@ export async function listStudents(
   }
 
   const total = folded.length;
+
+  // Class metadata the grouped view puts on the class row. It lives on the
+  // enrolment query, not on the row DTOs.
+  const teacherByGrade = new Map(allRows.map((r) => [r.gradeId, r.teacherName]));
+
+  // Grouping paginates over classes rather than students, so a class is always
+  // whole on the page it lands on — a class split across two pages would show
+  // the same class row twice, each with a partial count.
+  const allGroups =
+    params.groupBy === "class" ? groupRowsByClass(folded, teacherByGrade) : null;
+  const pageUnits = allGroups === null ? total : allGroups.length;
+  const pageCount = Math.max(1, Math.ceil(pageUnits / params.pageSize));
+
   const offset = (params.page - 1) * params.pageSize;
-  const rows = folded.slice(offset, offset + params.pageSize);
+  const groups =
+    allGroups === null ? null : allGroups.slice(offset, offset + params.pageSize);
+  const rows =
+    groups === null
+      ? folded.slice(offset, offset + params.pageSize)
+      : groups.flatMap((g) => g.rows);
 
   const summary = folded.reduce(
     (acc, row) => {
@@ -210,9 +238,12 @@ export async function listStudents(
 
   return {
     rows,
+    groups,
     page: params.page,
     pageSize: params.pageSize,
     total,
+    totalGroups: allGroups === null ? null : allGroups.length,
+    pageCount,
     fee: params.fee,
     summary,
   };

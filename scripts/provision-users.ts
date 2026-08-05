@@ -92,13 +92,27 @@ async function main(): Promise<void> {
 
   for (const entry of allowlist) {
     // 1. Allowlist row (the authorization gate). Idempotent on email.
-    await db
+    //
+    // `is_active` is deliberately NOT reset here. An admin who revoked this
+    // person on the Users and access screen made a decision the script has no
+    // business quietly undoing — re-running provisioning must never re-grant
+    // access. The row is reported below instead, so it isn't invisible either.
+    const [row] = await db
       .insert(users)
       .values({ email: entry.email, role: entry.role })
       .onConflictDoUpdate({
         target: users.email,
-        set: { role: sql`excluded.role` },
-      });
+        set: { role: sql`excluded.role`, updatedAt: new Date() },
+      })
+      .returning({ isActive: users.isActive });
+
+    if (row && !row.isActive) {
+      console.log(
+        `  ${entry.email} [${entry.role}] — role set, but access is REVOKED.` +
+          " Restore it on the Users and access screen if that's wrong.",
+      );
+      continue;
+    }
 
     // 2. Password auth user, if requested.
     if (!entry.password) {

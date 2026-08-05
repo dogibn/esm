@@ -5,10 +5,33 @@ export const strings = {
       "What the school charges, and what it charged before. A new rate never edits the old one — it supersedes it.",
     adminHint: "What the school charges, and what it charged before. Only an admin can publish a new rate.",
   },
+  tabs: {
+    label: "Fee sections",
+    tuition: "Tuition",
+    clubs: "Clubs",
+    others: "Others",
+  },
   schoolFees: {
     title: "School-wide fees",
     description: "Tuition, registration, and bus. The rate in force plus its history.",
     empty: "No school-wide fees are loaded yet.",
+  },
+  tuition: {
+    empty: "No tuition rate is loaded yet.",
+  },
+  others: {
+    title: "Other fees",
+    description:
+      "Every school-wide fee apart from tuition — registration, bus, and anything else the import loads. Expand a fee for its per-grade amounts and earlier rates.",
+    empty: "No other school-wide fees are loaded yet.",
+    columns: {
+      name: "Fee",
+      amount: "Amount",
+      from: "Applies from",
+    },
+    perGrade: "Per grade level",
+    noAmount: "—",
+    expand: (fee: string) => `Show details for ${fee}`,
   },
   current: "In force",
   from: (date: string) => `From ${date}`,

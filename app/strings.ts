@@ -21,6 +21,7 @@ export const strings = {
     classes: "Classes",
     fees: "Fee rates",
     discounts: "Discounts",
+    users: "Users and access",
     collapse: "Collapse the sidebar",
     expand: "Expand the sidebar",
   },

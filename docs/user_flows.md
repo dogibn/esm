@@ -9,13 +9,15 @@ UI workflows the accountant performs in the app. The fourth lifecycle (year/term
 Every flow below starts from a **left sidebar**, in two groups.
 
 - **The daily loop, unlabelled at the top:** Students, Imports, Transactions, **History**. History sits here on purpose — it drives reversals and is used constantly, so filing it with configuration would lend a daily tool the weight of "settings I shouldn't be poking at".
-- **Setup:** Academic calendar, Classes, Fee rates, Discounts. Everything here is configuration — touched a few times a year, read far more often than written. One group rather than two: once History moves up, splitting the rest into "school" and "money" only invites the argument about which one Classes is.
+- **Setup:** Academic calendar, Classes, Fee rates, Discounts, **Users and access**. Everything here is configuration — touched a few times a year, read far more often than written. One group rather than two: once History moves up, splitting the rest into "school" and "money" only invites the argument about which one Classes is. Users and access sits last, and is the one row an accountant never sees at all (§8).
 
 The sidebar also carries the brand and, at its foot, the **identity block** — name, role, and sign-out. That is the one place for "things about me", which is why there is no account menu in a header. There is no header bar at all: each page's own `PageHeader` owns the title and that page's primary action (New contract on Students, Add year on Academic calendar).
 
 **Collapse.** The sidebar collapses to an icon rail, remembered per browser in the `esm-sidebar` cookie — read on the server, so a reload paints at the right width instead of snapping. Expanded is the real state: icon-only navigation is exactly where a twice-a-year item like Academic calendar becomes unfindable, so collapse is a temporary "I need the width for this table" gesture. In the rail each item grows a tooltip, and keeps an `aria-label` — the tooltip is a hover affordance, not an accessible name. Below the `md` breakpoint there is no room for labels, so the rail is the only layout and the toggle is hidden.
 
-Pages that don't exist yet (Clubs, Users and access) have no nav row: a link to a page that isn't there costs more than the row saves.
+Pages that don't exist yet (Clubs) have no nav row: a link to a page that isn't there costs more than the row saves.
+
+**Role filtering.** Rows marked `adminOnly` in `features/shell/nav.ts` are dropped for accountants — today only Users and access. The filter is cosmetic: it spares an accountant a row they'd only get a 404 from, and the page and its API routes check the role themselves regardless.
 
 ---
 
@@ -35,8 +37,9 @@ The accountant comes here to answer questions about who has paid what:
 1. Accountant signs in with email and password.
 2. The view is **scoped to one fee at a time** — a tab row across the top: *All fees | Tuition | Bus | Registration | Clubs*, defaulting to Tuition. The scope lives in the URL (`?fee=bus`), so a view is linkable and survives a refresh.
 3. The system shows one row per student — ID, student, class, due, paid, status, last payment — ordered by class, then surname, so a class-filtered view reads like the accountant's spreadsheet. The list is paginated.
-4. The accountant searches by student name, ID, or contact info, and/or filters by grade level, class, and payment status, until the question is answered.
-5. Clicking a row opens that student's detail page, where the per-fee breakdown lives.
+4. On the Tuition scope the accountant can turn **Group by class** on. Each class then gets a short row above its students — class name, teacher, student count, and the class's own due / paid / outstanding — with a chevron that collapses it. Off is the flat list. The setting lives in the URL (`?groupBy=class`) alongside the fee scope.
+5. The accountant searches by student name, ID, or contact info, and/or filters by grade level, class, and payment status, until the question is answered.
+6. Clicking a row opens that student's detail page, where the per-fee breakdown lives.
 
 **Notes**
 - Read-only view. No data is created or modified here.
@@ -45,6 +48,9 @@ The accountant comes here to answer questions about who has paid what:
 - Clubs is the one fee where a student may hold several charges in a term; those are summed into the student's single row.
 - The *All fees* total adds year-scoped tuition/registration to term-scoped bus/club charges. Different scopes, so the column names both ("year + current term") and must not be read as a single amount owed right now.
 - The summary cards (outstanding balance, collected + collection rate) recompute for the selected fee scope, not the whole school.
+- **Grouping paginates by class, not by student.** A class row's totals are the whole class's, so the class must be whole on the page it lands on — paginating by student would split a class across two pages and show its row twice, each with a partial count. `page`/`pageSize` therefore count classes while grouping (ten per page, since each carries its students), and the footer says so.
+- **Grouping is offered on Tuition only.** It's the fee every enrolled student carries, so a class row there sums the whole class. In a scope that drops students holding no such charge — bus, registration, clubs — the row would sum a subset while naming the class. Switching scope turns grouping off.
+- Grouping narrows nothing: the summary cards, the record count, and the rows themselves are identical either way.
 - The bank-transaction side of things lives in **Transaction history** (flow 3), kept deliberately separate.
 
 ---
@@ -67,7 +73,8 @@ The accountant has just downloaded a bank Excel/CSV file and needs to record tho
    - One transaction may map to more than one fee (e.g. a parent paying tuition and bus fee in a single transfer).
    - Match confidence is shown as which fields contributed (memo grade, memo name, account number, amount), not as a numeric score.
 5. For transactions where parsing fails or is ambiguous, match fields are left empty for the accountant to fill in manually.
-6. The review screen triages rows into two tiers so the common case is fast. Every row is a compact, **directly editable** one line: memo on the left; **class → student → charge** inputs on the right, where the student list is limited to the chosen class and the charge list to that student's open charges. A single charge takes the full transfer amount; a **Split** control lets one transfer pay several of that student's charges. The chevron toggle reveals read-only detail only — full transaction fields and why it matched (which signals contributed, warnings, alternative candidates).
+6. The review screen triages rows into two tiers so the common case is fast. Every row is a compact, **directly editable** one line: memo on the left; **class → student → charge → amount** inputs on the right, where the student list is limited to the chosen class and the charge list to that student's open charges. The chevron toggle reveals read-only detail only — full transaction fields and why it matched (which signals contributed, warnings, and every candidate student the matcher weighed, the one currently in the row included, so trying another candidate is reversible).
+   A single charge takes the full transfer amount. **Split** adds another charge row directly beneath, in the same columns and with its own class, student, charge and amount — so one transfer can pay several of one child's fees (the new row repeats the student above it) or be shared between siblings (change the student on the row). A sibling split the matcher found arrives already filled in this way, one row per child; the running **Allocated X of Y** must reach the transfer amount before the row can be confirmed. Confirming creates one payment per row, and any fee not yet on a child's ledger is created in the same operation.
    - **Confident** — a single, balanced, flag-free auto-match to one charge (e.g. a start-of-year tuition-only transfer for the exact amount). Pre-selected; the accountant glances, unchecks any that look wrong, and clicks **Confirm N selected** to record them in one action.
    - **Needs attention** — everything else (no match, low confidence, split, multiple candidates, flagged, or unbalanced), sorted to the top, each carrying a reason chip.
    For any row the accountant can **Confirm** (after editing the inline inputs), **Discard** it (not a student payment — soft-deleted, reversible; see `history_and_reversibility.md`), or **Skip** it (stays unmatched, resurfaces in Transaction history).
@@ -150,9 +157,9 @@ The year-start import creates grade levels and classes from esmlh.edu.mn, and it
 
 **Flow**
 
-1. Any accountant opens "Classes" in the main navigation. Only admins see the controls (the API enforces `requireAdmin` regardless).
-2. **Grade levels** (school-wide, stable across years) list their code, display order, whether tuition prices them, and what uses them.
-3. **Classes** are shown for one academic year, picked from a dropdown that defaults to the current year. Each row carries its level, teacher, teacher contact, and student count.
+1. Any accountant opens "Classes" in the main navigation and lands on one of two tabs — **Classes** and **Grade levels**. Only admins see the controls (the API enforces `requireAdmin` regardless). The tab lives in the URL (`?tab=`), so a section is linkable and survives the year picker's navigation.
+2. **Classes** (the default tab) are shown for one academic year, picked from a dropdown that defaults to the current year. Each row carries its level, teacher, teacher contact, and student count.
+3. **Grade levels** (school-wide, stable across years) list their code, display order, whether tuition prices them, and what uses them.
 4. Adding or editing a class sets its name, level, and teacher details. Deleting is offered only for a class nobody is enrolled in.
 
 **Notes**
@@ -173,8 +180,11 @@ What the school charges — tuition per grade level, registration, bus — lived
 
 **Flow**
 
-1. Any accountant opens "Fees" in the main navigation and sees each school-wide fee: the rate in force, the date it applies from, and its earlier rates behind a toggle. Club fees follow, grouped by term.
-2. An admin publishes a new rate for a fee: a date it applies from, plus one amount (flat fees) or an amount per grade level (tuition), pre-filled from the rate in force.
+1. Any accountant opens "Fees" in the main navigation and picks one of three tabs, kept in the URL (`?tab=`):
+   - **Tuition** (the default) — the rate in force, per grade level, the date it applies from, and its earlier rates behind a toggle.
+   - **Clubs** — club fees grouped by term, read-only.
+   - **Others** — every remaining school-wide fee (registration, bus, anything else the import loads) as one table of fee name and amount, plus the date each applies from. A row expands to what a cell can't hold: a per-grade breakdown, and the rates it replaced.
+2. An admin publishes a new rate for a fee from either the Tuition or the Others tab: a date it applies from, plus one amount (flat fees) or an amount per grade level (tuition), pre-filled from the rate in force.
 3. Publishing marks the old rate replaced and inserts the new one, in one transaction.
 
 **Notes**
@@ -185,3 +195,28 @@ What the school charges — tuition per grade level, registration, bus — lived
 - **A per-grade rate must price every grade level, and nothing else.** A level with no amount silently yields no tuition when a contract is created; a stray code is a typo nothing will ever look up.
 - **New fee names aren't invented here.** Rates are published for fees the school already has; a new fee arrives with the year/term-start import.
 - **Club fees are read-only.** They're per-term and loaded from esmlh.edu.mn each term, so an edit here would be overwritten by the next import.
+
+---
+
+## 8. Users and access
+
+**Purpose**
+
+Who can sign in to the portal, and what they can change. Until now the allowlist was seeded only by `pnpm provision:users` — adding a colleague or removing someone who left meant editing a JSON file and running a script. This is the same job in the app, for the one person who should be doing it.
+
+**Flow**
+
+1. An **admin** opens "Users and access", the last item under Setup. Accountants have no nav row and get a 404 on the URL: the allowlist is the access-control surface itself, so it isn't a read-only view either.
+2. The table lists every allowlist row — active first, then alphabetical — with the role, whether access is active or revoked, how many actions the person has logged in History, and when they were added. The admin's own row is marked "You".
+3. **Add user** takes an email and a role. The row *is* the grant: `lib/auth.ts` authorizes by matching the signed-in email against this table, so the person can sign in with Google immediately. Nothing is created on the Supabase side.
+4. A row menu offers **change role**, **revoke access**, and **restore access**. Each pauses on a confirm dialog first — one click either hands someone the ability to manage users or stops them working.
+
+**Notes**
+- **Revoking never deletes the row.** `operations.actor_user_id` FKs to `users`, so a delete would orphan the audit trail. Revoking clears `is_active`, which keeps their history readable and makes restoring access a one-click reversal (`schema.md` § `users`).
+- **Revocation takes effect on the next request**, in both the shell and the API — `lib/auth.ts` rejects a deactivated row exactly as it rejects a missing one, rather than waiting for the Supabase session to expire.
+- **Emails are normalised to lowercase** on the way in, because authorization lowercases the session email before the lookup. A row stored with capitals would never match anyone.
+- **The email is not editable.** It's the identity the allowlist matches on; changing it would silently transfer one person's audit trail to another. Revoke the old address and add the new one.
+- **Two lockouts are refused server-side:** an admin revoking or demoting themselves, and removing the last active admin. Either one leaves nobody able to reach this screen. The row menu also disables those actions, but the API is what enforces it.
+- **Re-adding a revoked address reactivates the existing row** rather than failing, so the person keeps their history.
+- **Password sign-in still needs a Supabase Auth user**, which `pnpm provision:users` creates; this screen grants portal access, not a password. The add dialog says so.
+- **Every change writes a `user_access` operation** and shows up in History (`history_and_reversibility.md`). Those operations are not undoable — restoring access is a one-click action here, which is clearer than an undo that silently re-grants it.

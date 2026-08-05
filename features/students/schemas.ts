@@ -29,14 +29,58 @@ export const feeScopeSchema = z
   .catch(DEFAULT_FEE_SCOPE)
   .default(DEFAULT_FEE_SCOPE);
 
+// How the tracking table is laid out. `class` folds each class's students
+// under one class row and paginates by class, so a class is never split across
+// two pages — `page`/`pageSize` count classes, not students. `none` is the flat
+// list. Display only: it narrows nothing and changes no total.
+export const GROUP_BY_VALUES = ["none", "class"] as const;
+export type GroupByValue = (typeof GROUP_BY_VALUES)[number];
+
+export const DEFAULT_GROUP_BY: GroupByValue = "none";
+
+export const groupBySchema = z
+  .enum(GROUP_BY_VALUES)
+  .catch(DEFAULT_GROUP_BY)
+  .default(DEFAULT_GROUP_BY);
+
+/** Students per page in the flat table. */
+export const STUDENT_PAGE_SIZE = 50;
+
+/**
+ * Classes per page when grouping. Far fewer, because a class row carries its
+ * students with it — ten classes is already ~250 rows on the page.
+ */
+export const CLASS_PAGE_SIZE = 10;
+
+export function pageSizeFor(groupBy: GroupByValue): number {
+  return groupBy === "class" ? CLASS_PAGE_SIZE : STUDENT_PAGE_SIZE;
+}
+
+/**
+ * The one scope that offers grouping: tuition is the fee every enrolled
+ * student carries, so a class row there sums the whole class. In a scope that
+ * drops students holding no such charge, it would sum a subset while naming
+ * the class (`user_flows.md` § 1).
+ */
+export const GROUPABLE_FEE_SCOPE: FeeScopeValue = "tuition";
+
+/** Grouping asked for outside that scope is dropped, not honoured. */
+export function resolveGroupBy(
+  fee: FeeScopeValue,
+  groupBy: GroupByValue,
+): GroupByValue {
+  return fee === GROUPABLE_FEE_SCOPE ? groupBy : DEFAULT_GROUP_BY;
+}
+
 export const studentListParamsSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
-  pageSize: z.coerce.number().int().min(1).max(200).default(50),
+  pageSize: z.coerce.number().int().min(1).max(200).default(STUDENT_PAGE_SIZE),
   search: z.string().trim().min(1).optional(),
   gradeLevelId: z.coerce.number().int().positive().optional(),
   gradeId: z.coerce.number().int().positive().optional(),
   status: z.enum(STATUS_FILTER_VALUES).optional(),
   fee: feeScopeSchema,
+  groupBy: groupBySchema,
 });
 
 export type StudentListParams = z.infer<typeof studentListParamsSchema>;

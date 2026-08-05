@@ -8,6 +8,7 @@ export {
   updateGradeLevel,
 } from "./api";
 export {
+  CLASSES_TABS,
   classCreateSchema,
   classIdParamSchema,
   classUpdateSchema,
@@ -19,6 +20,7 @@ export type {
   ClassCreateInput,
   ClassUpdateInput,
   ClassesQuery,
+  ClassesTab,
   GradeLevelCreateInput,
   GradeLevelUpdateInput,
 } from "./schemas";

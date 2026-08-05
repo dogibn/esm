@@ -59,13 +59,20 @@ function toRateRow(
     data: unknown;
   },
   levelOrder: Map<string, number>,
+  // End of the current academic year. A rate that only takes effect after it
+  // is next year's published price, not the one in force — see activeFeeData
+  // in features/enrollments/api.ts, which this must agree with or the screen
+  // would advertise a rate the app is not billing.
+  currentYearEnd: string | null,
 ): FeeRateRow {
   const parsed = parseFeeData(row.data);
   const base = {
     id: row.id,
     effectiveFrom: row.effectiveFrom,
     supersededAt: row.supersededAt === null ? null : row.supersededAt.toISOString(),
-    isCurrent: row.supersededAt === null,
+    isCurrent:
+      row.supersededAt === null &&
+      (currentYearEnd === null || row.effectiveFrom <= currentYearEnd),
   };
 
   if (parsed.shape === "flat") {
@@ -94,7 +101,7 @@ function toRateRow(
  * secret. A fixed number of queries.
  */
 export async function listFeeRates(): Promise<FeesOverview> {
-  const [levelRows, feeRows, termRows] = await Promise.all([
+  const [levelRows, feeRows, termRows, currentYearRows] = await Promise.all([
     db
       .select({
         id: gradeLevels.id,
@@ -125,9 +132,15 @@ export async function listFeeRates(): Promise<FeesOverview> {
       .from(academicTerms)
       .innerJoin(academicYears, eq(academicYears.id, academicTerms.academicYearId))
       .orderBy(desc(academicTerms.startDate)),
+    db
+      .select({ endDate: academicYears.endDate })
+      .from(academicYears)
+      .where(eq(academicYears.isCurrent, true))
+      .limit(1),
   ]);
 
   const levelOrder = new Map(levelRows.map((l) => [l.code, l.sortOrder]));
+  const currentYearEnd = currentYearRows[0]?.endDate ?? null;
 
   // School-wide fees: academic_term_id IS NULL (domain_model.md § FeeStructure).
   const schoolByName = new Map<string, FeeRateRow[]>();
@@ -135,7 +148,7 @@ export async function listFeeRates(): Promise<FeesOverview> {
   for (const row of feeRows) {
     if (row.academicTermId === null) {
       const arr = schoolByName.get(row.feeName);
-      const mapped = toRateRow(row, levelOrder);
+      const mapped = toRateRow(row, levelOrder, currentYearEnd);
       if (arr) arr.push(mapped);
       else schoolByName.set(row.feeName, [mapped]);
     } else {

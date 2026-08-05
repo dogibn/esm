@@ -6,6 +6,11 @@ export const strings = {
     adminHint:
       "Grade levels and the classes of each academic year. Only an admin can change them.",
   },
+  tabs: {
+    label: "Classes sections",
+    classes: "Classes",
+    levels: "Grade levels",
+  },
   yearPicker: {
     label: "Academic year",
     current: "Current",

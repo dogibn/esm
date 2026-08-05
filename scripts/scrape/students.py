@@ -18,6 +18,7 @@ import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 
+from lib.config import year_suffix
 from lib.io import write_json
 from lib.paths import PROJECT_ROOT, SCRAPED_DIR
 
@@ -129,6 +130,23 @@ def main() -> None:
 
     write_json(OUTPUT_PATH, records, indent=2)
     print(f"Wrote {len(records)} records to {OUTPUT_PATH}", file=sys.stderr)
+
+    # Also keep a per-year archive. The directory only ever shows the year the
+    # school has made current, so without this a re-scrape at year rollover
+    # silently destroys the previous year's snapshot — which later passes still
+    # need (e.g. deriving next grade level for a student the new year's
+    # directory has not listed yet).
+    years = {r["academic_year_name"] for r in records}
+    if len(years) != 1:
+        print(
+            f"WARNING: directory mixes academic years {sorted(years)} — "
+            "skipping the per-year archive.",
+            file=sys.stderr,
+        )
+        return
+    archive_path = SCRAPED_DIR / f"students_{year_suffix(years.pop())}.json"
+    write_json(archive_path, records, indent=2)
+    print(f"Archived to {archive_path}", file=sys.stderr)
 
 
 if __name__ == "__main__":

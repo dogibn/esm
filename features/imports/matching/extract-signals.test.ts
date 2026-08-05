@@ -310,3 +310,49 @@ describe('extractSignals — grade shapes that used to be missed', () => {
     expect(s.nameGroups.length).toBe(2);
   });
 });
+
+describe('extractSignals — degraded and rejoined grade/name shapes (Phase 9)', () => {
+  // Students named so the initial joins have real directory entries to verify
+  // against; the class list deliberately has no plain "4A".
+  const phase9Ctx = ctx({
+    students: [
+      { id: 1, firstName: 'Enkh-Uchral', lastName: 'Gurbazar' },
+      { id: 2, firstName: 'Sondor', lastName: 'Erkhembayar' },
+      { id: 3, firstName: 'Sondor', lastName: 'Sain-Od' },
+      { id: 4, firstName: 'Khuslen', lastName: 'Ikhbayar' },
+      { id: 5, firstName: 'Khulan', lastName: 'Ikhbayar' },
+    ],
+    enrollments: [
+      { studentId: 1, gradeName: '4SA', gradeLevelCode: '4' },
+      { studentId: 2, gradeName: '8E', gradeLevelCode: '8' },
+      { studentId: 3, gradeName: '8E', gradeLevelCode: '8' },
+      { studentId: 4, gradeName: '11C', gradeLevelCode: '11' },
+      { studentId: 5, gradeName: '6A', gradeLevelCode: '6' },
+    ],
+  });
+
+  it("degrades 'Энх-Учрал 4А' (no class 4A exists) to level 4 + matching-class wildcards, not a dead name token", () => {
+    const s = extractSignals('Энх-Учрал 4А', BigInt('1625000'), phase9Ctx);
+    expect(s.gradeTokens.level).toContain('4');
+    expect(s.gradeTokens.wildcard).toContain('4sa');
+    expect(s.nameTokens).not.toContain('4a');
+    expect(s.nameTokens).toContain('enh-uchral');
+  });
+
+  it("rejoins the trailing surname initial — 'SONDOR.E' resolves as e.sondor", () => {
+    const s = extractSignals('VOLLEYBALL SONDOR.E 8E', BigInt('210000'), phase9Ctx);
+    const group = s.nameGroups.find((g) => g.includes('sundur'));
+    expect(group).toContain('e.sundur');
+  });
+
+  it("rejoins a leading stranded initial — 'I KHUSLEN I KHULAN' resolves both children", () => {
+    const s = extractSignals('I KHUSLEN I KHULAN AVTOBUS', BigInt('750000'), phase9Ctx);
+    expect(s.nameTokens).toContain('i.huslen');
+    expect(s.nameTokens).toContain('i.hulan');
+  });
+
+  it('never invents an initial join the directory does not index', () => {
+    const s = extractSignals('B SONDOR', BigInt('100000'), phase9Ctx);
+    expect(s.nameTokens).not.toContain('b.sundur');
+  });
+});

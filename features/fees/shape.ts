@@ -6,6 +6,11 @@
 //   Per-grade fee (tuition):       { "by_grade": { "1": 2000000, "5+": 1800000 } }
 //   Club fee:                      { "amount": 300000, "teacher": …, "schedule": … }
 
+// The stored name of the one fee every student is charged and the only one
+// priced per grade level. It gets its own section on /fees; every other
+// school-wide fee is listed together.
+export const TUITION_FEE_NAME = "tuition";
+
 export type ParsedFeeData =
   | {
       shape: "flat";

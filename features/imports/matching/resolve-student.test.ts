@@ -174,3 +174,100 @@ describe('detectMultiStudent', () => {
     expect(multi?.studentIds.sort()).toEqual([1, 2]);
   });
 });
+
+describe('resolveStudent — Phase 9 scoring', () => {
+  // "ENKHBAYAR ENEREL 12B": the child's surname doubles as another student's
+  // first name. Both names landing on one student must outweigh one shared
+  // token plus the same class.
+  const phase9Ctx = ctx({
+    students: [
+      { id: 1, firstName: 'Enerel', lastName: 'Enkhbayar' },
+      { id: 2, firstName: 'Enkhbayar', lastName: 'Otgonbayar' },
+      { id: 3, firstName: 'Enkh-Uchral', lastName: 'Tuguldur' },
+      { id: 4, firstName: 'Enkh-Uchral', lastName: 'Gurbazar' },
+    ],
+    enrollments: [
+      { studentId: 1, gradeName: '12B', gradeLevelCode: '12' },
+      { studentId: 2, gradeName: '12B', gradeLevelCode: '12' },
+      { studentId: 3, gradeName: '5IA', gradeLevelCode: '5' },
+      { studentId: 4, gradeName: '4SA', gradeLevelCode: '4' },
+    ],
+  });
+
+  it('a full name (both groups) clearly outscores its own surname on another student', () => {
+    const signals = extractSignals('ENKHBAYAR ENEREL ULDEGDEL TOLBOR 12B', BigInt('7000000'), phase9Ctx);
+    const cands = resolveStudent(signals, null, phase9Ctx);
+    const full = cands.find((c) => c.studentId === 1)!;
+    const partial = cands.find((c) => c.studentId === 2)!;
+    expect(full.signals.has('memo_name_full')).toBe(true);
+    expect(full.nameGroupsHit).toBe(2);
+    expect(partial.nameGroupsHit).toBe(1);
+    expect(full.score).toBeGreaterThan(partial.score);
+  });
+
+  it("a grade only one of two same-named students satisfies breaks the tie — 'Энх-Учрал 4А'", () => {
+    const signals = extractSignals('Энх-Учрал 4А', BigInt('1625000'), phase9Ctx);
+    const cands = resolveStudent(signals, null, phase9Ctx);
+    const inGrade = cands.find((c) => c.studentId === 4)!;
+    const outOfGrade = cands.find((c) => c.studentId === 3)!;
+    // 1.5× is triage's dominance bar; the tie-break must clear it.
+    expect(inGrade.score).toBeGreaterThanOrEqual(outOfGrade.score * 1.5);
+  });
+
+  it('the grade tie-break never fires when no candidate satisfies the grade (stale class)', () => {
+    // Memo says grade 9; neither Enkh-Uchral is in it — scores stay level.
+    const signals = extractSignals('Энх-Учрал 9А', BigInt('1625000'), phase9Ctx);
+    const cands = resolveStudent(signals, null, phase9Ctx);
+    const a = cands.find((c) => c.studentId === 3)!;
+    const b = cands.find((c) => c.studentId === 4)!;
+    expect(a.score).toBe(b.score);
+  });
+});
+
+describe('detectMultiStudent — Phase 9 segmentation', () => {
+  const siblingsCtx = ctx({
+    students: [
+      { id: 1, firstName: 'Oyudari', lastName: 'Zolbayar' },
+      { id: 2, firstName: 'Nomindari', lastName: 'Zolbayar' },
+      { id: 3, firstName: 'Bayasgalan', lastName: 'Narandash' },
+      { id: 4, firstName: 'Tushig', lastName: 'Narandash' },
+      { id: 5, firstName: 'Yesui', lastName: 'Kherlen' },
+      { id: 6, firstName: 'Esukhei', lastName: 'Kherlen' },
+      { id: 7, firstName: 'Yesui', lastName: 'Batbold' },
+      { id: 8, firstName: 'Yesui', lastName: 'Dorj' },
+    ],
+    enrollments: [
+      { studentId: 1, gradeName: '11A', gradeLevelCode: '11' },
+      { studentId: 2, gradeName: '8D', gradeLevelCode: '8' },
+      { studentId: 3, gradeName: '12B', gradeLevelCode: '12' },
+      { studentId: 4, gradeName: '9B', gradeLevelCode: '9' },
+      { studentId: 5, gradeName: '3A', gradeLevelCode: '3' },
+      { studentId: 6, gradeName: '5A', gradeLevelCode: '5' },
+      { studentId: 7, gradeName: '2A', gradeLevelCode: '2' },
+      { studentId: 8, gradeName: '7A', gradeLevelCode: '7' },
+    ],
+  });
+
+  const detect = (memo: string) => {
+    const signals = extractSignals(memo, BigInt('750000'), siblingsCtx);
+    const cands = resolveStudent(signals, null, siblingsCtx);
+    return detectMultiStudent(cands, signals, memo, siblingsCtx);
+  };
+
+  it("splits two initial-form siblings with no separator — 'З.ОЮУДАРЬ 11A З.НОМИНДАРЬ 8D'", () => {
+    expect(detect('З.ОЮУДАРЬ 11A З.НОМИНДАРЬ 8D')?.studentIds.sort()).toEqual([1, 2]);
+  });
+
+  it("splits slash-separated siblings — 'Н. Баясгалан 12В/ Н. Түшиг 9В автобус'", () => {
+    expect(detect('Н. Баясгалан 12В/ Н. Түшиг 9В автобус')?.studentIds.sort()).toEqual([3, 4]);
+  });
+
+  it('resolves an ambiguous bare sibling name through the surname its co-segments pin down', () => {
+    // "ЕСҮЙ" alone is three students; the resolved Х./Kherlen sibling settles it.
+    expect(detect('Х.ЕСҮХЭЙ, ЕСҮЙ ТӨЛБӨР')?.studentIds.sort()).toEqual([5, 6]);
+  });
+
+  it('still refuses an ambiguous segment no sibling surname can settle', () => {
+    expect(detect('ЕСҮЙ, ОЮУДАРЬ ТӨЛБӨР')).toBeNull();
+  });
+});

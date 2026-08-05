@@ -41,10 +41,18 @@ export type {
 } from "./detail";
 export {
   CHARGE_SCOPES,
+  CLASS_PAGE_SIZE,
   DEFAULT_FEE_SCOPE,
+  DEFAULT_GROUP_BY,
   FEE_SCOPE_VALUES,
+  GROUPABLE_FEE_SCOPE,
+  GROUP_BY_VALUES,
   STATUS_FILTER_VALUES,
+  STUDENT_PAGE_SIZE,
   feeScopeSchema,
+  groupBySchema,
+  pageSizeFor,
+  resolveGroupBy,
   chargeCreateSchema,
   chargeUpdateSchema,
   studentIdParamSchema,
@@ -57,6 +65,7 @@ export type {
   ChargeScopeValue,
   ChargeUpdateInput,
   FeeScopeValue,
+  GroupByValue,
   StatusFilterValue,
   StudentListParams,
   StudentUpdateInput,
@@ -69,10 +78,12 @@ export type {
   GradeLevelOption,
   GradeOption,
   Student,
+  StudentClassGroup,
   StudentListResponse,
   StudentRow,
 } from "./types";
 export { FeeScopeTabs } from "./components/FeeScopeTabs";
+export { GroupByToggle } from "./components/GroupByToggle";
 export { StudentTable } from "./components/StudentTable";
 export {
   StudentFilters,

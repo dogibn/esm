@@ -1,5 +1,19 @@
 import { z } from "zod";
 
+// The page's three sections. The selection lives in the URL so a section is
+// linkable and survives a refresh.
+export const FEES_TABS = ["tuition", "clubs", "others"] as const;
+
+export type FeesTab = (typeof FEES_TABS)[number];
+
+export const feesQuerySchema = z.object({
+  // A tab nobody recognises falls back to the default rather than erroring a
+  // link that is otherwise perfectly usable.
+  tab: z.enum(FEES_TABS).catch("tuition"),
+});
+
+export type FeesQuery = z.infer<typeof feesQuerySchema>;
+
 const isoDate = z
   .string()
   .trim()

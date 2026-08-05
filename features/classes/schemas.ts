@@ -1,8 +1,17 @@
 import { z } from "zod";
 
+// The page's two sections. The selection lives in the URL so a section is
+// linkable and survives the year picker's navigation.
+export const CLASSES_TABS = ["classes", "levels"] as const;
+
+export type ClassesTab = (typeof CLASSES_TABS)[number];
+
 // Which year's classes to show. Absent → the current year.
 export const classesQuerySchema = z.object({
   year: z.coerce.number().int().positive().optional(),
+  // A tab nobody recognises falls back to the default rather than erroring a
+  // link that is otherwise perfectly usable.
+  tab: z.enum(CLASSES_TABS).catch("classes"),
 });
 
 export type ClassesQuery = z.infer<typeof classesQuerySchema>;

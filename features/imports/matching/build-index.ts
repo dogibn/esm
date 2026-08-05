@@ -183,6 +183,11 @@ export function buildMatchingContext(input: BuildIndexInput): MatchingContext {
 
   // 6. nameIndex — name tokens → student_ids.
   const nameIndex = new Map<string, number[]>();
+  const lastNameNormByStudent = new Map<number, string>();
+  for (const s of input.students) {
+    const lastNorm = normalize(s.lastName ?? '');
+    if (lastNorm.length > 0) lastNameNormByStudent.set(s.id, lastNorm);
+  }
   for (const s of input.students) {
     const tokens = new Set<string>();
     for (const raw of (s.firstName ?? '').split(/\s+/)) {
@@ -288,6 +293,7 @@ export function buildMatchingContext(input: BuildIndexInput): MatchingContext {
     levelIndex,
     nameIndex,
     nameTokenList,
+    lastNameNormByStudent,
     accountIndex,
     openChargesByStudent,
     amountFeeIndex,

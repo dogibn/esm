@@ -8,6 +8,7 @@ export const OPERATION_KIND_VALUES = [
   "restore_transaction",
   "create_enrollment",
   "add_discount",
+  "user_access",
   "undo",
 ] as const;
 export type OperationKindValue = (typeof OPERATION_KIND_VALUES)[number];

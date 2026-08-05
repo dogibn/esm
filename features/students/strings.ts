@@ -11,6 +11,19 @@ export const strings = {
       clubs: "Clubs",
     },
   },
+  group: {
+    label: "Group by class",
+    on: "Grouping by class",
+    off: "Not grouping",
+    noTeacher: "No teacher",
+    students: (n: number) => (n === 1 ? "1 student" : `${n} students`),
+    due: (amount: string) => `${amount} due`,
+    paid: (amount: string) => `${amount} paid`,
+    outstanding: (amount: string) => `${amount} outstanding`,
+    settled: "Settled",
+    toggleOpen: (cls: string) => `Show the students in ${cls}`,
+    toggleClose: (cls: string) => `Hide the students in ${cls}`,
+  },
   summary: {
     totalDue: "Outstanding balance",
     totalCollected: "Total collected",
@@ -68,6 +81,10 @@ export const strings = {
       `Page ${page} of ${totalPages}`,
     rowCount: (shown: number, total: number) =>
       `Showing ${shown} of ${total}`,
+    // Grouped, a page holds classes; the student count is what the classes add
+    // up to, so both numbers are named.
+    groupCount: (classes: number, totalClasses: number, students: number) =>
+      `Showing ${classes} of ${totalClasses} ${totalClasses === 1 ? "class" : "classes"} · ${students === 1 ? "1 student" : `${students} students`}`,
   },
   toasts: {
     profileSaved: "Student details saved.",

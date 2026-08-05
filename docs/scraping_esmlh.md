@@ -373,6 +373,52 @@ This makes Per Session club charges' gross amount **mutable** — a deliberate e
 
 ---
 
+## Year rollover: the 2026-2027 intake
+
+The tuition workbook, not esmlh, is the roster of record for a new year — it lists students who have signed a contract but whom esmlh has not registered yet. Rollover therefore joins three sources rather than loading one:
+
+```
+data/tuition_<year>.xlsx  ─┐
+scraped/students_<yy-yy>.json (current + previous) ─┼─→ processed/tuition_<yy-yy>.resolved.json ─→ load scripts
+processed/students_tuition.matched.json ─┘
+```
+
+- **`scripts/parse/parse_tuition_2627.py`** → `parsed/tuition_26-27.json` + `.markers.json`. The 2026-2027 sheet has its own layout (90 dated payment columns, seven MNT discount columns, and two kinds of interleaved marker row), so it gets its own parser rather than a branch in `parse_tuition_excel.py`. Strips the accountants' duplicate-surname counters (`"Batbold 2"` → `"Batbold"`), keeping the verbatim value alongside.
+- **`scripts/match/tuition_2627_resolve.py`** → `processed/tuition_26-27.resolved.json`, `.leavers.json`, and `reports/tuition_26-27.resolution.md`. Ties each workbook row to an esmlh student and a 2026-2027 grade level. See the module docstring for the identity and grade fallback chains and why the workbook's section headers are never parsed.
+- **Load scripts**, in order — `grades_2627.ts`, `students_2627.ts`, `enrollments_2627.ts`, `fee_structure_2627.ts`, `charges_tuition_2627.ts`, `discounts_2627.ts`, `payments_2627.ts` (`pnpm load:<name>-2627`). All but the first take `--dry-run`.
+- **`scripts/qa/verify_tuition_2627.ts`** (`pnpm qa:tuition-2627`) — reconciles the loaded charges and discounts back against the workbook, re-deriving every percentage. Exits non-zero on any mismatch.
+
+Two conventions this introduced:
+
+- **Per-year scrape archives.** `scrape.students` now writes `scraped/students_<yy-yy>.json` alongside `scraped/students.json`, deriving the suffix from the scraped rows. The directory only ever shows the year the school has made current, so without the archive a re-scrape at rollover destroys the previous year's snapshot — which the resolver still needs to place students the new directory has not listed yet.
+- **`<level>temp` holding classes.** `enrollments.grade_id` points at a class, not a level, so students placed only to a level need somewhere to sit. esmlh already uses this convention (`1temp`, `4temp`, `5temp`); the loader reuses those names and creates the rest. A student in one of these is correctly graded and correctly billed — only their stream is unknown. They merge with esmlh's own `temp` classes by design.
+
+`grades.teacher_name` is NOT NULL and the staff directory still lists the *previous* year's form tutors at rollover, so 2026-2027 classes are created with `"TBD"`. Re-run the teachers scrape and loader once the school publishes them.
+
+### Which rate is in force
+
+Next year's rates are published months before the year begins, so a `tuition` row for 2026-2027 exists long before it applies. Supersession cannot express that — both rows are legitimately live — so **the current academic year decides**: the reader takes the non-superseded, term-scopeless row with the latest `effective_from` that is not after the current year's `end_date` (`features/enrollments/api.ts` § `activeFeeData`; `features/fees/api.ts` applies the same bound so the Fees screen cannot advertise a rate the app is not billing). Rolling `academic_years.is_current` forward is what switches prices over. `superseded_at` keeps its original meaning: retiring a rate that was *wrong*, not one that has merely aged out.
+
+One rough edge: a not-yet-effective rate is currently filed under the Fees screen's "Earlier rates" rather than an "Upcoming" section. It resolves itself when the year rolls over.
+
+### Base tuition is per student
+
+`charges.amount` for `fee_name = 'tuition'` is the student's gross before discounts — the same field the New Contract form's editable "Base tuition" writes to. It is normally the level's rate, but on 22 rows the workbook bills something else (mostly exactly 50% for a half-year enrolment, or 95%). The resolver recovers those from the sheet's own arithmetic — `Total payment` + the itemised discounts — and the loader records the departure in `charges.notes`. The reason for the reduction is nowhere in the workbook; the rows are listed in the resolution report for the accountants to attribute.
+
+### Payments arrive without a bank transaction
+
+The workbook records a payment as a bare (date, amount) cell — the accountants keyed it from a statement they reconciled offline, so there is no sender, memo or reference. `payments.bank_transaction_id` is NOT NULL, so each cell becomes a synthetic `bank_transactions` row: `transaction_id = XLS-2627-<student>-<date>` (deterministic, so re-running is a no-op), sender and account NULL, status `matched`, timestamp at Ulaanbaatar local midnight (`+08:00`, no DST — same convention as the bank-file parser). The `XLS-` prefix is what tells these apart from genuinely imported statements.
+
+Fifteen cells are negative — refunds and corrections — and load as negative payments, which keeps loaded totals equal to the sheet's.
+
+**The dated cells are the primary record, not the "Total Paid" column.** That column is a summary formula over them and has gone stale on two rows; the QA script checks the database against the cells and reports the disagreement rather than treating the summary as authoritative.
+
+### Discounts carry their rule, not just their amount
+
+`discounts.amount` is always the MNT figure from the workbook, so balances reconcile with the sheet whatever else is stored. `unit`/`value` additionally record *how* the figure arose, and a percentage is only claimed when it round-trips to that amount to the last MNT. Recovered from the 2026-2027 numbers: Early-bird is a flat ₮5,000,000; **Siblings is 5% (or 50%) of what remains *after* early-bird**, not of gross — which is why `position` matters and why the loader writes lines in compounding order rather than sheet-column order; Staff is a per-family percentage of gross (40–90%); Scholarship, Corporate and Barter are negotiated cash amounts.
+
+---
+
 ## Fields not sourced from any scrape yet
 
 These fields the year-start / term-start load needs are not covered by any scrape source above. They must be supplied manually at load time, or another esmlh page found. Open questions about source live in `notes.md`.

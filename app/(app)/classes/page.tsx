@@ -16,7 +16,13 @@ export default async function ClassesPage({
 }) {
   const user = await requireUserForLayout();
   const raw = await searchParams;
-  const query = classesQuerySchema.parse({ year: raw.year });
+  const query = classesQuerySchema.parse({ year: raw.year, tab: raw.tab });
   const overview = await listClasses(query);
-  return <ClassesView overview={overview} canEdit={user.role === "admin"} />;
+  return (
+    <ClassesView
+      overview={overview}
+      tab={query.tab}
+      canEdit={user.role === "admin"}
+    />
+  );
 }

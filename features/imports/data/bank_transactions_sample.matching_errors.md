@@ -1,10 +1,10 @@
 # Matching Error Audit
 
-- Generated: 2026-08-04T15:54:55.974Z
+- Generated: 2026-08-05T19:52:08.050Z
 - Source: `features/imports/data/bank_transactions_sample.xlsx`
 - Context: 2025-2026, Term 4 — 1387 students, 1907 open charges
 - Incoming rows audited: 334 (filtered rows excluded)
-- Rows with at least one finding: 87
+- Rows with at least one finding: 75
 - **Rows the matcher called `confident` that still have a finding: 3**
 
 Findings are heuristics: the memo is the only available ground truth and
@@ -16,14 +16,14 @@ reviewer will see anyway.
 
 | severity | finding | rows | of which `confident` |
 |:---|:---|---:|---:|
-| high | `coin_flip_candidates` — Top two candidates are effectively tied | 26 | 0 |
-| high | `surname_initial_mismatch` — Memo's surname initial doesn't match the proposed student's surname | 6 | 0 |
+| high | `coin_flip_candidates` — Top two candidates are effectively tied | 15 | 0 |
+| high | `surname_initial_mismatch` — Memo's surname initial doesn't match the proposed student's surname | 5 | 0 |
 | high | `class_mismatch` — Memo names a class the proposed student is not in | 3 | 1 |
-| high | `multi_student_fallback` — Memo names several students; the split failed and one student got the whole transfer | 2 | 0 |
-| medium | `no_allocation_with_open_charges` — Student has open charges but nothing was allocated | 29 | 0 |
-| medium | `fuzzy_only_match` — Student reached only through a fuzzy (misspelled) name | 19 | 2 |
+| high | `multi_student_fallback` — Memo names several students; the split failed and one student got the whole transfer | 1 | 0 |
+| medium | `no_allocation_with_open_charges` — Student has open charges but nothing was allocated | 25 | 0 |
+| medium | `fuzzy_only_match` — Student reached only through a fuzzy (misspelled) name | 18 | 2 |
 | medium | `unmatched_despite_name` — Memo contains a name but no student was proposed | 12 | 0 |
-| medium | `level_mismatch` — Memo names a grade level the proposed student is not in | 11 | 0 |
+| medium | `level_mismatch` — Memo names a grade level the proposed student is not in | 9 | 0 |
 | medium | `multi_student_separator` — Memo lists several students with an explicit separator, but only one was proposed | 1 | 0 |
 | medium | `combo_available_not_taken` — A combination of charges sums to the amount but wasn't used | 1 | 0 |
 | low | `under_allocated` — Allocation is short of the transfer amount | 8 | 0 |
@@ -58,7 +58,7 @@ Written by hand from these runs, not computed — the row lists below are the ev
 4. **Prepayments for next year** ('26-27', '2026.09САРД') have nothing to match
    against in a current-term-only charge context, and surface as under-allocated.
 
-## `coin_flip_candidates` (high) — 26 rows
+## `coin_flip_candidates` (high) — 15 rows
 
 Top two candidates are effectively tied
 
@@ -76,58 +76,23 @@ Top two candidates are effectively tied
   - proposed: Anir-Erdene Munkhzaya (5IA)
   - Anir-Erdene Munkhzaya (0.40) vs Anir Otgonchuluun (0.40)
   - also: level_mismatch
-- **Row 52** · 1,625,000 MNT · tier=attention (multiple_candidates)
-  - memo: `EB -Энх-Учрал 4А ; 99097953 (ХУДАЛДАА ХӨГЖЛИЙН БАНК ДЭЛХИЙЦЭЦЭГ ДЭЛЭГНЯМДОРЖ)`
-  - proposed: Enkh-Uchral Tuguldur (5IA)
-  - Enkh-Uchral Tuguldur (0.60) vs Enkh-uchral Gurbazar (0.60)
 - **Row 115** · 400,000 MNT · tier=attention (low_confidence)
   - memo: `BAYANMUNKHIIN MUNKHZAYA 3? (ХААН БАНК БААТАР БАЯНМӨНХ)`
   - proposed: Munkhjin Bayanmunkh (12D)
   - Munkhjin Bayanmunkh (0.40) vs Anir-Erdene Munkhzaya (0.40)
-- **Row 134** · 4,000,000 MNT · tier=attention (multiple_candidates)
-  - memo: `GOOSAR UNURBAT PRESCHOOL 5?B (ХААН БАНК ТӨМӨРТОГОО НАРМАНДАХ)`
-  - proposed: Erkhembileg Unurbat (6C)
-  - Erkhembileg Unurbat (0.85) vs Goosar Unubat (0.85)
-  - also: level_mismatch
-- **Row 155** · 210,000 MNT · tier=attention (multiple_candidates)
-  - memo: `VOLLEYBALL SONDOR.E 8E (ГОЛОМТ БАНК ЭРХЭМБАЯР ДАВААСҮРЭН)`
-  - proposed: Sondor Sain-Od (8E)
-  - Sondor Sain-Od (0.60) vs Sondor Erkhembayar (0.60)
-  - also: surname_initial_mismatch, no_allocation_with_open_charges
-- **Row 210** · 750,000 MNT · tier=attention (low_confidence)
-  - memo: `I KHUSLEN I KHULAN AVTOBUS (ХААН БАНК ЛХАГВАСҮРЭН ТУЯА)`
-  - proposed: Khuslen Amarjargal (7C)
-  - Khuslen Amarjargal (0.40) vs Khulan Chinbat (0.40)
-  - also: no_allocation_with_open_charges
 - **Row 213** · 400,000 MNT · tier=attention (multiple_candidates)
   - memo: `TELMEN GEGEEN ?3 (ХААН БАНК ЦЭНД-ОЧИР ЦЭДЭВСҮРЭН)`
   - proposed: Oyungoo Telmen (2AB)
   - Oyungoo Telmen (0.60) vs Tsetsengoo Telmen (0.60)
-- **Row 259** · 360,000 MNT · tier=attention (multiple_candidates)
-  - memo: `EB-ENEREL.E 8B MATH-JOEL (ХААН БАНК ЧОЙЖИЛСҮРЭН МӨНХСАРУУЛ)`
-  - proposed: Enerel Enkhbaatar (8B)
-  - Enerel Enkhbaatar (0.60) vs Enerel Lkhagvasuren (0.60)
-- **Row 262** · 255,000 MNT · tier=attention (multiple_candidates)
-  - memo: `ENEREL.E 8B VOLLEYBALL 13-15 (ХААН БАНК ЧОЙЖИЛСҮРЭН МӨНХСАРУУЛ)`
-  - proposed: Enerel Enkhbaatar (8B)
-  - Enerel Enkhbaatar (0.60) vs Enerel Lkhagvasuren (0.60)
 - **Row 361** · 210,000 MNT · tier=attention (multiple_candidates)
   - memo: `EB -8E - Enerel Voleyball payment (ХУДАЛДАА ХӨГЖЛИЙН БАНК ГАНБАТ ЧУЛУУНБААТАР)`
   - proposed: Enerel Ganbat (8E)
   - Enerel Ganbat (0.60) vs Munkh-Enerel Ganbold (0.60)
-- **Row 387** · 384,000 MNT · tier=attention (low_confidence)
-  - memo: `EB -Egshiglen, Tselmeg.G ballet payment (ХУДАЛДАА ХӨГЖЛИЙН БАНК ГАНБАТ ЧУЛУУНБААТАР)`
-  - proposed: Egshiglen Ganbat (2LB)
-  - Egshiglen Ganbat (0.40) vs Egshiglen Oyun-Erdene (0.40)
 - **Row 394** · 4,350,000 MNT · tier=attention (multiple_candidates)
   - memo: `EB -Л. Амир, 5 В, 4-р улирал (ХУДАЛДАА ХӨГЖЛИЙН БАНК AMIR LAILA)`
   - proposed: Amir Dilshad (7B)
   - Amir Dilshad (0.60) vs Amir Laila (0.60)
   - also: level_mismatch
-- **Row 395** · 2,500,000 MNT · tier=attention (multiple_candidates)
-  - memo: `ARUUKHAN 1BO TUITION (ХААН БАНК БАЛДАНГОМБО ОЮУНГЭРЭЛ)`
-  - proposed: Yi Bo / Tergel Gong (1PB)
-  - Yi Bo / Tergel Gong (1.00) vs Aruukhan Ganbayar (1.00)
 - **Row 441** · 5,000,000 MNT · tier=attention (multiple_candidates)
   - memo: `ORGIL NEGUN PRESCHOOL5? /88786688/ (ХААН БАНК ОТГОНЖАРГАЛ ҮҮРЦАЙХ)`
   - proposed: Negun Zorigtbaatar (4SA)
@@ -137,33 +102,19 @@ Top two candidates are effectively tied
   - memo: `TUGULDUR TSELMEG 3? 2026-2027, REGIST FEE (ХААН БАНК ТӨМӨРХҮҮ ЦЭЛМЭГ)`
   - proposed: Tselmeg Delgerdalai (3LM)
   - Tselmeg Delgerdalai (0.50) vs Tuguldur-Uils Munkhbadrakh (0.50)
-- **Row 478** · 35,850,000 MNT · tier=attention (multiple_candidates)
-  - memo: `Сургалтын төлбөр Б.Батул Б.Жамул (КАПИТРОН БАНК МГБИ ХХК)`
-  - proposed: Jamul Batjargal (8C)
-  - Jamul Batjargal (0.85) vs Batul Batjargal (0.85)
 - **Row 485** · 300,000 MNT · tier=attention (multiple_candidates)
   - memo: `YI JI DA ER HAN（EDA）/5TA/FOOTBALL (ГОЛОМТ БАНК MENGGENQIQIGE XXX)`
   - proposed: Yi Bo / Tergel Gong (1PB)
   - Yi Bo / Tergel Gong (0.60) vs Cha yi ru ma /Tsakhirmaa Bai wu en qi (0.60)
   - also: class_mismatch, no_allocation_with_open_charges
-- **Row 487** · 1,125,000 MNT · tier=attention (multiple_candidates)
-  - memo: `BUS12 Х. ЕСҮХЭЙ, ЕСҮЙ, ЕСҮТЭЙ (ХААН БАНК БАТМӨНХ БААСАНСҮРЭН)`
-  - proposed: Esutei Kherlen (2GS)
-  - Esutei Kherlen (0.85) vs Esukhei Kherlen (0.85)
-  - also: level_mismatch, multi_student_fallback
 - **Row 502** · 300,000 MNT · tier=attention (multiple_candidates)
   - memo: `art club. Tsegts`
   - proposed: Tsegts Munkhtsooj (5+A)
   - Tsegts Munkhtsooj (0.60) vs Tsegts Chinzorigt (0.60)
-- **Row 526** · 3,000,000 MNT · tier=attention (multiple_candidates)
-  - memo: `АРУУХАН 1BO TUITION (ГОЛОМТ БАНК ОЮУНГЭРЭЛ БАЛДАНГОМБО)`
-  - proposed: Yi Bo / Tergel Gong (1PB)
-  - Yi Bo / Tergel Gong (1.00) vs Aruukhan Ganbayar (1.00)
 - **Row 539** · 3,250,000 MNT · tier=attention (multiple_candidates)
   - memo: `EB -5348218 Amjiltiin ezed-s Ch.Bat-Amgalan 4 (ХУДАЛДАА ХӨГЖЛИЙН БАНК АМЖИЛТЫН ЭЗЭД ХХК)`
-  - proposed: Soyon Bat-Amgalan (10B)
-  - Soyon Bat-Amgalan (0.60) vs Bat-Amgalan Chultemsuren (0.60)
-  - also: level_mismatch
+  - proposed: Sodongoo Enkh-Amgalan (4SA)
+  - Sodongoo Enkh-Amgalan (0.55) vs Sonor Munkh-Amgalan (0.55)
 - **Row 547** · 342,000 MNT · tier=attention (multiple_candidates)
   - memo: `EB -E.Enerel 6D math’s club (ХУДАЛДАА ХӨГЖЛИЙН БАНК МӨНХЖАРГАЛ БАЯРСАЙХАН)`
   - proposed: Enerel Enkhjargal (6D)
@@ -177,7 +128,7 @@ Top two candidates are effectively tied
   - proposed: Sondor Batzorig (3SE)
   - Sondor Batzorig (0.60) vs Anir Bum-Erdene (0.60)
 
-## `surname_initial_mismatch` (high) — 6 rows
+## `surname_initial_mismatch` (high) — 5 rows
 
 Memo's surname initial doesn't match the proposed student's surname
 
@@ -191,11 +142,6 @@ Memo's surname initial doesn't match the proposed student's surname
   - proposed: Batmunkh Gerelt-Od (8B)
   - memo "E.BATMUNKH" names Batmunkh, so the initial should be the surname — proposed student's is "Gerelt-Od"
   - also: fuzzy_only_match, no_allocation_with_open_charges
-- **Row 155** · 210,000 MNT · tier=attention (multiple_candidates)
-  - memo: `VOLLEYBALL SONDOR.E 8E (ГОЛОМТ БАНК ЭРХЭМБАЯР ДАВААСҮРЭН)`
-  - proposed: Sondor Sain-Od (8E)
-  - memo "SONDOR.E" names Sondor, so the initial should be the surname — proposed student's is "Sain-Od"
-  - also: coin_flip_candidates, no_allocation_with_open_charges
 - **Row 209** · 400,000 MNT · tier=attention (low_confidence)
   - memo: `O.ERDEM/UT20291175/ BURTGELIN HURAAMJ (ХААН БАНК ДАМДИНСҮРЭН ЭНХБОЛД)`
   - proposed: Erdem Shinebayar (9A)
@@ -231,7 +177,7 @@ Memo names a class the proposed student is not in
   - memo class 5TA vs student in 1PB
   - also: coin_flip_candidates, no_allocation_with_open_charges
 
-## `multi_student_fallback` (high) — 2 rows
+## `multi_student_fallback` (high) — 1 rows
 
 Memo names several students; the split failed and one student got the whole transfer
 
@@ -240,13 +186,8 @@ Memo names several students; the split failed and one student got the whole tran
   - proposed: Saran Mariya Erdenetuul (12B)
   - memo reads as Tushig Lkhagvasuren + Saran Mariya Erdenetuul; allocation fell back to Saran Mariya Erdenetuul alone for the full 48,775,000 MNT
   - also: level_mismatch, under_allocated
-- **Row 487** · 1,125,000 MNT · tier=attention (multiple_candidates)
-  - memo: `BUS12 Х. ЕСҮХЭЙ, ЕСҮЙ, ЕСҮТЭЙ (ХААН БАНК БАТМӨНХ БААСАНСҮРЭН)`
-  - proposed: Esutei Kherlen (2GS)
-  - memo reads as Esukhei Kherlen + Esutei Kherlen; allocation fell back to Esutei Kherlen alone for the full 1,125,000 MNT
-  - also: level_mismatch, coin_flip_candidates
 
-## `no_allocation_with_open_charges` (medium) — 29 rows
+## `no_allocation_with_open_charges` (medium) — 25 rows
 
 Student has open charges but nothing was allocated
 
@@ -280,21 +221,15 @@ Student has open charges but nothing was allocated
   - proposed: Manduukh Sanaa (8E)
   - 3 open charge(s) totalling 24,655,000 MNT; flags: manual_review
   - also: fuzzy_only_match
-- **Row 155** · 210,000 MNT · tier=attention (multiple_candidates)
+- **Row 155** · 210,000 MNT · tier=attention (unbalanced)
   - memo: `VOLLEYBALL SONDOR.E 8E (ГОЛОМТ БАНК ЭРХЭМБАЯР ДАВААСҮРЭН)`
-  - proposed: Sondor Sain-Od (8E)
-  - 1 open charge(s) totalling 19,000,000 MNT; flags: manual_review
-  - also: surname_initial_mismatch, coin_flip_candidates
+  - proposed: Sondor Erkhembayar (8E)
+  - 1 open charge(s) totalling 24,000,000 MNT; flags: manual_review
 - **Row 169** · 400,000 MNT · tier=attention (unbalanced)
   - memo: `LEE MINWOO KAAN 1ML TAEKWONDO (ХААН БАНК ЭНХЖАРГАЛ ИТГЭЛ)`
   - proposed: Kaan Lee Minwoo (1ML)
   - 3 open charge(s) totalling 24,050,000 MNT; flags: manual_review
   - also: combo_available_not_taken
-- **Row 172** · 750,000 MNT · tier=attention (multiple_candidates)
-  - memo: `З.ОЮУДАРЬ 11A З.НОМИНДАРЬ 8D (ХААН БАНК БАЯРСАЙХАН УУГАНЦЭЦЭГ)`
-  - proposed: Nomindari Zolbayar (8D)
-  - 1 open charge(s) totalling 22,800,000 MNT; flags: manual_review
-  - also: fuzzy_only_match
 - **Row 173** · 690,000 MNT · tier=attention (unbalanced)
   - memo: `EB -unumunkh geriin daalgavariim angi 3VO (ХУДАЛДАА ХӨГЖЛИЙН БАНК ЭНХБАТ БАТБАЯР)`
   - proposed: Unumunkh Enkhbat (3VO)
@@ -303,16 +238,7 @@ Student has open charges but nothing was allocated
   - memo: `EB -Altansukh munkhmandakh,4rr,football (ХУДАЛДАА ХӨГЖЛИЙН БАНК САРАНГУА БАТДОРЖ)`
   - proposed: Munkhmandakh Altansukh (4RR)
   - 1 open charge(s) totalling 9,000,000 MNT; flags: manual_review
-- **Row 200** · 800,000 MNT · tier=attention (unbalanced)
-  - memo: `S Saran S Tushig admission fee`
-  - proposed: Saran Mariya Erdenetuul (12B)
-  - 1 open charge(s) totalling 25,000,000 MNT; flags: manual_review
-- **Row 210** · 750,000 MNT · tier=attention (low_confidence)
-  - memo: `I KHUSLEN I KHULAN AVTOBUS (ХААН БАНК ЛХАГВАСҮРЭН ТУЯА)`
-  - proposed: Khuslen Amarjargal (7C)
-  - 3 open charge(s) totalling 19,615,000 MNT; flags: manual_review
-  - also: coin_flip_candidates
-- **Row 251** · 645,000 MNT · tier=attention (multiple_candidates)
+- **Row 251** · 645,000 MNT · tier=attention (unbalanced)
   - memo: `MATH TEST ODMANDAKH 12B (ГОЛОМТ БАНК ЭЛИТСЕРВИС ХХК)`
   - proposed: Odmandakh Galsansar (12B)
   - 1 open charge(s) totalling 30,000,000 MNT; flags: manual_review
@@ -365,10 +291,6 @@ Student has open charges but nothing was allocated
   - memo: `ANKHILUUN MORSAL SHAH MOHAMMAD 2ABHOMEWORK CLUB (ХААН БАНК ДАЯНЖАВ ЛХАГВА)`
   - proposed: Ankhiluun Morsal Shakh Mokhammad (2AB)
   - 2 open charge(s) totalling 23,660,000 MNT; flags: manual_review
-- **Row 540** · 750,000 MNT · tier=attention (multiple_candidates)
-  - memo: `EB -Н. Баясгалан 12В/ Н. Түшиг 9В автобус (ХУДАЛДАА ХӨГЖЛИЙН БАНК НАРАНДАШ ДАШДАВАА)`
-  - proposed: Tushig Narandash (9B)
-  - 1 open charge(s) totalling 19,000,000 MNT; flags: manual_review
 - **Row 542** · 10,000 MNT · tier=attention (unbalanced)
   - memo: `EB -Amar 12B ID (ХУДАЛДАА ХӨГЖЛИЙН БАНК САРАНТУЯА БААСАНХҮҮ)`
   - proposed: Amar Baasanbat (12B)
@@ -378,7 +300,7 @@ Student has open charges but nothing was allocated
   - proposed: Chinguun Munkhzul (9D)
   - 4 open charge(s) totalling 23,157,860 MNT; flags: manual_review
 
-## `fuzzy_only_match` (medium) — 19 rows
+## `fuzzy_only_match` (medium) — 18 rows
 
 Student reached only through a fuzzy (misspelled) name
 
@@ -405,11 +327,10 @@ Student reached only through a fuzzy (misspelled) name
   - memo: `A NUOJIN(M.ANUJIN) 1JB, TAEKWONDO (ХААН БАНК CHAOGE MANDUHU)`
   - proposed: Anuojin/Anujin - (1JB)
   - edit distance 2, class corroborates
-- **Row 172** · 750,000 MNT · tier=attention (multiple_candidates)
+- **Row 172** · 750,000 MNT · tier=attention (multi_student)
   - memo: `З.ОЮУДАРЬ 11A З.НОМИНДАРЬ 8D (ХААН БАНК БАЯРСАЙХАН УУГАНЦЭЦЭГ)`
-  - proposed: Nomindari Zolbayar (8D)
-  - edit distance 1, class corroborates
-  - also: no_allocation_with_open_charges
+  - proposed: Oyudari Zolbayar (11A)
+  - edit distance 2, class corroborates
 - **Row 209** · 400,000 MNT · tier=attention (low_confidence)
   - memo: `O.ERDEM/UT20291175/ BURTGELIN HURAAMJ (ХААН БАНК ДАМДИНСҮРЭН ЭНХБОЛД)`
   - proposed: Erdem Shinebayar (9A)
@@ -465,10 +386,6 @@ Student reached only through a fuzzy (misspelled) name
   - memo: `Home work 2 T.MunhkErdene`
   - proposed: Munkh-Erdene Tuvshintur (2AB)
   - edit distance 1, no class in memo
-- **Row 555** · 375,000 MNT · tier=attention (missing_charge)
-  - memo: `AVTOBUS #8, B.NAMUDARI 7B (ГОЛОМТ БАНК БАТБАЯР ГҮРБАЗАР)`
-  - proposed: Namudari Batbayar (7B)
-  - edit distance 1, class corroborates
 
 ## `unmatched_despite_name` (medium) — 12 rows
 
@@ -523,7 +440,7 @@ Memo contains a name but no student was proposed
   - proposed: (no proposal)
   - memo token "yiergui" is 2 edit(s) from directory name "ergui" but no student was proposed
 
-## `level_mismatch` (medium) — 11 rows
+## `level_mismatch` (medium) — 9 rows
 
 Memo names a grade level the proposed student is not in
 
@@ -551,11 +468,6 @@ Memo names a grade level the proposed student is not in
   - memo: `БАТБЭХ АНХИЛ-ҮЖИН 4 НАС АНГИ (ХААН БАНК БАДАМСҮРЭН ХУЛАН)`
   - proposed: Ankhil Ider (2MG)
   - memo level 4 vs student in 2MG
-- **Row 134** · 4,000,000 MNT · tier=attention (multiple_candidates)
-  - memo: `GOOSAR UNURBAT PRESCHOOL 5?B (ХААН БАНК ТӨМӨРТОГОО НАРМАНДАХ)`
-  - proposed: Erkhembileg Unurbat (6C)
-  - memo level 1+/2+/3+/4+/5+ vs student in 6C
-  - also: coin_flip_candidates
 - **Row 338** · 4,900,000 MNT · tier=attention (flagged)
   - memo: `EZLEN 1-Р АНГИ 88115699 (ХААН БАНК ЧОЙЖИЛ МЯГМАРДОРЖ)`
   - proposed: Ezlen Enkhmanlai (5KO)
@@ -570,16 +482,10 @@ Memo names a grade level the proposed student is not in
   - proposed: Negun Zorigtbaatar (4SA)
   - memo level 1+/2+/3+/4+/5+ vs student in 4SA
   - also: coin_flip_candidates
-- **Row 487** · 1,125,000 MNT · tier=attention (multiple_candidates)
+- **Row 487** · 1,125,000 MNT · tier=attention (multi_student)
   - memo: `BUS12 Х. ЕСҮХЭЙ, ЕСҮЙ, ЕСҮТЭЙ (ХААН БАНК БАТМӨНХ БААСАНСҮРЭН)`
-  - proposed: Esutei Kherlen (2GS)
-  - memo level 12 vs student in 2GS
-  - also: coin_flip_candidates, multi_student_fallback
-- **Row 539** · 3,250,000 MNT · tier=attention (multiple_candidates)
-  - memo: `EB -5348218 Amjiltiin ezed-s Ch.Bat-Amgalan 4 (ХУДАЛДАА ХӨГЖЛИЙН БАНК АМЖИЛТЫН ЭЗЭД ХХК)`
-  - proposed: Soyon Bat-Amgalan (10B)
-  - memo level 4 vs student in 10B
-  - also: coin_flip_candidates
+  - proposed: Esukhei Kherlen (8E)
+  - memo level 12 vs student in 8E
 
 ## `multi_student_separator` (medium) — 1 rows
 
@@ -607,7 +513,7 @@ Allocation is short of the transfer amount
 - **Row 15** · 48,775,000 MNT · tier=attention (unbalanced)
   - memo: `Tushig 4grade Sergelen Saran 7 grade 2026-27 academic year`
   - proposed: Saran Mariya Erdenetuul (12B)
-  - allocated 25,000,000 MNT of 48,775,000 MNT; 23,775,000 MNT unexplained; flags: overpayment
+  - allocated 25,000,000 MNT of 48,775,000 MNT; 23,775,000 MNT unexplained; flags: overpayment, multi_student_unresolved
   - also: level_mismatch, multi_student_fallback
 - **Row 32** · 20,500,000 MNT · tier=attention (unbalanced)
   - memo: `BOLOR NAIDAN 5MA (FOR 6TH CLASS), BOLOR NAIDAN 5MA (FOR 6TH CLASS) (M BANK ПҮРЭВДОРЖ НАЙДАН)`

@@ -28,7 +28,13 @@ export const users = pgTable(
     id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
     email: text("email").notNull().unique(),
     role: text("role").notNull(),
+    // Access is revoked by clearing this flag, never by deleting the row:
+    // operations.actor_user_id points here, so a delete would either fail or
+    // orphan the audit trail. An inactive row keeps the history readable and
+    // makes re-granting access a one-click reversal.
+    isActive: boolean("is_active").notNull().default(true),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [check("users_role_check", sql`${t.role} IN ('accountant', 'admin')`)]
 );
@@ -407,7 +413,7 @@ export const operations = pgTable(
   (t) => [
     check(
       "operations_kind_check",
-      sql`${t.kind} IN ('confirm_match', 'discard_transaction', 'restore_transaction', 'create_enrollment', 'add_discount', 'undo')`
+      sql`${t.kind} IN ('confirm_match', 'discard_transaction', 'restore_transaction', 'create_enrollment', 'add_discount', 'user_access', 'undo')`
     ),
     index("operations_actor_user_id_idx").on(t.actorUserId),
     index("operations_bank_transaction_id_idx").on(t.bankTransactionId),

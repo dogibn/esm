@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { Fragment, useMemo, useState, type ReactNode } from "react";
 import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
   useReactTable,
+  type Row,
 } from "@tanstack/react-table";
+import { ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -24,7 +26,7 @@ import {
 import { formatDate, formatMnt } from "../format";
 import type { FeeScopeValue } from "../schemas";
 import { strings } from "../strings";
-import type { StudentListResponse, StudentRow } from "../types";
+import type { StudentClassGroup, StudentListResponse, StudentRow } from "../types";
 import { StatusBadge } from "./StatusBadge";
 
 type Props = {
@@ -129,6 +131,66 @@ function buildColumns(fee: FeeScopeValue) {
   ];
 }
 
+/**
+ * The row a class's students sit under: shorter than a student row, and the
+ * only row in the table that isn't a link — its chevron opens and closes the
+ * class. Its figures are the whole class's, not the page's, because grouping
+ * paginates by class (features/students/api.ts § listStudents).
+ */
+function ClassRow({
+  group,
+  open,
+  columnCount,
+  onToggle,
+}: {
+  group: StudentClassGroup;
+  open: boolean;
+  columnCount: number;
+  onToggle: () => void;
+}) {
+  const g = strings.group;
+  return (
+    <TableRow className="bg-muted/40 hover:bg-muted/60">
+      <TableCell colSpan={columnCount} className="py-1">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <button
+            type="button"
+            aria-expanded={open}
+            aria-label={open ? g.toggleClose(group.gradeName) : g.toggleOpen(group.gradeName)}
+            onClick={onToggle}
+            className="flex items-center gap-1.5 rounded-sm font-semibold outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <ChevronRight
+              aria-hidden
+              className={`size-4 text-muted-foreground transition-transform ${
+                open ? "rotate-90" : ""
+              }`}
+            />
+            {group.gradeName}
+          </button>
+          <span className="text-sm text-muted-foreground">
+            {group.teacherName.trim() === "" ? g.noTeacher : group.teacherName}
+          </span>
+          <span className="text-sm text-muted-foreground">
+            {g.students(group.students)}
+          </span>
+          <div className="ml-auto flex flex-wrap items-center gap-x-3 text-sm tabular-nums">
+            <span className="text-muted-foreground">{g.due(formatMnt(group.due))}</span>
+            <span className="text-muted-foreground">{g.paid(formatMnt(group.paid))}</span>
+            <span
+              className={
+                group.balance > 0 ? "font-semibold text-foreground" : "text-muted-foreground"
+              }
+            >
+              {group.balance > 0 ? g.outstanding(formatMnt(group.balance)) : g.settled}
+            </span>
+          </div>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+}
+
 export function StudentTable({
   data,
   fee,
@@ -138,20 +200,72 @@ export function StudentTable({
   onPageChange,
 }: Props) {
   const router = useRouter();
-  const totalPages = Math.max(1, Math.ceil(data.total / data.pageSize));
   const columns = useMemo(() => buildColumns(fee), [fee]);
+  // Classes the accountant has collapsed. Open is the default: grouping is a
+  // reading aid, not a way to hide students.
+  const [collapsed, setCollapsed] = useState<ReadonlySet<number>>(new Set());
 
   const table = useReactTable({
     data: data.rows,
     columns,
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
-    pageCount: totalPages,
+    pageCount: data.pageCount,
   });
 
   const shown = data.rows.length;
   const canPrev = data.page > 1 && !loading;
-  const canNext = data.page < totalPages && !loading;
+  const canNext = data.page < data.pageCount && !loading;
+
+  const toggleClass = (gradeId: number) =>
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      if (!next.delete(gradeId)) next.add(gradeId);
+      return next;
+    });
+
+  const renderStudentRow = (row: Row<StudentRow>) => (
+    <TableRow
+      key={row.id}
+      className="group cursor-pointer"
+      onClick={() => {
+        // Let the accountant copy a cell's text without navigating.
+        if (window.getSelection()?.toString()) return;
+        router.push(`/students/${row.original.studentId}`);
+      }}
+    >
+      {row.getVisibleCells().map((cell) => (
+        <TableCell key={cell.id}>
+          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+        </TableCell>
+      ))}
+    </TableRow>
+  );
+
+  // Grouped, the page's rows arrive in group order, so each class takes the
+  // next slice of them — the cells stay the table's, not a second rendering.
+  const renderGrouped = (groups: StudentClassGroup[]): ReactNode => {
+    const rows = table.getRowModel().rows;
+    const body: ReactNode[] = [];
+    let cursor = 0;
+    for (const group of groups) {
+      const slice = rows.slice(cursor, cursor + group.rows.length);
+      cursor += group.rows.length;
+      const open = !collapsed.has(group.gradeId);
+      body.push(
+        <Fragment key={group.gradeId}>
+          <ClassRow
+            group={group}
+            open={open}
+            columnCount={columns.length}
+            onToggle={() => toggleClass(group.gradeId)}
+          />
+          {open ? slice.map(renderStudentRow) : null}
+        </Fragment>,
+      );
+    }
+    return body;
+  };
 
   return (
     <div className="flex flex-col gap-3">
@@ -183,32 +297,26 @@ export function StudentTable({
                   {loading ? strings.loading : emptyMessage}
                 </TableCell>
               </TableRow>
+            ) : data.groups !== null ? (
+              renderGrouped(data.groups)
             ) : (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  className="group cursor-pointer"
-                  onClick={() => {
-                    // Let the accountant copy a cell's text without navigating.
-                    if (window.getSelection()?.toString()) return;
-                    router.push(`/students/${row.original.studentId}`);
-                  }}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              table.getRowModel().rows.map(renderStudentRow)
             )}
           </TableBody>
         </Table>
       </div>
       <div className="flex items-center justify-between gap-3 text-sm text-muted-foreground">
-        <span>{strings.pagination.rowCount(shown, data.total)}</span>
+        <span>
+          {data.groups !== null
+            ? strings.pagination.groupCount(
+                data.groups.length,
+                data.totalGroups ?? data.groups.length,
+                shown,
+              )
+            : strings.pagination.rowCount(shown, data.total)}
+        </span>
         <div className="flex items-center gap-2">
-          <span>{strings.pagination.pageIndicator(data.page, totalPages)}</span>
+          <span>{strings.pagination.pageIndicator(data.page, data.pageCount)}</span>
           <Button
             variant="outline"
             size="sm"

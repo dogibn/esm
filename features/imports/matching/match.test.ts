@@ -394,3 +394,114 @@ describe('match — income that is not a student payment', () => {
     if (result.kind === 'unmatched') expect(result.reason).toBe('not_student');
   });
 });
+
+describe('match — Phase 9', () => {
+  it('drops a runner-up whose whole evidence is a subset of the top candidate (surname doubling as a first name)', () => {
+    const ctx = buildContext({
+      students: [
+        { id: 1, firstName: 'Enerel', lastName: 'Enkhbayar' },
+        { id: 2, firstName: 'Enkhbayar', lastName: 'Otgonbayar' },
+      ],
+      enrollments: [
+        { studentId: 1, gradeName: '12B', gradeLevelCode: '12' },
+        { studentId: 2, gradeName: '12B', gradeLevelCode: '12' },
+      ],
+      openCharges: [
+        {
+          studentId: 1,
+          id: 100,
+          feeName: 'tuition',
+          scope: { kind: 'year', academicYearId: 1 },
+          grossAmount: BigInt('25000000'),
+          outstandingBalance: BigInt('25000000'),
+        },
+        {
+          studentId: 2,
+          id: 101,
+          feeName: 'tuition',
+          scope: { kind: 'year', academicYearId: 1 },
+          grossAmount: BigInt('25000000'),
+          outstandingBalance: BigInt('25000000'),
+        },
+      ],
+    });
+    const result = match(
+      {
+        memo: 'ENKHBAYAR ENEREL ULDEGDEL TOLBOR 12B',
+        amount: BigInt('7000000'),
+        senderAccount: 'ACC9',
+      },
+      ctx,
+    );
+    expect(result.kind).toBe('matched');
+    if (result.kind === 'matched') {
+      expect(result.proposals[0]?.studentId).toBe(1);
+      // Student 2's only evidence ("enkhbayar" + 12B) is fully explained by
+      // student 1's full name — it is not competition and must not surface.
+      expect(result.proposals.some((p) => p.studentId === 2)).toBe(false);
+    }
+  });
+
+  it('flags the single-student fallback when a detected sibling memo fails to split', () => {
+    const ctx = buildContext({
+      students: [
+        { id: 1, firstName: 'Oyudari', lastName: 'Zolbayar' },
+        { id: 2, firstName: 'Nomindari', lastName: 'Zolbayar' },
+      ],
+      enrollments: [
+        { studentId: 1, gradeName: '11A', gradeLevelCode: '11' },
+        { studentId: 2, gradeName: '8D', gradeLevelCode: '8' },
+      ],
+      // No charges at all: the split detects both children but nothing can be
+      // allocated, so it falls back to a single-student proposal.
+    });
+    const result = match(
+      {
+        memo: 'З.ОЮУДАРЬ 11A З.НОМИНДАРЬ 8D',
+        amount: BigInt('755000'),
+        senderAccount: 'ACC10',
+      },
+      ctx,
+    );
+    expect(result.kind === 'matched' || result.kind === 'low_confidence').toBe(true);
+    if (result.kind === 'matched' || result.kind === 'low_confidence') {
+      expect(
+        result.proposals.every((p) => p.flags.has('multi_student_unresolved')),
+      ).toBe(true);
+    }
+  });
+
+  it('an equal-share sibling split re-derives the fee from the per-child share', () => {
+    const ctx = buildContext({
+      students: [
+        { id: 1, firstName: 'Oyudari', lastName: 'Zolbayar' },
+        { id: 2, firstName: 'Nomindari', lastName: 'Zolbayar' },
+      ],
+      enrollments: [
+        { studentId: 1, gradeName: '11A', gradeLevelCode: '11' },
+        { studentId: 2, gradeName: '8D', gradeLevelCode: '8' },
+      ],
+      academicTermId: 4,
+      currentTermFees: [
+        { feeStructureId: 1, feeName: 'bus_fee', amount: BigInt('375000'), isClub: false },
+      ],
+    });
+    const result = match(
+      {
+        // No fee word, no separator; 750,000 is nothing, but each share is the
+        // bus rate.
+        memo: 'З.ОЮУДАРЬ 11A З.НОМИНДАРЬ 8D',
+        amount: BigInt('750000'),
+        senderAccount: 'ACC11',
+      },
+      ctx,
+    );
+    expect(result.kind).toBe('matched_multi');
+    if (result.kind === 'matched_multi') {
+      expect(result.proposal.proposals.map((p) => p.studentId).sort()).toEqual([1, 2]);
+      expect(
+        result.proposal.proposals.every((p) => p.proposedCharge?.feeName === 'bus_fee'),
+      ).toBe(true);
+    }
+  });
+});
