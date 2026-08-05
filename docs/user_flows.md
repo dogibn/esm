@@ -4,6 +4,21 @@ UI workflows the accountant performs in the app. The fourth lifecycle (year/term
 
 ---
 
+## 0. Navigation
+
+Every flow below starts from a **left sidebar**, in two groups.
+
+- **The daily loop, unlabelled at the top:** Students, Imports, Transactions, **History**. History sits here on purpose — it drives reversals and is used constantly, so filing it with configuration would lend a daily tool the weight of "settings I shouldn't be poking at".
+- **Setup:** Academic calendar, Classes, Fee rates, Discounts. Everything here is configuration — touched a few times a year, read far more often than written. One group rather than two: once History moves up, splitting the rest into "school" and "money" only invites the argument about which one Classes is.
+
+The sidebar also carries the brand and, at its foot, the **identity block** — name, role, and sign-out. That is the one place for "things about me", which is why there is no account menu in a header. There is no header bar at all: each page's own `PageHeader` owns the title and that page's primary action (New contract on Students, Add year on Academic calendar).
+
+**Collapse.** The sidebar collapses to an icon rail, remembered per browser in the `esm-sidebar` cookie — read on the server, so a reload paints at the right width instead of snapping. Expanded is the real state: icon-only navigation is exactly where a twice-a-year item like Academic calendar becomes unfindable, so collapse is a temporary "I need the width for this table" gesture. In the rail each item grows a tooltip, and keeps an `aria-label` — the tooltip is a hover affordance, not an accessible name. Below the `md` breakpoint there is no room for labels, so the rail is the only layout and the toggle is hidden.
+
+Pages that don't exist yet (Clubs, Users and access) have no nav row: a link to a page that isn't there costs more than the row saves.
+
+---
+
 ## 1. Tracking view
 
 **Purpose**
@@ -100,3 +115,73 @@ Standardize tuition discounts so accountants pick from a shared list instead of 
 **Notes**
 - The net tuition is derived by `computeTuition` (`features/discounts/calc.ts`) and each line's resolved MNT reduction is snapshotted, so the balance stays a simple sum. See `domain_model.md` § Discount.
 - Discounts loaded before the catalog existed show as "legacy" rows: preserved and counted, but not tied to a catalog entry.
+
+---
+
+## 5. Academic calendar
+
+**Purpose**
+
+The school's years and terms are the scope every other view is read through. An admin needs to add next year before the year-start import runs, correct a term's dates when the school calendar shifts, and — once a term or year actually begins — move the app onto it.
+
+**Flow**
+
+1. Any accountant opens "Calendar" in the main navigation and sees each academic year as a card: its dates, whether it is current, what already references it, and its terms. Only admins see the controls (the API enforces `requireAdmin` regardless).
+2. An admin adds a year (name + start/end), then adds its terms. A new year is never created as the current one — that is a separate, deliberate act.
+3. **"Set as current"** asks for confirmation before switching, spelling out what changes. Setting a *year* current also moves the current term to one of its terms, and the dialog names which one beforehand.
+4. Editing a year or term corrects its name and dates in place.
+5. Deleting is offered only for a row nothing references; otherwise the control is disabled and the row shows what is holding it.
+
+**Notes**
+- **The current year and the current term always belong together.** They are separate `is_current` flags read independently across the app (the tracker resolves both, then loads year-scoped and term-scoped charges), so a current term from a different year would silently mix two years' money. Switching the year therefore carries a term with it, and only a term of the current year can be made current.
+- **Invariants enforced server-side:** a year's dates can't overlap another year's; a term must fall inside its year and can't overlap a sibling term; a year's dates can't be narrowed so that one of its terms falls outside; names are unique (year names globally, term names within their year).
+- **A term can't be moved to another year.** Its charges and club enrolments are scoped to it, so re-parenting would silently re-scope them. The year is fixed at creation.
+- **Deletes are guarded, not cascading.** Every FK is `ON DELETE RESTRICT`; the service counts references first so the refusal can say what is in the way instead of surfacing a constraint error.
+- **This is a config surface, not a data one.** Nothing here creates or edits students, enrolments, or charges — the year/term-start imports still do that (`domain_model.md` § Lifecycle).
+- **Not yet in the activity log.** Calendar changes do not write `operations` rows, so they don't appear in History and can't be undone — the same as the discount catalog today. Adding them needs new `operations.kind` values (a migration).
+
+---
+
+## 6. Classes & levels
+
+**Purpose**
+
+The year-start import creates grade levels and classes from esmlh.edu.mn, and it gets things wrong or leaves them blank — classes with no teacher, a section filed under the wrong level. An admin needs to correct those without a script, and to set up a class the import didn't create.
+
+**Flow**
+
+1. Any accountant opens "Classes" in the main navigation. Only admins see the controls (the API enforces `requireAdmin` regardless).
+2. **Grade levels** (school-wide, stable across years) list their code, display order, whether tuition prices them, and what uses them.
+3. **Classes** are shown for one academic year, picked from a dropdown that defaults to the current year. Each row carries its level, teacher, teacher contact, and student count.
+4. Adding or editing a class sets its name, level, and teacher details. Deleting is offered only for a class nobody is enrolled in.
+
+**Notes**
+- **A grade level's `code` can never be renamed.** Tuition is priced per level code inside `fee_structures.data.by_grade` (`domain_model.md` § FeeStructure) — a JSONB key, not an FK — so renaming it would silently detach every class at that level from its rate. The code is set at creation; only the display order stays editable.
+- **Display order is what makes 2 sort before 10.** It's `grade_levels.sort_order`, used by the tracker and every class list.
+- **A class's grade level is fixed once anyone is enrolled.** The level decides which tuition rate a student is charged, and moving it here recomputes nothing — what was charged would simply disagree with what the class claims. Teacher details and the class name stay editable at all times, since those are display data.
+- **A class can't be moved to another year.** Enrolments are scoped by (student, year); the year is fixed at creation.
+- **Renaming a class can confuse the next import**, which matches classes by name and may create a second one. The dialog says so.
+- **Deletes are guarded, not cascading.** A level with classes, or whose code tuition still prices, is refused — the second is a JSONB reference no FK protects, so the service checks it explicitly.
+
+---
+
+## 7. Fee rates
+
+**Purpose**
+
+What the school charges — tuition per grade level, registration, bus — lived only in the seed scripts. An admin needs to see the rate in force, see what it replaced, and publish a new one when the school changes its prices.
+
+**Flow**
+
+1. Any accountant opens "Fees" in the main navigation and sees each school-wide fee: the rate in force, the date it applies from, and its earlier rates behind a toggle. Club fees follow, grouped by term.
+2. An admin publishes a new rate for a fee: a date it applies from, plus one amount (flat fees) or an amount per grade level (tuition), pre-filled from the rate in force.
+3. Publishing marks the old rate replaced and inserts the new one, in one transaction.
+
+**Notes**
+- **Rates are never edited or deleted — only superseded.** `superseded_at` on the old row plus a new row with its own `effective_from` (`domain_model.md` § FeeStructure) is the model, so the validity chain stays the record of what the school charged and when. There is no PUT and no DELETE on this feature.
+- **A new rate changes no existing charge.** A Charge stores the resolved gross amount at creation (`domain_model.md` § Charge), so a new rate reaches only charges created after it. The dialog says this before publishing.
+- **A published rate applies immediately**, because the app reads "the rate in force" as the row with `superseded_at IS NULL` and never consults `effective_from`. A future-dated rate would therefore apply today while claiming otherwise, so future dates are refused: publish a rate on the day it starts applying. *(Revisit if scheduling rates ahead becomes worth teaching the readers about `effective_from`.)*
+- **A fee keeps its shape.** Tuition stays per-grade, a flat fee stays flat — every reader expects one or the other.
+- **A per-grade rate must price every grade level, and nothing else.** A level with no amount silently yields no tuition when a contract is created; a stray code is a typo nothing will ever look up.
+- **New fee names aren't invented here.** Rates are published for fees the school already has; a new fee arrives with the year/term-start import.
+- **Club fees are read-only.** They're per-term and loaded from esmlh.edu.mn each term, so an edit here would be overwritten by the next import.

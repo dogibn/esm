@@ -151,7 +151,7 @@ Carries the proposed student, proposed allocation (list of `(charge_id, amount)`
 ### User
 Someone who signs in to the app. Five total in v1: one admin, four regular accountants. Mirrors a row in Supabase Auth. `role` is `accountant` or `admin`.
 
-Permission model is minimal: regular accountants do everything except manage `FeeStructure` (admin only, via year/term-start import — not a UI) and curate the `DiscountType` catalog (admin only — this one *does* have a UI; all accountants can view it and apply discounts, only admins add/edit types).
+Permission model is minimal: regular accountants do everything except the admin-only config surfaces — `FeeStructure` rates, `GradeLevel`/`Grade`, the academic calendar, and the `DiscountType` catalog. Every one of those *is* readable by all accountants; only admins get the write controls, enforced server-side by `requireAdmin`. Fee rates now have a UI too (`user_flows.md` § Fee rates): school-wide rates are published from the app by supersede-and-insert, while club fees and the year/term-start data load stay with the import scripts.
 
 ---
 
@@ -184,7 +184,7 @@ Run as a script by the admin before each academic year begins.
 
 | Assumption | What changes if it's wrong |
 |---|---|
-| Runs as a script, not in-app UI | No year-roll-over UI; `academic_years.is_current` is flipped by the script, not user action |
+| The **data** import runs as a script, not in-app UI | No roll-over UI for students/enrolments/charges; the script creates them. **The AcademicYear and AcademicTerm rows themselves are managed in-app** (`user_flows.md` § Academic calendar) — including which is current, so `academic_years.is_current` is now flipped by an admin, not only by the script |
 | Source data comes from esmlh.edu.mn | If source changes, `scraping_esmlh.md` and the load script change; domain unchanged |
 | Tuition is annual: one Charge per Enrollment per year | `Charge.academic_year_id` is set for tuition (not term); Discount → Enrollment 1:1 makes sense |
 | `student_category = 'new'` triggers a registration Charge | `Enrollment.student_category` is a real column, not derived; registration is year-scoped |
@@ -199,7 +199,7 @@ Run as a script by the admin before each term begins.
 
 | Assumption | What changes if it's wrong |
 |---|---|
-| Runs as a script, not UI | No term-roll-over UI |
+| The **data** import runs as a script, not UI | No roll-over UI for club/bus charges; the AcademicTerm row itself is managed in-app (`user_flows.md` § Academic calendar) |
 | Club enrollments are term-scoped | `ClubEnrollment.academic_term_id` is required; club Charges are term-cadence |
 | Bus opt-in source is known per term (open: see `notes.md`) | Bus Charge generation depends on resolution |
 | Tuition is *not* regenerated at term start | Only bus + club Charges are term-cadence |
@@ -240,8 +240,8 @@ confirms every one.
 
 These won't be modeled in v1. Each is listed because the AI would otherwise re-derive it.
 
-- **Year/term-end roll-over UI.** New years and terms are added by script.
-- **CRUD UI for FeeStructure / Student / Enrollment / Grade.**
+- **Year/term-end roll-over UI.** Rolling the *data* over — enrolments, charges, club sign-ups — is a script. Superseded in part: the AcademicYear and AcademicTerm rows, and which of them is current, are now added and edited in-app (`user_flows.md` § Academic calendar).
+- **CRUD UI for Student / Enrollment.** Still script-and-import territory (the student detail page edits a profile, it does not create one). Superseded for the other two: `Grade`/`GradeLevel` are managed in `user_flows.md` § Classes & levels, and `FeeStructure` rates in § Fee rates — the latter publish-only, never edited or deleted in place.
 - **Per-student detail page.**
 - **Discounts on non-tuition fees.** Would require restructuring Discount back to → Charge.
 - **Family / siblings entity.** No Family relationship is modeled. Sibling discounts remain flat per-Enrollment Discount rows; a Discount's optional `sibling_student_id` is only a soft pointer to one sibling Student (see the Discount entity), not a family graph.

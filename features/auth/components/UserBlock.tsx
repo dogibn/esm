@@ -2,15 +2,16 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ClockIcon, LogOutIcon } from "lucide-react";
+import { LogOutIcon } from "lucide-react";
 
-import { Menu, MenuContent, MenuItem, MenuTrigger } from "@/components/ui/menu";
+import { Button } from "@/components/ui/button";
+import { sidebarRailHiddenClass } from "@/components/ui/sidebar";
 import { createBrowserClient } from "@/lib/supabase-browser";
 import { cn } from "@/lib/utils";
 
 import { strings } from "../strings";
 
-type UserMenuProps = {
+type UserBlockProps = {
   email: string;
   role: string;
   /** Google-provided name; null for password-only accounts. */
@@ -51,12 +52,14 @@ function initialsFor(name: string | null, email: string) {
   return letters.toUpperCase();
 }
 
-export function UserMenu({
-  email,
-  role,
-  displayName,
-  avatarUrl,
-}: UserMenuProps) {
+/**
+ * Who you are and how to leave, at the foot of the sidebar — the one place for
+ * "things about me", which is why there is no account menu in the header.
+ *
+ * In the rail the name and role drop away and the avatar stacks above sign-out:
+ * leaving must stay reachable in every state.
+ */
+export function UserBlock({ email, role, displayName, avatarUrl }: UserBlockProps) {
   const router = useRouter();
   const supabase = createBrowserClient();
   // Google avatar URLs can 403 (rate limits, revoked photo). Drop to initials
@@ -64,8 +67,8 @@ export function UserMenu({
   const [imageFailed, setImageFailed] = useState(false);
 
   const showImage = Boolean(avatarUrl) && !imageFailed;
-  const roleLabel =
-    role === "admin" ? strings.menu.roleAdmin : strings.menu.roleAccountant;
+  const roleLabel = role === "admin" ? strings.user.roleAdmin : strings.user.roleAccountant;
+  const name = displayName?.trim() || email;
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -74,11 +77,16 @@ export function UserMenu({
   }
 
   return (
-    <Menu>
-      <MenuTrigger
-        aria-label={strings.menu.trigger}
+    <div
+      className={cn(
+        "flex items-center gap-2",
+        "max-md:flex-col group-data-[collapsed=true]/sidebar:flex-col",
+      )}
+    >
+      <span
+        aria-hidden
         className={cn(
-          "flex size-9 items-center justify-center overflow-hidden rounded-full text-xs font-semibold outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring/50",
+          "flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full text-xs font-semibold",
           showImage ? "bg-muted" : colorFor(email),
         )}
       >
@@ -89,8 +97,8 @@ export function UserMenu({
           <img
             src={avatarUrl!}
             alt=""
-            width={36}
-            height={36}
+            width={32}
+            height={32}
             referrerPolicy="no-referrer"
             className="size-full object-cover"
             onError={() => setImageFailed(true)}
@@ -98,39 +106,22 @@ export function UserMenu({
         ) : (
           initialsFor(displayName, email)
         )}
-      </MenuTrigger>
-      <MenuContent className="p-0">
-        <div className="border-b border-border px-3 py-2.5">
-          {displayName ? (
-            <p className="truncate text-sm font-medium">{displayName}</p>
-          ) : null}
-          <p
-            className={cn(
-              "truncate text-muted-foreground",
-              displayName ? "text-xs" : "text-sm font-medium text-foreground",
-            )}
-          >
-            {email}
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">{roleLabel}</p>
-        </div>
-        <div className="p-1">
-          <MenuItem
-            className="flex-row items-center gap-2"
-            onClick={() => router.push("/history")}
-          >
-            <ClockIcon className="size-4 text-muted-foreground" />
-            {strings.menu.history}
-          </MenuItem>
-          <MenuItem
-            className="flex-row items-center gap-2"
-            onClick={handleSignOut}
-          >
-            <LogOutIcon className="size-4 text-muted-foreground" />
-            {strings.menu.signOut}
-          </MenuItem>
-        </div>
-      </MenuContent>
-    </Menu>
+      </span>
+
+      <span className={cn("flex min-w-0 flex-1 flex-col", sidebarRailHiddenClass)}>
+        <span className="truncate text-sm font-medium">{name}</span>
+        <span className="truncate text-xs text-muted-foreground">{roleLabel}</span>
+      </span>
+
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        onClick={handleSignOut}
+        aria-label={strings.user.signOut}
+        title={strings.user.signOut}
+      >
+        <LogOutIcon />
+      </Button>
+    </div>
   );
 }

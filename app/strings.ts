@@ -1,6 +1,9 @@
 export const strings = {
   brand: {
     schoolName: "English School of Mongolia",
+    // The sidebar is 15rem wide at its widest, so the brand goes by its
+    // initials there; the full name still reads on the login page.
+    shortName: "ESM",
     portalName: "Finance Portal",
     appTitle: "ESM Finance Portal",
     appDescription:
@@ -8,10 +11,18 @@ export const strings = {
     logoAlt: "English School of Mongolia",
   },
   nav: {
-    tracking: "Students",
+    landmark: "Main navigation",
+    students: "Students",
     imports: "Imports",
     transactions: "Transactions",
+    history: "History",
+    setupGroup: "Setup",
+    calendar: "Academic calendar",
+    classes: "Classes",
+    fees: "Fee rates",
     discounts: "Discounts",
+    collapse: "Collapse the sidebar",
+    expand: "Expand the sidebar",
   },
   auth: {
     login: {

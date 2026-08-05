@@ -1,7 +1,7 @@
 export const strings = {
-  menu: {
-    trigger: "Account menu",
-    history: "History",
+  // Identity block at the foot of the sidebar — the one place for "things
+  // about me" now that the header has no account menu.
+  user: {
     signOut: "Sign out",
     roleAdmin: "Admin",
     roleAccountant: "Accountant",
