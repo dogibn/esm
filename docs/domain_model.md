@@ -184,7 +184,7 @@ Run as a script by the admin before each academic year begins.
 
 | Assumption | What changes if it's wrong |
 |---|---|
-| Runs as a script, not in-app UI | No year-roll-over UI; `academic_years.is_current` is flipped by the script, not user action |
+| The **data** import runs as a script, not in-app UI | No roll-over UI for students/enrolments/charges; the script creates them. **The AcademicYear and AcademicTerm rows themselves are managed in-app** (`user_flows.md` § Academic calendar) — including which is current, so `academic_years.is_current` is now flipped by an admin, not only by the script |
 | Source data comes from esmlh.edu.mn | If source changes, `scraping_esmlh.md` and the load script change; domain unchanged |
 | Tuition is annual: one Charge per Enrollment per year | `Charge.academic_year_id` is set for tuition (not term); Discount → Enrollment 1:1 makes sense |
 | `student_category = 'new'` triggers a registration Charge | `Enrollment.student_category` is a real column, not derived; registration is year-scoped |
@@ -199,7 +199,7 @@ Run as a script by the admin before each term begins.
 
 | Assumption | What changes if it's wrong |
 |---|---|
-| Runs as a script, not UI | No term-roll-over UI |
+| The **data** import runs as a script, not UI | No roll-over UI for club/bus charges; the AcademicTerm row itself is managed in-app (`user_flows.md` § Academic calendar) |
 | Club enrollments are term-scoped | `ClubEnrollment.academic_term_id` is required; club Charges are term-cadence |
 | Bus opt-in source is known per term (open: see `notes.md`) | Bus Charge generation depends on resolution |
 | Tuition is *not* regenerated at term start | Only bus + club Charges are term-cadence |
@@ -240,7 +240,7 @@ confirms every one.
 
 These won't be modeled in v1. Each is listed because the AI would otherwise re-derive it.
 
-- **Year/term-end roll-over UI.** New years and terms are added by script.
+- **Year/term-end roll-over UI.** Rolling the *data* over — enrolments, charges, club sign-ups — is a script. Superseded in part: the AcademicYear and AcademicTerm rows, and which of them is current, are now added and edited in-app (`user_flows.md` § Academic calendar).
 - **CRUD UI for FeeStructure / Student / Enrollment / Grade.**
 - **Per-student detail page.**
 - **Discounts on non-tuition fees.** Would require restructuring Discount back to → Charge.

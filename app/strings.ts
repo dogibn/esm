@@ -12,6 +12,7 @@ export const strings = {
     imports: "Imports",
     transactions: "Transactions",
     discounts: "Discounts",
+    calendar: "Calendar",
   },
   auth: {
     login: {

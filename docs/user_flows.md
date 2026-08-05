@@ -100,3 +100,27 @@ Standardize tuition discounts so accountants pick from a shared list instead of 
 **Notes**
 - The net tuition is derived by `computeTuition` (`features/discounts/calc.ts`) and each line's resolved MNT reduction is snapshotted, so the balance stays a simple sum. See `domain_model.md` § Discount.
 - Discounts loaded before the catalog existed show as "legacy" rows: preserved and counted, but not tied to a catalog entry.
+
+---
+
+## 5. Academic calendar
+
+**Purpose**
+
+The school's years and terms are the scope every other view is read through. An admin needs to add next year before the year-start import runs, correct a term's dates when the school calendar shifts, and — once a term or year actually begins — move the app onto it.
+
+**Flow**
+
+1. Any accountant opens "Calendar" in the main navigation and sees each academic year as a card: its dates, whether it is current, what already references it, and its terms. Only admins see the controls (the API enforces `requireAdmin` regardless).
+2. An admin adds a year (name + start/end), then adds its terms. A new year is never created as the current one — that is a separate, deliberate act.
+3. **"Set as current"** asks for confirmation before switching, spelling out what changes. Setting a *year* current also moves the current term to one of its terms, and the dialog names which one beforehand.
+4. Editing a year or term corrects its name and dates in place.
+5. Deleting is offered only for a row nothing references; otherwise the control is disabled and the row shows what is holding it.
+
+**Notes**
+- **The current year and the current term always belong together.** They are separate `is_current` flags read independently across the app (the tracker resolves both, then loads year-scoped and term-scoped charges), so a current term from a different year would silently mix two years' money. Switching the year therefore carries a term with it, and only a term of the current year can be made current.
+- **Invariants enforced server-side:** a year's dates can't overlap another year's; a term must fall inside its year and can't overlap a sibling term; a year's dates can't be narrowed so that one of its terms falls outside; names are unique (year names globally, term names within their year).
+- **A term can't be moved to another year.** Its charges and club enrolments are scoped to it, so re-parenting would silently re-scope them. The year is fixed at creation.
+- **Deletes are guarded, not cascading.** Every FK is `ON DELETE RESTRICT`; the service counts references first so the refusal can say what is in the way instead of surfacing a constraint error.
+- **This is a config surface, not a data one.** Nothing here creates or edits students, enrolments, or charges — the year/term-start imports still do that (`domain_model.md` § Lifecycle).
+- **Not yet in the activity log.** Calendar changes do not write `operations` rows, so they don't appear in History and can't be undone — the same as the discount catalog today. Adding them needs new `operations.kind` values (a migration).
