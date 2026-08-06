@@ -2,7 +2,10 @@ import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Emit a self-contained server bundle (.next/standalone) so the Docker
+  // runner stage can ship just that + .next/static + public, without
+  // node_modules. Required for the Cloud Run image. See Dockerfile.
+  output: "standalone",
 };
 
 // withSentryConfig is safe to keep on unconditionally: without SENTRY_DSN the

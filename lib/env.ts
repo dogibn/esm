@@ -18,11 +18,32 @@ const envSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
 });
 
-const parsed = envSchema.safeParse(process.env);
+type Env = z.infer<typeof envSchema>;
 
-if (!parsed.success) {
-  const missing = parsed.error.issues.map((i) => i.path.join(".")).join(", ");
-  throw new Error(`Missing or invalid environment variables: ${missing}`);
+// Validate LAZILY, on first property access — not at module load. `next build`
+// pulls this module into the build graph (via server route handlers), but the
+// runtime-only secrets (DATABASE_URL, DIRECT_URL, SUPABASE_SERVICE_ROLE_KEY)
+// are deliberately absent at build time. Parsing eagerly here would throw and
+// fail the build. Deferring validation to the first read means the build needs
+// only what it actually inlines (the NEXT_PUBLIC_* vars), while a running
+// server still fails fast the moment it touches a missing/invalid var.
+let cached: Env | undefined;
+
+function loadEnv(): Env {
+  if (cached) return cached;
+  const parsed = envSchema.safeParse(process.env);
+  if (!parsed.success) {
+    const missing = parsed.error.issues.map((i) => i.path.join(".")).join(", ");
+    throw new Error(`Missing or invalid environment variables: ${missing}`);
+  }
+  cached = parsed.data;
+  return cached;
 }
 
-export const env = parsed.data;
+// A Proxy keeps the existing `env.DATABASE_URL` call sites unchanged: each
+// property read triggers validation (memoized) instead of a load-time parse.
+export const env: Env = new Proxy({} as Env, {
+  get(_target, prop: string) {
+    return loadEnv()[prop as keyof Env];
+  },
+});
